@@ -18,6 +18,9 @@ export async function searchTemplates(ctx: CliContext, opts: SearchOpts): Promis
     enginesAvailable,
     top: opts.top ?? 5,
   });
+  // Đọc phòng thủ: một template khai báo thiếu trường chỉ nên hiện thiếu
+  // thông tin của chính nó, không được làm sập cả lệnh search cho mọi
+  // template còn lại (đã từng sập vì thiếu `best_for` rồi `preview.poster`).
   ok({
     matches: matches.map((m) => ({
       id: m.template.id,
@@ -26,12 +29,12 @@ export async function searchTemplates(ctx: CliContext, opts: SearchOpts): Promis
       engine_installed: ctx.engines.has(m.template.engine),
       score: m.score,
       score_reason: m.reason,
-      preview_poster: m.template.preview.poster,
-      best_for: m.template.best_for,
+      preview_poster: m.template.preview?.poster ?? null,
+      best_for: m.template.best_for ?? [],
       category: m.template.category,
-      license: m.template.license.spdx,
-      duration_min_sec: m.template.output.duration.min_sec,
-      duration_max_sec: m.template.output.duration.max_sec,
+      license: m.template.license?.spdx ?? 'unknown',
+      duration_min_sec: m.template.output?.duration?.min_sec ?? null,
+      duration_max_sec: m.template.output?.duration?.max_sec ?? null,
     })),
   });
 }

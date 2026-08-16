@@ -104,9 +104,12 @@ export class TemplateRegistry {
       const reasonParts: string[] = [];
       let score = 0;
 
+      // Dùng ?? [] vì một template thiếu `tags`/`best_for` từng làm sập toàn
+      // bộ lệnh search (TypeError: t.best_for is not iterable). Một template
+      // khai báo thiếu chỉ nên tự nó bị xếp hạng thấp, không kéo sập cả CLI.
       const haystack = [
-        ...t.tags,
-        ...t.best_for,
+        ...(t.tags ?? []),
+        ...(t.best_for ?? []),
         t.name,
         t.description,
         t.category,

@@ -1,6 +1,11 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { createRequire } from 'node:module';
 import type { CliContext } from '../context.js';
 import { ok } from '../output.js';
+
+const require = createRequire(import.meta.url);
 
 interface Check {
   name: string;
@@ -10,19 +15,9 @@ interface Check {
   detail?: string;
 }
 
-function which(cmd: string): string | null {
-  try {
-    return execSync(`which ${cmd}`, { stdio: ['ignore', 'pipe', 'ignore'] })
-      .toString()
-      .trim() || null;
-  } catch {
-    return null;
-  }
-}
-
 function version(cmd: string, args = '--version'): string | null {
   try {
-    return execSync(`${cmd} ${args}`, { stdio: ['ignore', 'pipe', 'ignore'] })
+    return execFileSync(cmd, args.split(' '), { stdio: ['ignore', 'pipe', 'ignore'] })
       .toString()
       .trim()
       .split('\n')[0]
@@ -30,6 +25,50 @@ function version(cmd: string, args = '--version'): string | null {
   } catch {
     return null;
   }
+}
+
+/** Chạy được không — dùng để phân biệt "có file" với "thật sự dùng được". */
+function runnable(bin: string): boolean {
+  try {
+    execFileSync(bin, ['-version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Cùng thứ tự ưu tiên với resolve-binaries.js ở gốc dự án. */
+function resolveFfmpeg(): string | null {
+  const fromEnv = process.env.FFMPEG_PATH;
+  if (fromEnv && existsSync(fromEnv)) return fromEnv;
+
+  try {
+    const p = require('@ffmpeg-installer/ffmpeg')?.path;
+    if (p && existsSync(p)) return p;
+  } catch {}
+
+  return runnable('ffmpeg') ? 'ffmpeg' : null;
+}
+
+function resolveChromium(projectRoot: string): string | null {
+  // playwright được khai báo trong adapter-hyperframes, không phải ở package
+  // này, nên require thẳng sẽ trượt — phải resolve từ vị trí của adapter.
+  const attempts: Array<() => unknown> = [
+    () => require('playwright'),
+    () => {
+      const adapterPkg = join(projectRoot, 'packages', 'adapter-hyperframes', 'package.json');
+      return createRequire(adapterPkg)('playwright');
+    },
+  ];
+
+  for (const attempt of attempts) {
+    try {
+      const playwright = attempt() as { chromium: { executablePath(): string } };
+      const p = playwright.chromium.executablePath();
+      if (p && existsSync(p)) return p;
+    } catch {}
+  }
+  return null;
 }
 
 export async function runDoctor(ctx: CliContext): Promise<void> {
@@ -44,35 +83,32 @@ export async function runDoctor(ctx: CliContext): Promise<void> {
     detail: 'html-video targets Node 20+',
   });
 
-  // ffmpeg
-  if (which('ffmpeg')) {
-    checks.push({ name: 'ffmpeg', status: 'ok', value: version('ffmpeg', '-version')?.split(' ')[2] ?? '?' });
+  // ffmpeg — phải dò theo đúng thứ tự mà app thật sự dùng lúc render,
+  // không dùng `which` (lệnh này không có trên Windows nên luôn báo missing
+  // dù app chạy tốt, khiến user tưởng hỏng và báo lỗi nhầm).
+  const ffmpegPath = resolveFfmpeg();
+  if (ffmpegPath) {
+    checks.push({
+      name: 'ffmpeg',
+      status: 'ok',
+      value: version(ffmpegPath, '-version')?.split(' ')[2] ?? '?',
+      detail: ffmpegPath,
+    });
   } else {
     checks.push({
       name: 'ffmpeg',
       status: 'missing',
-      install_hint: 'brew install ffmpeg  (macOS) / apt install ffmpeg (Linux)',
+      install_hint: 'Chạy: node setup-binaries.js',
     });
   }
 
-  // chromium / chrome (for HF puppeteer)
-  const chromePaths = [
-    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
-    '/usr/bin/chromium',
-    '/usr/bin/google-chrome',
-  ];
-  const chromiumOk = chromePaths.some((p) => {
-    try {
-      execSync(`test -x "${p}"`);
-      return true;
-    } catch {
-      return false;
-    }
-  });
+  // chromium — engine render dùng trình duyệt của playwright, không phải
+  // Chrome cài sẵn trong máy, nên phải hỏi chính playwright.
+  const chromiumPath = resolveChromium(ctx.projectRoot);
   checks.push({
     name: 'chromium',
-    status: chromiumOk ? 'ok' : 'warning',
-    detail: chromiumOk ? 'Chrome found in standard location' : 'Chrome/Chromium not detected; HF render will need a browser',
+    status: chromiumPath ? 'ok' : 'warning',
+    detail: chromiumPath ?? 'Chưa có Chromium để render. Chạy: node setup-binaries.js',
   });
 
   // Engines
