@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>GO4AI Tech Shorts</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1080px;
+    height: 1920px;
+    background-color: #070b14;
+    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 100px 70px 80px 70px;
+  }
+
+  /* Ambient Cyber Glow Effects */
+  .bg-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.55;
+    animation: pulseGlow 6s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  .glow-blue { width: 750px; height: 750px; background: #1d4ed8; top: -150px; left: -150px; }
+  .glow-purple { width: 680px; height: 680px; background: #7c3aed; bottom: 120px; right: -120px; }
+  .glow-cyan { width: 500px; height: 500px; background: #06b6d4; top: 45%; left: 150px; opacity: 0.25; }
+
+  @keyframes pulseGlow {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.12) translate(30px, -20px); }
+  }
+
+  /* Glassmorphism Cards */
+  .card-glass {
+    background: rgba(15, 23, 42, 0.82);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 36px;
+    padding: 44px 48px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+  }
+
+  .card-item {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 28px 32px;
+    transition: all 0.3s ease;
+  }
+
+  /* Keyframe Animations */
+  @keyframes slideUpFade {
+    0% { opacity: 0; transform: translateY(50px) scale(0.96); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes subtitleIn {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes badgePop {
+    0% { opacity: 0; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .animate-header { animation: badgePop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .animate-stage { animation: slideUpFade 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
+  .animate-sub { animation: subtitleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
+
+  /* Brand Badge */
+  .badge-brand {
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    padding: 16px 36px;
+    border-radius: 9999px;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.45);
+  }
+
+  /* Progress Bar */
+  .progress-bar-bg {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
+    overflow: hidden;
+    margin-top: 24px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #38bdf8, #6366f1, #c084fc);
+    border-radius: 9999px;
+    width: 65%;
+  }
+</style>
+</head>
+<body>
+  <div class="bg-glow glow-blue"></div>
+  <div class="bg-glow glow-purple"></div>
+  <div class="bg-glow glow-cyan"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="relative z-10 flex items-center justify-between animate-header">
+    <div class="flex items-center gap-4">
+      <div class="badge-brand">GO4AI SHORTS</div>
+      <div class="text-[24px] text-blue-300 font-bold tracking-wider uppercase">AI Academy</div>
+    </div>
+    <div class="px-6 py-3 rounded-full bg-slate-900/90 border border-slate-800 text-[26px] text-slate-200 font-extrabold tracking-wider">
+      01 / 04
+    </div>
+  </header>
+
+  <!-- Central Dynamic Information Stage -->
+  <main class="relative z-10 my-auto animate-stage text-center flex flex-col items-center">
+    <!-- Keyword Pill -->
+    <div class="inline-flex items-center gap-3 px-7 py-3 rounded-full bg-blue-500/15 border border-blue-500/30 mb-8">
+      <span class="w-3.5 h-3.5 rounded-full bg-blue-400 animate-pulse"></span>
+      <span class="text-blue-400 text-[26px] font-bold tracking-widest uppercase">PROMPT ENGINEERING TIP</span>
+    </div>
+
+    <!-- Main Large Title -->
+    <h1 class="text-[76px] font-black leading-[1.12] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200 max-w-[940px] mb-10">
+      Kỹ Thuật Few-Shot Prompting Đỉnh Cao
+    </h1>
+
+    <!-- Showcase Cards -->
+    <div class="w-full flex flex-col gap-5 text-left">
+      <div class="card-item flex items-center gap-5">
+        <div class="w-16 h-16 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-3xl font-extrabold shrink-0">1</div>
+        <div>
+          <div class="text-[30px] font-bold text-white leading-tight">Cung Cấp 2-3 Ví Dụ Mẫu</div>
+          <div class="text-slate-400 text-[22px] mt-1">Giúp LLM hiểu chính xác format đầu ra mong muốn.</div>
+        </div>
+      </div>
+      <div class="card-item flex items-center gap-5">
+        <div class="w-16 h-16 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-3xl font-extrabold shrink-0">2</div>
+        <div>
+          <div class="text-[30px] font-bold text-white leading-tight">Giảm Thiểu 90% Ảo Giác</div>
+          <div class="text-slate-400 text-[22px] mt-1">Đảm bảo độ chính xác và nhất quán cho hệ thống AI.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Synchronized Vietnamese Subtitle Bar -->
+  <footer class="relative z-10 card-glass animate-sub">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-3 text-cyan-400 text-[22px] font-extrabold tracking-wider uppercase">
+        <span class="w-3.5 h-3.5 rounded-full bg-cyan-400 animate-ping"></span>
+        Vietnamese Narration
+      </div>
+      <div class="text-slate-400 text-[20px] font-bold">Scene 01/04</div>
+    </div>
+    <p class="text-[40px] font-extrabold text-white leading-snug tracking-tight">
+      “Few-shot prompting là bí quyết giúp mô hình AI luôn trả về kết quả chuẩn xác theo đúng cấu trúc của bạn.”
+    </p>
+    <div class="progress-bar-bg">
+      <div class="progress-fill"></div>
+    </div>
+  </footer>
+</body>
+</html>

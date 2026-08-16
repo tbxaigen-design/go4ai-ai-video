@@ -1,0 +1,34 @@
+# Chuẩn hoá line ending — KHÔNG phụ thuộc core.autocrlf của từng máy dev.
+# Thiếu file này, một lần commit từ máy cấu hình khác là script Mac dính CRLF
+# và chết với lỗi khó hiểu: "bad interpreter: /bin/bash^M".
+
+* text=auto
+
+# Script macOS/Linux BẮT BUỘC dùng LF, nếu không sẽ không chạy được.
+*.command text eol=lf
+*.sh      text eol=lf
+
+# Script Windows dùng CRLF cho chắc (cmd.exe xử lý goto/label ổn định hơn).
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# File nhị phân — tuyệt đối không đụng vào.
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.mp4  binary
+*.webm binary
+*.mov  binary
+*.wav  binary
+*.mp3  binary
+*.m4a  binary
+*.onnx binary
+*.zip  binary
+*.exe  binary
+*.dll  binary
+*.ttf  binary
+*.otf  binary
+*.woff  binary
+*.woff2 binary

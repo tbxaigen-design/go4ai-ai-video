@@ -1,0 +1,122 @@
+# macOS
+.DS_Store
+._*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.npm
+.yarn-integrity
+package-lock.json
+yarn.lock
+# LƯU Ý: pnpm-lock.yaml PHẢI được commit.
+# Script khởi động chạy `pnpm install --frozen-lockfile` — lệnh này lỗi cứng
+# nếu thiếu lockfile, và thiếu nó thì máy user cài ra version khác máy dev.
+.pnp.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+*.egg-info/
+
+# Build / dist
+dist/
+build/
+out/
+.next/
+.cache/
+.parcel-cache/
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Wrangler / Cloudflare
+.wrangler/
+.dev.vars
+
+# Local-only working files
+scratch/
+tmp/
+research/
+notes/
+
+# Node.js portable runtime (tải tự động lần đầu chạy, không commit)
+runtime-node/
+
+# Chromium portable cache
+.chromium-cache/
+public/chromium/
+
+# Per-user runtime state (projects, assets, preview, MP4 outputs)
+# This dir is created by the CLI / studio at runtime and is per-developer.
+.html-video/
+projects/
+temp-audio-*/
+exports/
+feedback.log
+feedback.json
+
+# Large AI Models (stored on Cloudflare R2 / downloaded on-demand)
+models/
+
+# Generated video & audio outputs (large binaries)
+*.mp4
+*.webm
+*.mov
+*.gif
+*.wav
+*.mp3
+*.m4a
+output/
+renders/
+
+# File test nặng ở root (không cần commit)
+go4ai-tech-shorts-demo.mp4
+go4ai-news-ticker-demo.mp4
+synthetic-testing-go4ai.mp4
+voice-narration.wav
+voice-synthetic-testing.mp3
+voice-vi-normalized.wav
+voice-vi.mp3
+voice-vi.wav
+test-google-vi-fallback.mp3
+test-hoai-my-dynamic.mp3
+test-hoai-my-standard.mp3
+test-nam-minh-deep.mp3
+test-nam-minh-fast.mp3
+test-nam-minh-standard.mp3
+test-nam.mp3
+test-piper-offline.wav
+test-tts.mp3
+test-multilingual-ava.mp3
+
+# Electron build outputs
+electron/dist/
+electron/node_modules/
+
+# FFmpeg dự phòng do setup-binaries.js tải về khi @ffmpeg-installer thất bại
+binaries/
+
+# Tài liệu nội bộ — KHÔNG public.
+# COMMERCIALIZATION_PLAN.md lộ chiến lược giá, lộ trình chuyển thu phí và
+# cơ chế bật/tắt từ xa; CLAUDE.md là working notes nội bộ.
+COMMERCIALIZATION_PLAN.md
+CLAUDE.md

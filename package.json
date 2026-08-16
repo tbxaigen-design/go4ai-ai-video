@@ -1,0 +1,40 @@
+{
+  "name": "go4ai-ai-video",
+  "version": "1.0.0-beta.1",
+  "private": true,
+  "type": "module",
+  "description": "GO4AI AI Video - Automated HTML→Video Studio & Engine for creators and agents",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "workspaces": [
+    "packages/*",
+    "templates/*"
+  ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "smoke": "pnpm --filter @html-video/cli smoke",
+    "render": "node render-folder.js",
+    "format": "biome format --write .",
+    "lint": "biome lint ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "1.1.0",
+    "@ffprobe-installer/ffprobe": "2.1.2",
+    "@remotion/bundler": "^4",
+    "@remotion/renderer": "^4",
+    "react": "^18",
+    "react-dom": "^18",
+    "remotion": "^4"
+  }
+}

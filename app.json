@@ -1,0 +1,23 @@
+{
+  "id": "go4ai-ai-video",
+  "name": "GO4AI AI Video Studio & Engine",
+  "type": "product",
+  "lifecycle": "development",
+  "criticality": "medium",
+  "purpose": "Hệ thống studio render video tự động từ HTML/CSS/Remotion và AI Voice narration.",
+  "owner": "GO4AI",
+  "ssot": true,
+  "domains": ["video.go4ai.org"],
+  "runtime": {
+    "provider": "local",
+    "deploy": "Local Desktop Web Server (PORT 3075)"
+  },
+  "services": ["go4ai-ai-video-server"],
+  "dependencies": [],
+  "datastores": [],
+  "integrations": [],
+  "backup": {
+    "required": false,
+    "notes": "Local Desktop client tool."
+  }
+}

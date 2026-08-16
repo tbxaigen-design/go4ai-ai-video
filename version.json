@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0-beta",
+  "channel": "public-beta",
+  "releasedAt": "2026-08-17",
+  "mode": "FREE_BETA",
+  "notes": "Bản Beta công khai đầu tiên. Miễn phí toàn bộ tính năng.",
+  "minSupportedVersion": "1.0.0-beta"
+}

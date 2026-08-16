@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+<title>GO4AI News Ticker</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1920px;
+    height: 1080px;
+    background-color: #060812;
+    color: #ffffff;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 50px 70px 40px 70px;
+  }
+
+  .bg-glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(150px);
+    opacity: 0.45;
+    animation: pulseGlow 7s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  .glow-red { width: 650px; height: 650px; background: #dc2626; top: -150px; right: -100px; opacity: 0.35; }
+  .glow-blue { width: 750px; height: 750px; background: #1d4ed8; bottom: -100px; left: -100px; }
+
+  @keyframes pulseGlow {
+    0% { transform: scale(1) translate(0, 0); }
+    100% { transform: scale(1.12) translate(30px, -20px); }
+  }
+
+  .card-glass {
+    background: rgba(13, 19, 36, 0.85);
+    backdrop-filter: blur(28px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 28px;
+    padding: 30px 40px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+  }
+
+  .news-card {
+    background: rgba(22, 30, 52, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 22px;
+    padding: 24px 28px;
+    transition: all 0.3s ease;
+  }
+
+  @keyframes slideInUp {
+    from { opacity: 0; transform: translateY(35px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes tickerMarquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-main { animation: slideInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  
+  .ticker-wrap {
+    overflow: hidden;
+    white-space: nowrap;
+    display: flex;
+  }
+  .ticker-content {
+    display: inline-flex;
+    animation: tickerMarquee 25s linear infinite;
+  }
+
+  .badge-live {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    padding: 10px 24px;
+    border-radius: 9999px;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+  }
+</style>
+</head>
+<body>
+  <div class="bg-glow glow-red"></div>
+  <div class="bg-glow glow-blue"></div>
+
+  <!-- Header -->
+  <header class="relative z-10 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="badge-live flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-white animate-ping"></span>
+        BREAKING NEWS
+      </div>
+      <div class="text-[20px] text-red-300 font-bold tracking-widest uppercase">BẢN TIN CÔNG NGHỆ & AI TUẦN</div>
+    </div>
+    <div class="px-5 py-2 rounded-full bg-slate-900/90 border border-slate-800 text-[20px] text-slate-300 font-extrabold">
+      GO4AI NEWS • 2026
+    </div>
+  </header>
+
+  <!-- Central Stage -->
+  <main class="relative z-10 my-auto animate-main flex flex-col gap-6">
+    <h1 class="text-[56px] font-black leading-[1.15] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-indigo-200">
+      Tổng Hợp 3 Bước Đột Phá AI Trong Tuần Vừa Qua
+    </h1>
+
+    <div class="grid grid-cols-3 gap-6">
+      <div class="news-card flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-400 font-bold text-xl flex items-center justify-center mb-3">01</div>
+          <div class="text-[24px] font-bold text-white mb-2 leading-tight">Mô Hình AI Mới Ra Mắt</div>
+          <div class="text-slate-400 text-[17px] leading-relaxed">Tốc độ xử lý nhanh gấp 3 lần với khả năng lập luận vượt trội.</div>
+        </div>
+      </div>
+
+      <div class="news-card flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 font-bold text-xl flex items-center justify-center mb-3">02</div>
+          <div class="text-[24px] font-bold text-white mb-2 leading-tight">Tự Động Hóa Workflow</div>
+          <div class="text-slate-400 text-[17px] leading-relaxed">Hơn 500 doanh nghiệp áp dụng giải pháp AI Agent thành công.</div>
+        </div>
+      </div>
+
+      <div class="news-card flex flex-col justify-between">
+        <div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold text-xl flex items-center justify-center mb-3">03</div>
+          <div class="text-[24px] font-bold text-white mb-2 leading-tight">Cập Nhật AI Passport</div>
+          <div class="text-slate-400 text-[17px] leading-relaxed">Ra mắt hệ thống chứng chỉ năng lực AI tiêu chuẩn quốc tế.</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Subtitle Bar & Continuous Marquee Ticker -->
+  <footer class="relative z-10 flex flex-col gap-3">
+    <!-- Subtitle -->
+    <div class="card-glass">
+      <div class="flex items-center justify-between mb-1">
+        <div class="flex items-center gap-2.5 text-cyan-400 text-[17px] font-extrabold tracking-wider uppercase">
+          <span class="w-3 h-3 rounded-full bg-cyan-400 animate-ping"></span>
+          Vietnamese Narration
+        </div>
+        <div class="text-slate-400 text-[16px] font-bold">GO4AI Digest</div>
+      </div>
+      <p class="text-[28px] font-extrabold text-white leading-snug">
+        “Cùng điểm qua những đột phá công nghệ AI đáng chú ý nhất trong tuần qua do GO4AI tổng hợp.”
+      </p>
+    </div>
+
+    <!-- Red Bottom Breaking Ticker -->
+    <div class="h-11 rounded-xl bg-red-950/90 border border-red-800/80 flex items-center px-4 overflow-hidden">
+      <div class="text-red-400 font-bold text-sm tracking-wider uppercase shrink-0 mr-4 flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse"></span>
+        TIN VẮN:
+      </div>
+      <div class="ticker-wrap w-full font-mono text-sm text-red-200 font-semibold tracking-wide">
+        <div class="ticker-content">
+          <span>+++ GO4AI ra mắt giải pháp AI Agent thế hệ mới +++ AI Passport đạt mốc 10.000 học viên +++ Tự động hóa video marketing đạt hiệu suất x5 lần +++&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+          <span>+++ GO4AI ra mắt giải pháp AI Agent thế hệ mới +++ AI Passport đạt mốc 10.000 học viên +++ Tự động hóa video marketing đạt hiệu suất x5 lần +++&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,15 @@
+id: go4ai-news-ticker
+name: "GO4AI News Ticker (16:9 & 9:16)"
+description: "Mẫu video điểm tin công nghệ và bản tin AI tuần của GO4AI với thanh Breaking News ticker chạy chữ liên tục, 3 thẻ tin nổi bật và hiệu ứng ánh sáng hiện đại."
+category: "news-explainer"
+tags: ["go4ai", "news", "ticker", "breaking-news", "weekly-ai", "16:9", "9:16", "tech"]
+min_sec: 4
+max_sec: 20
+engine: hyperframes
+aspect_ratio: "16:9"
+resolution:
+  width: 1920
+  height: 1080
+source_entry: "source/index.html"
+author: "GO4AI Media Team"
+license: "Apache-2.0"

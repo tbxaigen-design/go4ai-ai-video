@@ -1,0 +1,3088 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GO4AI HTML → Video Studio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #070a12;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(71, 85, 105, 0.5);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(100, 116, 139, 0.8);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-panel {
+      background: rgba(10, 14, 24, 0.96);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .gradient-btn {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      transition: all 0.25s ease;
+    }
+    .gradient-btn:hover {
+      filter: brightness(1.12);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 25px -4px rgba(99, 102, 241, 0.45);
+    }
+    .gradient-btn:active {
+      transform: translateY(0);
+    }
+    .timeline-card {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+    .timeline-card.active {
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.16);
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.4);
+    }
+    .timeline-card .card-delete-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: rgba(239, 68, 68, 0.0);
+      border: 1px solid transparent;
+      color: transparent;
+      font-size: 11px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      z-index: 10;
+      padding: 0;
+    }
+    .timeline-card:hover .card-delete-btn {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .timeline-card .card-delete-btn:hover {
+      background: rgba(239, 68, 68, 0.85) !important;
+      border-color: #ef4444 !important;
+      color: #fff !important;
+      transform: scale(1.15);
+    }
+    #dropOverlay { display: none; }
+    body.dragging #dropOverlay { display: flex; }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.92) translateY(6px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden select-none">
+
+  <!-- Universal Drag & Drop Overlay -->
+  <div id="dropOverlay" class="fixed inset-0 bg-indigo-950/85 backdrop-blur-md z-50 flex-col items-center justify-center border-4 border-dashed border-indigo-400 p-10 text-center pointer-events-none">
+    <div class="w-20 h-20 rounded-3xl bg-indigo-600/30 flex items-center justify-center text-indigo-300 mb-4 animate-bounce">
+      <i data-lucide="upload-cloud" class="w-10 h-10"></i>
+    </div>
+    <h2 class="text-2xl font-black text-white">Thả file vào đây để thêm vào dự án</h2>
+    <p class="text-sm text-indigo-200 mt-2">Hỗ trợ file HTML (Cảnh), MP3/WAV (Âm thanh/Thuyết minh), Ảnh/Video Assets</p>
+  </div>
+
+  <!-- Top App Navigation Header -->
+  <header class="h-14 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur px-4 flex items-center justify-between shrink-0 z-20">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+        <i data-lucide="clapperboard" class="w-4 h-4 text-white"></i>
+      </div>
+      <div>
+        <h1 class="text-sm font-bold text-white flex items-center gap-2">
+          HTML → Video Studio
+          <span class="text-[10px] font-semibold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 font-mono">Pro Studio 2.0</span>
+        </h1>
+      </div>
+    </div>
+
+    <!-- Center Mode Switcher Tabs -->
+    <div class="flex items-center gap-1 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
+      <button onclick="switchSidebarTab('projects')" id="tabTopProjects" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 transition">
+        <i data-lucide="folder-kanban" class="w-3.5 h-3.5"></i>
+        <span>1. Dự Án</span>
+      </button>
+      <button onclick="switchSidebarTab('audio')" id="tabTopAudio" class="text-xs font-semibold px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+        <i data-lucide="mic" class="w-3.5 h-3.5 text-indigo-400"></i>
+        <span>2. Lồng Tiếng & Nhịp Đọc</span>
+      </button>
+      <button onclick="switchSidebarTab('aiDirector')" id="tabTopAiDirector" class="text-xs font-semibold px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+        <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span>3. AI Tạo Tự Động</span>
+      </button>
+      <button onclick="switchSidebarTab('templates')" id="tabTopTemplates" class="text-xs font-semibold px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+        <i data-lucide="layout-template" class="w-3.5 h-3.5 text-emerald-400"></i>
+        <span>4. Mẫu HTML Thủ Công</span>
+      </button>
+    </div>
+
+    <!-- Top Action Buttons -->
+    <div class="flex items-center gap-2">
+      <!-- Badge phiên bản: đọc động từ /api/system/status (nguồn = version.json) -->
+      <span id="versionBadge" title="Phiên bản đang chạy"
+            class="text-[10px] font-bold uppercase tracking-wide text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-md whitespace-nowrap">
+        Bản Thử Nghiệm
+      </span>
+
+      <!-- GO4AI 1-Click Creator -->
+      <button onclick="showGo4aiAutoModal()" class="text-xs font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 border border-blue-400/30 px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 shadow-md shadow-blue-500/25 transition">
+        <i data-lucide="zap" class="w-3.5 h-3.5 fill-amber-300 text-amber-300"></i>
+        <span>⚡ GO4AI Auto 1-Click</span>
+      </button>
+
+      <!-- Góp ý & Báo lỗi -->
+      <button onclick="showFeedbackModal()" class="text-xs font-semibold text-sky-300 hover:text-white bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/25 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+        <i data-lucide="message-square" class="w-3.5 h-3.5 text-sky-400"></i>
+        <span>Góp ý & Báo lỗi</span>
+      </button>
+
+      <button id="btnOpenFolder" onclick="openCurrentFolder()" class="hidden text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+        <i data-lucide="folder-open" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span>Mở Folder Máy</span>
+      </button>
+
+      <button id="btnOpenGallery" onclick="showExportGalleryModal()" class="hidden text-xs font-semibold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/25 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+        <i data-lucide="film" class="w-3.5 h-3.5"></i>
+        <span>Kho Video (<span id="topExportCount">0</span>)</span>
+      </button>
+
+      <button id="btnQuickAddScene" onclick="showAddSceneModal()" class="hidden text-xs font-semibold text-indigo-300 hover:text-white bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/25 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+        <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
+        <span>+ Thêm Cảnh</span>
+      </button>
+
+      <button id="btnRenderVideo" onclick="startRender()" class="hidden gradient-btn px-4 py-1.5 rounded-lg font-bold text-xs text-white flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
+        <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+        <span>Xuất Video 60fps</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="flex-1 flex overflow-hidden">
+    
+    <!-- Left Navigation Bar Icons -->
+    <nav class="w-14 bg-slate-950 border-r border-slate-800/80 flex flex-col items-center py-4 gap-3 shrink-0 z-10">
+      <button onclick="switchSidebarTab('projects')" id="tabBtnProjects" class="w-9 h-9 rounded-xl flex items-center justify-center text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 transition hover:scale-105" title="Quản Lý Dự Án">
+        <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+      </button>
+
+      <button onclick="switchSidebarTab('audio')" id="tabBtnAudio" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:bg-slate-800/60 border border-transparent transition hover:scale-105" title="Studio Lồng Tiếng, Giọng Đọc & Nhịp Độ">
+        <i data-lucide="mic" class="w-4 h-4"></i>
+      </button>
+
+      <button onclick="switchSidebarTab('aiDirector')" id="tabBtnAiDirector" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-amber-400 hover:bg-slate-800/60 border border-transparent transition hover:scale-105" title="AI Auto-Director: Tạo Video Tự Động">
+        <i data-lucide="sparkles" class="w-4 h-4"></i>
+      </button>
+
+      <button onclick="switchSidebarTab('templates')" id="tabBtnTemplates" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:bg-slate-800/60 border border-transparent transition hover:scale-105" title="Kho 22+ Mẫu HTML Chuyển Động Thủ Công">
+        <i data-lucide="layout-template" class="w-4 h-4"></i>
+      </button>
+
+      <button onclick="switchSidebarTab('exports')" id="tabBtnExports" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-400 hover:bg-slate-800/60 border border-transparent transition hover:scale-105" title="Quản Lý Video Đã Xuất">
+        <i data-lucide="film" class="w-4 h-4"></i>
+      </button>
+
+      <div class="mt-auto flex flex-col items-center gap-3">
+        <button onclick="loadAll()" class="w-9 h-9 rounded-xl flex items-center justify-center text-slate-500 hover:text-white hover:bg-slate-800 transition" title="Làm mới">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Sub-Sidebar Workbench Panel -->
+    <aside class="w-88 w-[360px] glass-panel flex flex-col shrink-0">
+      
+      <!-- Panel 1: Projects Manager -->
+      <div id="panelProjects" class="flex-1 flex flex-col overflow-hidden">
+        <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="folder" class="w-4 h-4 text-indigo-400"></i>
+            Danh Sách Dự Án
+          </span>
+          <button onclick="showNewProjectModal()" class="text-xs font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-1 rounded-md border border-indigo-500/20 transition">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            Mới
+          </button>
+        </div>
+
+        <div id="projectsList" class="flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-1.5">
+          <!-- Dynamic projects -->
+        </div>
+      </div>
+
+      <!-- Panel 2: Studio Lồng Tiếng & Ước Tính Thời Lượng Chính Xác -->
+      <div id="panelAudio" class="flex-1 flex flex-col overflow-hidden hidden p-3.5 custom-scrollbar overflow-y-auto space-y-3.5">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <span class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="mic" class="w-4 h-4 text-indigo-400"></i>
+            Studio Lồng Tiếng & Nhịp Đọc
+          </span>
+          <span class="text-[10px] font-mono bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20">Edge Neural</span>
+        </div>
+
+        <!-- 1. Voice Selector (Rõ Nam/Nữ & Ngôn ngữ) -->
+        <div class="glass-card rounded-xl p-3 border border-slate-800">
+          <label class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1.5 flex items-center justify-between">
+            <span>🎙️ 1. Chọn Giọng Đọc</span>
+            <span id="badgeVoiceType" class="text-[10px] text-indigo-300 font-mono">Nam • Tiếng Việt</span>
+          </label>
+
+          <select id="globalVoiceSelect" onchange="onVoiceChange()" class="w-full bg-slate-900 border border-slate-700 text-xs font-semibold text-white rounded-lg px-2.5 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <optgroup label="🇻🇳 Tiếng Việt Bản Địa (Microsoft Neural • 48kHz Miễn Phí)">
+              <option value="vi-nam-minh" selected>👨 [Nam • Chuẩn Bắc] Nam Minh (Trầm ấm, Công nghệ)</option>
+              <option value="vi-hoai-my">👩 [Nữ • Chuẩn Bắc] Hoài My (Nhẹ nhàng, Truyền cảm)</option>
+            </optgroup>
+            <optgroup label="🇻🇳 Tiếng Việt Google Cloud (Miễn Phí 100%)">
+              <option value="vi-google-female">👩 [Nữ • Phổ Thông] Chị Google (Review, TikTok, Tin tức)</option>
+            </optgroup>
+            <optgroup label="🇻🇳 Tiếng Việt Multilingual AI Neural (Microsoft Copilot AI)">
+              <option value="vi-ai-ava">👩 [Nữ AI] Ava Multilingual (Biểu cảm, Tự nhiên)</option>
+              <option value="vi-ai-andrew">👨 [Nam AI] Andrew Multilingual (Ấm áp, Copilot)</option>
+              <option value="vi-ai-emma">👩 [Nữ AI] Emma Multilingual (Tươi sáng, Trẻ trung)</option>
+              <option value="vi-ai-brian">👨 [Nam AI] Brian Multilingual (Chân thực, Gần gũi)</option>
+            </optgroup>
+            <optgroup label="🇺🇸 🇬🇧 English (Male & Female US/UK)">
+              <option value="en-us-guy">👨 [Male • US] Guy (Tech & Natural)</option>
+              <option value="en-us-jenny">👩 [Female • US] Jenny (Storytelling & Marketing)</option>
+              <option value="en-us-aria">👩 [Female • US] Aria (News Anchor)</option>
+              <option value="en-gb-ryan">👨 [Male • UK] Ryan (Documentary)</option>
+            </optgroup>
+          </select>
+
+          <!-- Nút Nghe Thử Mẫu Giọng Đọc -->
+          <button onclick="playVoiceAudition()" id="btnPlayVoiceAudition" class="w-full mt-2 bg-indigo-600/20 hover:bg-indigo-600/35 border border-indigo-500/40 text-indigo-300 hover:text-white font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm">
+            <i data-lucide="volume-2" class="w-4 h-4 text-indigo-400"></i>
+            <span id="txtBtnVoiceAudition">🔊 Nghe Thử Giọng Này (Voice Sample)</span>
+          </button>
+        </div>
+
+        <!-- 2. Văn Mẫu Đọc (Sample Presets) -->
+        <div class="glass-card rounded-xl p-3 border border-slate-800">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+              📜 2. Chọn Văn Mẫu Hoặc Nhập
+            </label>
+            <span class="text-[10px] text-slate-400">5 Mẫu Có Sẵn</span>
+          </div>
+
+          <select id="sampleScriptSelect" onchange="loadSampleScript()" class="w-full bg-slate-900 border border-slate-700 text-[11px] font-medium text-indigo-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500 mb-2 cursor-pointer">
+            <option value="">-- Chọn Văn Mẫu Kịch Bản Đọc --</option>
+            <option value="saas_intro">💡 Giới thiệu Sản Phẩm SaaS / AI (3 Cảnh)</option>
+            <option value="tiktok_viral">⚡ Video TikTok / Reels Viral Giữ Chân (4 Cảnh)</option>
+            <option value="market_data">📊 Báo cáo Số liệu & Tăng trưởng Thị trường (4 Cảnh)</option>
+            <option value="explainer_tech">🎓 Explainer: HTML-to-Video Là Gì? (3 Cảnh)</option>
+            <option value="business_vision">🏢 Tầm nhìn Chuyển Đổi Số Doanh Nghiệp (3 Cảnh)</option>
+          </select>
+
+          <textarea id="fullNarrationInput" oninput="debounceEstimate()" rows="4" placeholder="Dán hoặc nhập toàn bộ kịch bản thuyết minh video của bạn vào đây..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-slate-200 font-sans focus:outline-none focus:border-indigo-500 resize-none custom-scrollbar leading-relaxed"></textarea>
+
+          <!-- Nút Nghe Thử Đọc Toàn Bộ Kịch Bản / Văn Mẫu -->
+          <div class="flex items-center gap-2 mt-2">
+            <button onclick="playScriptAudition()" id="btnPlayScriptAudition" class="flex-1 bg-emerald-600/20 hover:bg-emerald-600/35 border border-emerald-500/40 text-emerald-300 hover:text-white font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm">
+              <i data-lucide="play-circle" class="w-4 h-4 text-emerald-400"></i>
+              <span id="txtBtnScriptAudition">▶️ Nghe Đọc Thử Đoạn Văn Này</span>
+            </button>
+            <button onclick="stopAuditionAudio()" id="btnStopAudition" class="hidden px-3 bg-rose-600/20 hover:bg-rose-600/35 border border-rose-500/40 text-rose-300 hover:text-white font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1 transition shadow-sm">
+              <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i>
+              <span>Dừng</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Bộ Điều Chỉnh Nhịp Độ & Cách Đọc (Pace & Pitch) -->
+        <div class="glass-card rounded-xl p-3 border border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+              ⏱️ 3. Nhịp Độ Đọc & Cao Độ
+            </label>
+            <span id="labelSpeedRate" class="text-[10px] font-mono font-bold text-indigo-400">1.0x (Chuẩn)</span>
+          </div>
+
+          <!-- Quick Speed Buttons -->
+          <div class="grid grid-cols-4 gap-1.5 mb-2.5">
+            <button onclick="setVoiceRate(-15)" id="btnRateSlow" class="py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800 transition">0.85x Chậm</button>
+            <button onclick="setVoiceRate(0)" id="btnRateNormal" class="py-1 rounded bg-indigo-600 text-[10px] font-bold text-white border border-indigo-500 transition">1.0x Chuẩn</button>
+            <button onclick="setVoiceRate(15)" id="btnRateFast" class="py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800 transition">1.15x Nhanh</button>
+            <button onclick="setVoiceRate(30)" id="btnRateVeryFast" class="py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800 transition">1.3x Rất nhanh</button>
+          </div>
+
+          <!-- Custom Sliders -->
+          <div class="space-y-2">
+            <div>
+              <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                <span>Tốc độ đọc (Rate)</span>
+                <span id="rateSliderVal" class="font-mono text-indigo-300">0%</span>
+              </div>
+              <input type="range" id="voiceRateSlider" min="-30" max="40" step="5" value="0" oninput="onRateSliderChange(this.value)" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
+            </div>
+
+            <div>
+              <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                <span>Cao độ giọng (Pitch)</span>
+                <span id="pitchSliderVal" class="font-mono text-indigo-300">0Hz (Tự nhiên)</span>
+              </div>
+              <input type="range" id="voicePitchSlider" min="-5" max="5" step="1" value="0" oninput="onPitchSliderChange(this.value)" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500" />
+            </div>
+          </div>
+
+          <!-- Direct Apply / Save Buttons -->
+          <div class="pt-2.5 mt-2.5 border-t border-slate-800 space-y-1.5">
+            <button onclick="applyGlobalVoiceToCurrentScene()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition shadow">
+              <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              <span>🎯 Áp Dụng Giọng Này Cho Cảnh Đang Chọn</span>
+            </button>
+            <button onclick="saveVoiceAsProjectDefault()" class="w-full bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white text-[11px] font-semibold py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition border border-slate-700">
+              <i data-lucide="bookmark" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>💾 Lưu Làm Giọng Mặc Định Cho Dự Án Này</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Logic Tự Động Phân Đoạn & Tính Thời Lượng Tối Thiểu -->
+        <div class="glass-card rounded-xl p-3 border border-indigo-500/30 bg-indigo-500/5">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[11px] font-bold text-indigo-300 uppercase tracking-wider flex items-center gap-1">
+              <i data-lucide="calculator" class="w-3.5 h-3.5"></i>
+              Bảng Ước Tính Thời Lượng Tối Thiểu
+            </span>
+            <span id="summaryWordCount" class="text-[10px] font-mono text-slate-400">0 từ • 0 cảnh</span>
+          </div>
+
+          <!-- Total Calculation Banner -->
+          <div class="bg-slate-950/80 rounded-lg p-2.5 border border-slate-800 mb-2 flex items-center justify-between text-xs">
+            <div>
+              <div class="text-[10px] text-slate-400">Thời gian đọc tối thiểu:</div>
+              <div id="estTotalSpeechTime" class="text-sm font-black text-indigo-400 font-mono">0.0s</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] text-slate-400">Khuyến nghị độ dài video:</div>
+              <div id="estTotalMinTime" class="text-sm font-black text-emerald-400 font-mono">0.0s</div>
+            </div>
+          </div>
+
+          <!-- Segments breakdown preview -->
+          <div id="segmentsBreakdownList" class="max-h-36 overflow-y-auto custom-scrollbar space-y-1 text-[11px]">
+            <div class="text-center py-3 text-slate-500 text-[10px]">Nhập văn bản ở trên để xem phân đoạn tự động</div>
+          </div>
+
+          <!-- Action button -->
+          <button onclick="applyAutoSplitAndTTS()" id="btnAutoSplitTTS" class="w-full mt-3 gradient-btn text-xs font-bold text-white py-2 rounded-lg flex items-center justify-center gap-1.5 shadow-md">
+            <i data-lucide="zap" class="w-3.5 h-3.5 fill-white"></i>
+            <span>⚡ Phân Cảnh & Tạo Toàn Bộ Giọng Đọc</span>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Panel 3: AI Auto-Director Studio (Tạo Video Tự Động) -->
+      <div id="panelAiDirector" class="flex-1 flex flex-col overflow-hidden hidden p-3.5 custom-scrollbar overflow-y-auto space-y-3.5">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <span class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            AI Auto-Director Studio
+          </span>
+          <span class="text-[10px] font-mono bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded border border-amber-500/20">Auto Director</span>
+        </div>
+
+        <div class="glass-card rounded-xl p-3.5 border border-slate-800">
+          <h4 class="text-xs font-bold text-white mb-1">Tạo Video Trọn Gói Trong 1 Click</h4>
+          <p class="text-[11px] text-slate-400 leading-relaxed mb-3">AI sẽ tự phân tích kịch bản, tự chọn các mẫu HTML chuyển động phù hợp nhất từng cảnh, tạo giọng đọc và căn chỉnh thời lượng tự động.</p>
+
+          <div class="space-y-2.5">
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Chủ Đề / Tên Video</label>
+              <input type="text" id="aiDirectorTopic" placeholder="vd: Giới thiệu giải pháp AI, Báo cáo tài chính..." class="w-full bg-slate-900 border border-slate-700 text-xs font-medium text-white px-3 py-2 rounded-lg focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Kịch Bản Thuyết Minh (Tùy chọn)</label>
+              <textarea id="aiDirectorScript" rows="4" placeholder="Nhập hoặc dán kịch bản... Hoặc chọn một văn mẫu từ tab Lồng Tiếng" class="w-full bg-slate-950 border border-slate-800 text-xs text-slate-200 rounded-lg p-2.5 font-sans focus:outline-none focus:border-indigo-500 resize-none custom-scrollbar"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Tỉ lệ khung hình</label>
+                <select id="aiDirectorAspect" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-1.5 focus:outline-none">
+                  <option value="16:9">16:9 (Ngang)</option>
+                  <option value="9:16">9:16 (TikTok/Reels)</option>
+                  <option value="1:1">1:1 (Vuông)</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Tạo giọng đọc</label>
+                <select id="aiDirectorVoiceOption" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg p-1.5 focus:outline-none">
+                  <option value="yes">✓ Tạo luôn giọng đọc</option>
+                  <option value="no">Chỉ tạo hình ảnh</option>
+                </select>
+              </div>
+            </div>
+
+            <button onclick="runAiAutoDirector()" id="btnRunAiDirector" class="w-full mt-2 gradient-btn text-xs font-bold text-white py-2.5 rounded-lg flex items-center justify-center gap-1.5 shadow-lg">
+              <i data-lucide="wand-2" class="w-4 h-4"></i>
+              <span>🤖 Bắt Đầu Tạo Toàn Bộ Video Bằng AI</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel 4: Template Library (22+ Motion Templates) -->
+      <div id="panelTemplates" class="flex-1 flex flex-col overflow-hidden hidden">
+        <div class="p-3.5 border-b border-slate-800">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <i data-lucide="layout-template" class="w-4 h-4 text-emerald-400"></i>
+              Kho Mẫu Chuyển Động
+            </span>
+            <span id="templateCountBadge" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">22 mẫu</span>
+          </div>
+
+          <select id="templateCategorySelect" onchange="filterTemplates()" class="w-full bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
+            <option value="all">Tất cả danh mục (22 mẫu)</option>
+            <option value="marketing">Marketing & Hero</option>
+            <option value="data-viz">Biểu Đồ & Data-Viz</option>
+            <option value="typography">Kinetic Type & Chữ Động</option>
+            <option value="explainer">Explainer & Cấu Trúc</option>
+            <option value="editorial">Editorial & Cinema</option>
+            <option value="title">Title Card & VFX</option>
+          </select>
+        </div>
+
+        <div id="templatesList" class="flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-2.5">
+          <!-- Dynamic templates -->
+        </div>
+      </div>
+
+      <!-- Panel 5: Project Exported Videos Management -->
+      <div id="panelExports" class="flex-1 flex flex-col overflow-hidden hidden">
+        <div class="p-3.5 border-b border-slate-800 flex items-center justify-between">
+          <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <i data-lucide="film" class="w-4 h-4 text-emerald-400"></i>
+            Video Đã Xuất (<span id="panelExportCount">0</span>)
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button onclick="openExportsFolder()" class="text-[11px] font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded border border-slate-700 flex items-center gap-1 transition" title="Mở thư mục video trong Explorer">
+              <i data-lucide="folder-open" class="w-3 h-3 text-amber-400"></i>
+              <span>Mở Folder</span>
+            </button>
+            <button onclick="loadProjectVideos()" class="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-white" title="Làm mới">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="projectVideosList" class="flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-2">
+          <!-- Dynamic exported videos for active project -->
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Main Workspace (Center Stage + Right CapCut Inspector + Bottom Timeline) -->
+    <main class="flex-1 flex flex-col overflow-hidden bg-slate-950/60">
+      
+      <!-- Empty Project View -->
+      <div id="emptyProjectView" class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div class="w-16 h-16 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mb-4">
+          <i data-lucide="film" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-lg font-bold text-slate-200">Chưa chọn dự án</h2>
+        <p class="text-xs text-slate-400 max-w-sm mt-1 mb-5">Chọn một dự án từ danh sách bên trái hoặc tạo mới để bắt đầu ghép và sản xuất video.</p>
+        <button onclick="showNewProjectModal()" class="gradient-btn px-5 py-2.5 rounded-xl text-xs font-bold text-white shadow-lg">
+          + Tạo Dự Án Mới
+        </button>
+      </div>
+
+      <!-- Active Project View -->
+      <div id="activeProjectView" class="flex-1 flex flex-col overflow-hidden hidden">
+        
+        <!-- Context Bar -->
+        <div class="px-4 py-2 border-b border-slate-800/80 bg-slate-900/40 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-3">
+            <h2 id="projHeaderTitle" class="text-sm font-black text-white tracking-tight">demo</h2>
+            
+            <!-- Aspect Ratio Selector -->
+            <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1">
+              <i data-lucide="aspect-ratio" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <select id="selectAspect" onchange="updateProjectConfig()" class="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
+                <option value="16:9">16:9 (1920x1080 Ngang)</option>
+                <option value="9:16">9:16 (1080x1920 Dọc)</option>
+                <option value="1:1">1:1 (1080x1080 Vuông)</option>
+              </select>
+            </div>
+
+            <!-- FPS Selector -->
+            <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1">
+              <i data-lucide="gauge" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <select id="selectFps" onchange="updateProjectConfig()" class="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
+                <option value="60">60 FPS (Siêu Mượt)</option>
+                <option value="30">30 FPS</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- View Mode Switcher -->
+          <div class="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+            <button onclick="switchViewMode('preview')" id="btnModePreview" class="text-xs font-bold px-3 py-1 rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 transition">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>Xem Trực Tiếp</span>
+            </button>
+            <button onclick="switchViewMode('editor')" id="btnModeEditor" class="text-xs font-semibold px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+              <i data-lucide="code-2" class="w-3.5 h-3.5"></i>
+              <span>Soạn Mã HTML</span>
+            </button>
+            <button onclick="switchViewMode('video')" id="btnModeVideo" class="text-xs font-semibold px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition">
+              <i data-lucide="video" class="w-3.5 h-3.5"></i>
+              <span>Video Xuất Bản</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Center Workspace: Stage (Left) + Scene Inspector (Right) -->
+        <div class="flex-1 flex overflow-hidden relative">
+          
+          <!-- Stage Area (Center Screen) -->
+          <div class="flex-1 flex flex-col overflow-hidden relative">
+            
+            <!-- Mode 1: Interactive Canvas Preview -->
+            <div id="stagePreview" class="flex-1 flex flex-col items-center justify-center p-4 bg-black/40 overflow-hidden relative">
+              <div id="previewFrameWrapper" class="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950 transition-all duration-300" style="width: 780px; height: 438px;">
+                <iframe id="mainPreviewIframe" class="border-0 bg-transparent absolute top-0 left-0" style="width: 1920px; height: 1080px; transform: scale(0.40625); transform-origin: 0 0;"></iframe>
+              </div>
+
+              <!-- Floating Stage Controls (Live Motion + Sync Audio) -->
+              <div class="absolute bottom-4 flex items-center gap-2 bg-slate-900/95 backdrop-blur-md border border-slate-700/90 px-3 py-1.5 rounded-2xl shadow-2xl z-30">
+                <button id="btnPlaySceneSync" onclick="togglePlaySceneWithAudio()" class="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-sm" title="Phát cảnh này cùng với file giọng đọc AI">
+                  <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+                  <span id="labelPlaySceneSync">Phát Cảnh Này + Giọng Đọc</span>
+                </button>
+
+                <button id="btnPlayAllSync" onclick="togglePlayAllScenesWithAudio()" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition" title="Phát tuần tự tất cả các cảnh từ đầu đến cuối">
+                  <i data-lucide="film" class="w-3.5 h-3.5"></i>
+                  <span id="labelPlayAllSync">Phát Toàn Bộ Dự Án</span>
+                </button>
+
+                <div class="w-px h-4 bg-slate-700 mx-0.5"></div>
+
+                <button onclick="reloadPreview()" class="text-xs font-semibold text-slate-300 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition" title="Chạy lại animation (không tiếng)">
+                  <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-400"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Mode 2: Live HTML Code Editor -->
+            <div id="stageEditor" class="flex-1 flex flex-col overflow-hidden hidden bg-slate-950">
+              <div class="px-4 py-2 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+                <div class="flex items-center gap-2">
+                  <i data-lucide="file-code" class="w-4 h-4 text-indigo-400"></i>
+                  <span id="editorFileName" class="text-xs font-bold text-slate-200 font-mono">01-intro.html</span>
+                </div>
+                <button onclick="saveSceneCode()" class="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition">
+                  <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                  <span>Lưu Mã (Ctrl+S)</span>
+                </button>
+              </div>
+              <div class="flex-1 p-2">
+                <textarea id="codeEditorTextarea" class="w-full h-full bg-slate-950 text-slate-200 font-mono text-xs p-4 leading-relaxed rounded-xl border border-slate-800 focus:outline-none focus:border-indigo-500 resize-none custom-scrollbar" spellcheck="false"></textarea>
+              </div>
+            </div>
+
+            <!-- Mode 3: Video Result Viewer -->
+            <div id="stageVideo" class="flex-1 flex flex-col items-center justify-center p-6 bg-black/60 overflow-hidden hidden">
+              <div id="videoContainer" class="w-full max-w-4xl flex flex-col items-center">
+                <div class="w-full aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-800 mb-4 flex items-center justify-center">
+                  <video id="finalVideoPlayer" controls class="w-full h-full object-contain"></video>
+                </div>
+                <div class="flex items-center gap-3">
+                  <a id="btnDownloadFinalVideo" href="#" download="output.mp4" class="gradient-btn px-5 py-2.5 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                    <span>Tải Video MP4 Về Máy</span>
+                  </a>
+                  <button onclick="showExportGalleryModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 transition">
+                    <i data-lucide="film" class="w-4 h-4 text-emerald-400"></i>
+                    <span>Xem Các Bản Đã Xuất</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Scene Inspector (CapCut Style Properties) -->
+          <aside class="w-80 border-l border-slate-800/80 bg-slate-950/80 p-3.5 flex flex-col overflow-y-auto custom-scrollbar shrink-0 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+              <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="sliders" class="w-4 h-4 text-indigo-400"></i>
+                Thuộc Tính Cảnh <span id="inspectorSceneNum" class="text-indigo-400">#1</span>
+              </span>
+              <span id="inspectorSceneFile" class="text-[10px] font-mono text-slate-500 truncate max-w-[120px]">01-intro.html</span>
+            </div>
+
+            <!-- 1. Lời thoại cảnh này (Per-Scene Script & TTS Voice) -->
+            <div class="glass-card rounded-xl p-3 border border-slate-800">
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1">
+                  <i data-lucide="message-square" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  Lời thoại cảnh này
+                </label>
+                <button onclick="playSceneAudioLive()" id="btnPlaySceneAudio" class="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 px-2 py-0.5 rounded flex items-center gap-1 transition" title="Nghe file audio đã tạo của cảnh này">
+                  <i data-lucide="volume-2" class="w-3 h-3"></i>
+                  <span>Nghe Audio</span>
+                </button>
+              </div>
+
+              <textarea id="sceneScriptInput" oninput="updateSceneMetricsLive()" rows="3" placeholder="Nhập câu nói / lời thoại cho riêng cảnh này..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 font-sans focus:outline-none focus:border-indigo-500 resize-none custom-scrollbar leading-relaxed"></textarea>
+
+              <div class="flex items-center justify-between text-[10px] text-slate-400 my-1 font-mono">
+                <span id="sceneWordCountBadge">0 từ</span>
+                <span id="sceneMinEstimatedDuration" class="text-indigo-300">Tối thiểu: ~4.0s</span>
+              </div>
+
+              <!-- Per-Scene Voice Customizer (Chọn giọng riêng cho cảnh này) -->
+              <div class="bg-slate-950/70 p-2.5 rounded-lg border border-slate-800/80 space-y-2 mb-2">
+                <div class="flex items-center justify-between text-[10px]">
+                  <span class="text-slate-400 font-bold uppercase flex items-center gap-1">
+                    <i data-lucide="user-voice" class="w-3.5 h-3.5 text-indigo-400"></i>
+                    Giọng đọc cảnh này:
+                  </span>
+                  <span id="sceneVoiceBadge" class="text-indigo-300 font-mono text-[9px]">Dùng mặc định</span>
+                </div>
+                <select id="sceneVoiceSelect" class="w-full bg-slate-900 border border-slate-700 text-[11px] font-semibold text-white rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
+                  <option value="inherit">✨ Dùng giọng mặc định của dự án</option>
+                  <optgroup label="🇻🇳 Tiếng Việt Bản Địa (Microsoft Neural • 48kHz)">
+                    <option value="vi-nam-minh">👨 [Nam • Chuẩn Bắc] Nam Minh</option>
+                    <option value="vi-hoai-my">👩 [Nữ • Chuẩn Bắc] Hoài My</option>
+                  </optgroup>
+                  <optgroup label="🇻🇳 Tiếng Việt Google Cloud">
+                    <option value="vi-google-female">👩 [Nữ] Chị Google (TikTok / Review)</option>
+                  </optgroup>
+                  <optgroup label="🇻🇳 Tiếng Việt Copilot Multilingual AI">
+                    <option value="vi-ai-ava">👩 [Nữ AI] Ava Multilingual</option>
+                    <option value="vi-ai-andrew">👨 [Nam AI] Andrew Multilingual</option>
+                    <option value="vi-ai-emma">👩 [Nữ AI] Emma Multilingual</option>
+                    <option value="vi-ai-brian">👨 [Nam AI] Brian Multilingual</option>
+                  </optgroup>
+                  <optgroup label="🇺🇸 🇬🇧 English">
+                    <option value="en-us-guy">👨 [Male] Guy US</option>
+                    <option value="en-us-jenny">👩 [Female] Jenny US</option>
+                    <option value="en-us-aria">👩 [Female] Aria US</option>
+                    <option value="en-gb-ryan">👨 [Male] Ryan UK</option>
+                  </optgroup>
+                </select>
+
+                <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800/60">
+                  <span class="text-slate-400 text-[10px]">Tốc độ đọc cảnh:</span>
+                  <select id="sceneRateSelect" class="bg-slate-900 border border-slate-700 text-[10px] font-mono text-indigo-300 rounded px-1.5 py-0.5 focus:outline-none cursor-pointer">
+                    <option value="inherit">Theo dự án</option>
+                    <option value="-15">0.85x Chậm</option>
+                    <option value="0">1.0x Chuẩn</option>
+                    <option value="15">1.15x Nhanh</option>
+                    <option value="30">1.3x Rất nhanh</option>
+                  </select>
+                </div>
+              </div>
+
+              <button onclick="generateSceneTTS()" id="btnSceneTTS" class="w-full mt-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:brightness-110 text-white font-bold text-[11px] py-2 rounded-lg flex items-center justify-center gap-1.5 shadow transition">
+                <i data-lucide="mic" class="w-3.5 h-3.5"></i>
+                <span>Tạo Giọng & Khớp Thời Lượng Cảnh Này</span>
+              </button>
+            </div>
+
+            <!-- 2. Điều Chỉnh Thời Lượng & Khoảng Trống Không Đọc (Silence / Gaps) -->
+            <div class="glass-card rounded-xl p-3 border border-slate-800 space-y-2">
+              <label class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block flex items-center justify-between">
+                <span class="flex items-center gap-1">
+                  <i data-lucide="clock" class="w-3.5 h-3.5 text-indigo-400"></i>
+                  Thời Lượng & Khoảng Trống
+                </span>
+                <span id="sceneVoiceDurationTag" class="text-[10px] font-mono text-emerald-400">Audio: 0.0s</span>
+              </label>
+
+              <!-- Intro Pause (Đệm đầu) -->
+              <div class="flex items-center justify-between text-xs bg-slate-900/60 p-1.5 rounded-lg border border-slate-800/80">
+                <span class="text-[11px] text-slate-400">Đệm đầu (Intro Pause):</span>
+                <div class="flex items-center gap-1">
+                  <input type="number" id="inputIntroPause" step="0.1" min="0" max="10" value="0.3" onchange="onTimingChange()" class="w-14 bg-slate-950 border border-slate-700 text-center font-mono font-bold text-white rounded py-0.5 text-xs focus:outline-none" />
+                  <span class="text-[10px] text-slate-500">giây</span>
+                </div>
+              </div>
+
+              <!-- Outro Pause (Nghỉ đuôi) -->
+              <div class="flex items-center justify-between text-xs bg-slate-900/60 p-1.5 rounded-lg border border-slate-800/80">
+                <span class="text-[11px] text-slate-400">Nghỉ đuôi (Outro Pause):</span>
+                <div class="flex items-center gap-1">
+                  <input type="number" id="inputOutroPause" step="0.1" min="0" max="10" value="0.5" onchange="onTimingChange()" class="w-14 bg-slate-950 border border-slate-700 text-center font-mono font-bold text-white rounded py-0.5 text-xs focus:outline-none" />
+                  <span class="text-[10px] text-slate-500">giây</span>
+                </div>
+              </div>
+
+              <!-- Total Scene Duration -->
+              <div>
+                <div class="text-[11px] text-slate-300 font-bold mb-1">Tổng Thời Lượng Cảnh (Scene):</div>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="stepSceneDuration(-0.5)" class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-xs">-</button>
+                  <input type="number" id="inputCurrentDuration" step="0.5" min="1" max="60" onchange="saveCurrentSceneDuration()" class="flex-1 bg-slate-950 border border-slate-700 text-center font-mono font-bold text-white rounded-lg py-1 text-sm focus:outline-none focus:border-indigo-500" />
+                  <button onclick="stepSceneDuration(0.5)" class="w-7 h-7 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white font-bold text-xs">+</button>
+                  <span class="text-xs text-slate-400 font-semibold">giây</span>
+                </div>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="grid grid-cols-4 gap-1 pt-1">
+                <button onclick="setQuickDuration(2)" class="py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800">2s</button>
+                <button onclick="setQuickDuration(3.5)" class="py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800">3.5s</button>
+                <button onclick="setQuickDuration(5)" class="py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800">5s</button>
+                <button onclick="setQuickDuration(8)" class="py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800">8s</button>
+              </div>
+            </div>
+
+            <!-- 3. Thao tác cảnh nhanh -->
+            <div class="glass-card rounded-xl p-3 border border-slate-800">
+              <label class="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-2 flex items-center gap-1">
+                <i data-lucide="wrench" class="w-3.5 h-3.5 text-indigo-400"></i>
+                Thao Tác Cảnh
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="duplicateCurrentScene()" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-300 flex items-center justify-center gap-1 border border-slate-800">
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  <span>Nhân bản</span>
+                </button>
+                <button onclick="deleteCurrentScene()" class="p-2 rounded-lg bg-slate-900 hover:bg-rose-900/40 text-xs font-semibold text-rose-400 flex items-center justify-center gap-1 border border-slate-800">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  <span>Xoá cảnh</span>
+                </button>
+              </div>
+            </div>
+
+          </aside>
+
+        </div>
+
+        <!-- CapCut Multi-Track Timeline (Bottom) -->
+        <div class="h-44 border-t border-slate-800/80 bg-slate-950/95 flex flex-col shrink-0 select-none">
+          <!-- Timeline Header -->
+          <div class="px-4 py-2 border-b border-slate-800/60 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <i data-lucide="film" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <span>Dòng Thời Gian (Timeline):</span>
+              <span id="timelineStats" class="text-indigo-300 font-mono font-semibold">0 cảnh • 0.0s</span>
+            </div>
+
+            <!-- Timeline controls -->
+            <div class="flex items-center gap-1.5">
+              <button onclick="moveCurrentScene(-1)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white" title="Di chuyển lùi lại (◀)">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+              </button>
+              <button onclick="moveCurrentScene(1)" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white" title="Di chuyển tiến lên (▶)">
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+              <span class="w-px h-4 bg-slate-800 mx-1"></span>
+              <button onclick="addSilenceOnlyScene()" class="text-xs font-semibold text-slate-300 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-2.5 py-1.5 rounded-lg flex items-center gap-1 transition" title="Thêm một cảnh chỉ có hình ảnh, không đọc lời">
+                <i data-lucide="volume-x" class="w-3.5 h-3.5 text-slate-400"></i>
+                <span>+ Cảnh Không Lời</span>
+              </button>
+              <button onclick="showAddSceneModal()" class="text-xs font-bold text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 px-3 py-1.5 rounded-lg flex items-center gap-1 transition">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>+ Thêm Cảnh Mẫu</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Timeline Track -->
+          <div id="timelineTrack" class="flex-1 overflow-x-auto custom-scrollbar p-3 flex items-center gap-3">
+            <!-- Timeline Cards -->
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal 0: Delete Scene Confirm -->
+  <div id="modalDeleteConfirm" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4 hidden" onclick="if(event.target===this)hideModals()">
+    <div class="glass-card rounded-2xl w-full max-w-sm border border-slate-700/80 shadow-2xl overflow-hidden" style="animation:scaleIn 0.18s cubic-bezier(0.16,1,0.3,1)">
+      <!-- Header -->
+      <div class="px-5 py-4 border-b border-slate-800/80 flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
+          <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-white">Xoá cảnh khỏi dự án?</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">Hành động này không thể hoàn tác</p>
+        </div>
+      </div>
+      <!-- Body -->
+      <div class="px-5 py-4">
+        <div class="flex items-center gap-2.5 bg-slate-800/60 rounded-xl px-3.5 py-2.5 border border-slate-700/60">
+          <i data-lucide="file-code" class="w-4 h-4 text-indigo-400 shrink-0"></i>
+          <span id="deleteConfirmSceneName" class="text-xs font-mono text-indigo-300 font-semibold truncate"></span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-2.5 leading-relaxed">File HTML và file audio của cảnh này sẽ bị xoá vĩnh viễn khỏi dự án.</p>
+      </div>
+      <!-- Footer -->
+      <div class="px-5 pb-4 flex gap-2 justify-end">
+        <button onclick="hideModals()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-white transition">Hủy</button>
+        <button id="deleteConfirmBtn" class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white transition flex items-center gap-1.5 shadow-lg">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          Xoá cảnh
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Project Created Successfully -->
+  <div id="modalGo4aiSuccess" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[70] flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl w-full max-w-lg border border-slate-700/80 shadow-2xl overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1)">
+      <!-- Header -->
+      <div class="px-6 py-5 border-b border-slate-800 bg-gradient-to-r from-indigo-950/60 to-purple-950/60 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+            <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white">Khởi Tạo Dự Án Thành Công!</h3>
+            <p class="text-xs text-slate-400">Đã tự động phân cảnh & tạo file giọng đọc AI</p>
+          </div>
+        </div>
+        <button onclick="hideModals()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6 space-y-4">
+        <!-- Specs Badge Grid -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
+            <div class="text-[10px] text-slate-500 font-bold uppercase">Số Cảnh</div>
+            <div id="successSceneCount" class="text-lg font-bold text-indigo-400 font-mono mt-0.5">1 cảnh</div>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
+            <div class="text-[10px] text-slate-500 font-bold uppercase">Tổng Thời Lượng</div>
+            <div id="successDuration" class="text-lg font-bold text-emerald-400 font-mono mt-0.5">5.6s</div>
+          </div>
+          <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3 text-center">
+            <div class="text-[10px] text-slate-500 font-bold uppercase">Định Dạng</div>
+            <div id="successAspect" class="text-lg font-bold text-amber-400 font-mono mt-0.5">9:16</div>
+          </div>
+        </div>
+
+        <!-- Storage Location Box -->
+        <div class="bg-slate-950/80 rounded-xl p-3.5 border border-slate-800/90 flex flex-col gap-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-slate-400 font-semibold flex items-center gap-1.5">
+              <i data-lucide="folder" class="w-4 h-4 text-indigo-400"></i>
+              Thư mục lưu trữ trên máy:
+            </span>
+            <button onclick="openCurrentProjectFolder()" class="text-[11px] font-bold text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+              <i data-lucide="folder-open" class="w-3.5 h-3.5"></i>
+              <span>Mở Folder</span>
+            </button>
+          </div>
+          <div id="successProjectPath" class="font-mono text-xs text-slate-300 bg-slate-900 px-3 py-2 rounded-lg border border-slate-800/80 truncate select-all">
+            projects/go4ai-video-...
+          </div>
+        </div>
+
+        <!-- Next Actions -->
+        <div class="pt-2 flex flex-col gap-2.5">
+          <button onclick="hideModals(); togglePlayAllScenesWithAudio();" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:brightness-110 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition">
+            <i data-lucide="play-circle" class="w-5 h-5"></i>
+            <span>▶ Xem Thử Full Chuyển Động & Âm Thanh Ngay</span>
+          </button>
+          
+          <div class="grid grid-cols-2 gap-2">
+            <button onclick="hideModals(); startRender();" class="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 transition shadow">
+              <i data-lucide="video" class="w-4 h-4"></i>
+              <span>⚡ Xuất Video MP4 Luôn</span>
+            </button>
+            <button onclick="hideModals();" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+              <span>Vào Chỉnh Sửa Từng Cảnh</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Video Export Finished Success -->
+  <div id="modalVideoFinished" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[75] flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl w-full max-w-2xl border border-slate-700/80 shadow-2xl overflow-hidden" style="animation:scaleIn 0.2s cubic-bezier(0.16,1,0.3,1)">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-slate-800 bg-slate-900/90 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="text-sm font-bold text-white">Xuất Video MP4 Hoàn Tất!</h3>
+        </div>
+        <button onclick="hideModals()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Body with Video Player -->
+      <div class="p-6 flex flex-col items-center">
+        <div class="w-full max-h-[48vh] bg-black rounded-xl overflow-hidden shadow-2xl border border-slate-800 mb-4 flex items-center justify-center">
+          <video id="modalFinishedVideoPlayer" controls autoplay class="max-h-[48vh] w-auto max-w-full"></video>
+        </div>
+
+        <div class="w-full bg-slate-950/80 p-3 rounded-xl border border-slate-800 text-xs mb-4 flex items-center justify-between">
+          <div class="flex items-center gap-2 truncate">
+            <i data-lucide="file-video" class="w-4 h-4 text-emerald-400 shrink-0"></i>
+            <span id="modalFinishedVideoPath" class="text-slate-300 font-mono truncate">projects/.../output.mp4</span>
+          </div>
+          <span id="modalFinishedVideoSize" class="text-slate-500 font-mono shrink-0 ml-2">-- MB</span>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3 w-full">
+          <a id="modalFinishedDownloadBtn" href="#" download class="flex-1 gradient-btn py-2.5 px-4 rounded-xl text-xs font-bold text-white flex items-center justify-center gap-2 shadow-lg">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Tải Video MP4 Về Máy</span>
+          </a>
+          <button onclick="openExportsFolder()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs flex items-center gap-2 transition">
+            <i data-lucide="folder-open" class="w-4 h-4 text-amber-400"></i>
+            <span>Mở Folder Chứa Video</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 1: Project Exports Gallery -->
+  <div id="modalExportGallery" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
+    <div class="glass-card rounded-2xl w-full max-w-4xl h-[80vh] flex flex-col border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 bg-slate-900/80 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="film" class="w-5 h-5 text-emerald-400"></i>
+          <h3 class="text-sm font-bold text-white">Kho Video Đã Xuất: <span id="galleryProjectTitle" class="text-emerald-400 font-mono"></span></h3>
+        </div>
+        <div class="flex items-center gap-3">
+          <button onclick="openExportsFolder()" class="text-xs font-bold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3.5 py-1.5 rounded-xl flex items-center gap-2 transition shadow-sm">
+            <i data-lucide="folder-open" class="w-4 h-4 text-amber-400"></i>
+            <span>Mở Thư Mục Video Trên Máy</span>
+          </button>
+          <button onclick="hideModals()" class="p-1.5 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <div id="galleryVideosGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Dynamic video cards -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Create New Project -->
+  <div id="modalNewProject" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md border border-slate-700 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="folder-plus" class="w-5 h-5 text-indigo-400"></i>
+          Tạo Thư Mục Dự Án Mới
+        </h3>
+        <button onclick="hideModals()" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+      <p class="text-xs text-slate-400 mb-4">Tạo một thư mục riêng trong <code class="text-indigo-300 font-mono">projects/&lt;tên-dự-án&gt;</code> để chứa các cảnh HTML của bạn.</p>
+      
+      <div class="mb-4">
+        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">Tên thư mục dự án</label>
+        <input type="text" id="inputNewProjectName" placeholder="vd: video-gioi-thieu, promo-tiktok" class="w-full bg-slate-900 border border-slate-700 text-sm font-medium text-white px-3.5 py-2.5 rounded-xl focus:outline-none focus:border-indigo-500 mb-3" />
+
+        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider block mb-1.5">Tỉ lệ khung hình (Aspect Ratio)</label>
+        <select id="inputNewProjectAspect" class="w-full bg-slate-900 border border-slate-700 text-sm font-medium text-white px-3 py-2 rounded-xl focus:outline-none focus:border-indigo-500">
+          <option value="16:9">16:9 (1920x1080 Ngang • YouTube/Web)</option>
+          <option value="9:16">9:16 (1080x1920 Dọc • TikTok/Reels/Shorts)</option>
+          <option value="1:1">1:1 (1080x1080 Vuông • Instagram)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center justify-end gap-2">
+        <button onclick="hideModals()" class="text-xs font-semibold text-slate-400 hover:text-white px-4 py-2 rounded-xl">Hủy</button>
+        <button onclick="createNewProject()" class="gradient-btn text-xs font-bold text-white px-5 py-2.5 rounded-xl shadow-md">Tạo Dự Án</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add Scene / Template Picker -->
+  <div id="modalAddScene" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
+    <div class="glass-card rounded-2xl w-full max-w-3xl h-[75vh] flex flex-col border border-slate-700 shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900/80">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5 text-indigo-400"></i>
+          <h3 class="text-sm font-bold text-white">Chọn Mẫu HTML hoặc Tạo Cảnh Mới</h3>
+        </div>
+        <button onclick="hideModals()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+        <div class="grid grid-cols-2 gap-3 mb-6">
+          <div class="p-3.5 rounded-xl border border-indigo-500/30 bg-indigo-500/5 flex flex-col justify-between">
+            <div>
+              <h4 class="text-xs font-bold text-white">Cảnh Trắng Chuẩn</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Tự do viết CSS/JS theo ý bạn</p>
+            </div>
+            <button onclick="addBlankScene(false)" class="mt-2 gradient-btn text-xs font-bold text-white py-1.5 rounded-lg shadow">
+              + Tạo Cảnh Trắng
+            </button>
+          </div>
+
+          <div class="p-3.5 rounded-xl border border-slate-700 bg-slate-900/50 flex flex-col justify-between">
+            <div>
+              <h4 class="text-xs font-bold text-slate-200">Cảnh Thuần Hình Ảnh / Không Lời</h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">Dành cho intro hook, outro logo hoặc chuyển cảnh</p>
+            </div>
+            <button onclick="addBlankScene(true)" class="mt-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 py-1.5 rounded-lg border border-slate-700">
+              + Cảnh Không Lời
+            </button>
+          </div>
+        </div>
+
+        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Hoặc chọn từ Thư viện 22+ Mẫu Chuyển Động:</h4>
+
+        <div id="modalTemplateGrid" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <!-- Dynamic templates -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Live Render Progress -->
+  <div id="modalRenderProgress" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
+    <div class="glass-card rounded-2xl p-7 w-full max-w-lg border border-indigo-500/30 shadow-2xl text-center">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center mx-auto mb-4 animate-spin">
+        <i data-lucide="loader-2" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">Đang Render Video MP4</h3>
+      <p id="renderStageText" class="text-xs text-slate-400 mb-5">Đang xử lý đồng bộ âm thanh & khoảng trống...</p>
+
+      <div class="w-full bg-slate-800 rounded-full h-3 mb-3 overflow-hidden p-0.5 border border-slate-700">
+        <div id="renderProgressBar" class="bg-gradient-to-r from-indigo-500 to-violet-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+      </div>
+      <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-4">
+        <span>Tiến độ render</span>
+        <span id="renderPercentText" class="font-bold text-indigo-400">0%</span>
+      </div>
+
+      <div id="renderLogs" class="text-left font-mono text-[11px] bg-slate-950 p-3 rounded-xl border border-slate-800 text-slate-400 h-28 overflow-y-auto custom-scrollbar">
+        <div>[System] Bắt đầu pipeline render...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Góp ý & Báo lỗi (Feedback & Telemetry) -->
+  <div id="modalFeedback" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-6 hidden">
+    <div class="glass-card rounded-2xl p-6 w-full max-w-md border border-slate-700 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-800">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i data-lucide="message-square" class="w-4 h-4 text-sky-400"></i>
+          <span>Góp Ý & Báo Lỗi Cho GO4AI</span>
+        </h3>
+        <button onclick="hideFeedbackModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Loại phản hồi</label>
+          <select id="fbType" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+            <option value="bug">🐞 Báo lỗi (Render lỗi, âm thanh lệch, crash...)</option>
+            <option value="feature">💡 Đề xuất tính năng mới</option>
+            <option value="template">🎨 Yêu cầu thêm mẫu Template mới</option>
+            <option value="feedback">⭐ Góp ý chung về trải nghiệm</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Họ tên / Telegram / Email (Tùy chọn)</label>
+          <input type="text" id="fbContact" placeholder="Ví dụ: @telegram hoặc email..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Nội dung chi tiết <span class="text-sky-400">*</span></label>
+          <textarea id="fbMessage" rows="4" placeholder="Mô tả cụ thể vấn đề hoặc ý tưởng cải thiện của bạn..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-sky-500 resize-none"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 text-[11px] text-slate-400">
+          <input type="checkbox" id="fbAttachLogs" checked class="rounded bg-slate-900 border-slate-700 text-sky-600 focus:ring-0">
+          <label for="fbAttachLogs" class="cursor-pointer">Tự động đính kèm thông số hệ thống</label>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button onclick="hideFeedbackModal()" class="px-4 py-2 rounded-lg border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800 transition">Hủy</button>
+          <button id="btnSubmitFeedback" onclick="submitFeedback()" class="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-xs font-bold text-white transition flex items-center gap-1.5">
+            <span>Gửi Phản Hồi</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: GO4AI 1-Click Auto Video Generator -->
+  <div id="modalGo4aiAuto" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card bg-slate-900/95 border border-slate-700/80 rounded-2xl w-full max-w-2xl p-6 shadow-2xl flex flex-col gap-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-black shadow-lg shadow-blue-500/30">⚡</div>
+          <div>
+            <h3 class="text-base font-bold text-white">GO4AI Auto Video Generator (Nội Bộ)</h3>
+            <p class="text-xs text-slate-400">Tự động phân đoạn cảnh, đo giọng đọc tiếng Việt, mix nhạc nền BGM và tạo video 1-Click</p>
+          </div>
+        </div>
+        <button onclick="hideModals()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">✕</button>
+      </div>
+
+      <!-- Form Fields -->
+      <div class="flex flex-col gap-3.5">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Tên Dự Án Mới</label>
+            <input id="inputGo4aiProjectName" type="text" placeholder="vd: go4ai-shorts-ai-tools" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Chủ Đề / Tiêu Đề</label>
+            <input id="inputGo4aiTopic" type="text" placeholder="vd: 3 Mẹo Tối Ưu Coding Agent" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Định Dạng Video</label>
+            <select id="selectGo4aiAspect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none">
+              <option value="9:16">📱 Dọc 9:16 (Shorts/TikTok)</option>
+              <option value="16:9">🖥️ Ngang 16:9 (Slide/YouTube)</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Giọng Đọc AI (EdgeTTS)</label>
+            <select id="selectGo4aiVoice" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none">
+              <optgroup label="🇻🇳 Tiếng Việt Bản Địa (Microsoft Neural • 48kHz Miễn Phí)">
+                <option value="vi-nam-minh" selected>👨 [Nam • Chuẩn Bắc] Nam Minh</option>
+                <option value="vi-hoai-my">👩 [Nữ • Chuẩn Bắc] Hoài My</option>
+              </optgroup>
+              <optgroup label="🇻🇳 Tiếng Việt Google Cloud (Miễn Phí 100%)">
+                <option value="vi-google-female">👩 [Nữ • Phổ Thông] Chị Google</option>
+              </optgroup>
+              <optgroup label="🇻🇳 Tiếng Việt Multilingual AI Neural (Microsoft Copilot AI)">
+                <option value="vi-ai-ava">👩 [Nữ AI] Ava Multilingual</option>
+                <option value="vi-ai-andrew">👨 [Nam AI] Andrew Multilingual</option>
+                <option value="vi-ai-emma">👩 [Nữ AI] Emma Multilingual</option>
+                <option value="vi-ai-brian">👨 [Nam AI] Brian Multilingual</option>
+              </optgroup>
+              <optgroup label="🇺🇸 🇬🇧 English (Male & Female US/UK)">
+                <option value="en-us-guy">👨 [Male • US] Guy</option>
+                <option value="en-us-jenny">👩 [Female • US] Jenny</option>
+                <option value="en-us-aria">👩 [Female • US] Aria</option>
+                <option value="en-gb-ryan">👨 [Male • UK] Ryan</option>
+              </optgroup>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs font-bold text-slate-300 block mb-1">Nhạc Nền (BGM Auto-Duck)</label>
+            <select id="selectGo4aiBgm" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none">
+              <option value="tech-ambient">🎵 Tech Ambient (Công nghệ)</option>
+              <option value="lofi-chill">☕ Lofi Chill (Nhẹ nhàng)</option>
+              <option value="energetic-beat">⚡ Energetic Beat (Sôi động)</option>
+              <option value="none">🔇 Không dùng nhạc nền</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs font-bold text-slate-300">Nội Dung / Kịch Bản Tiếng Việt</label>
+            <button onclick="fillGo4aiSampleScript()" type="button" class="text-[11px] text-blue-400 hover:text-blue-300 font-semibold">✨ Dán kịch bản mẫu</button>
+          </div>
+          <textarea id="textareaGo4aiScript" rows="6" placeholder="Dán nội dung kịch bản tiếng Việt vào đây. Mỗi đoạn văn bản sẽ được tự động phân tách thành 1 cảnh video đồng bộ với giọng đọc..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-white font-mono leading-relaxed focus:border-blue-500 focus:outline-none"></textarea>
+        </div>
+
+        <div id="go4aiGenStatus" class="hidden p-3 rounded-xl bg-blue-950/60 border border-blue-800/80 text-xs text-blue-300 flex items-center gap-2.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-400 animate-ping"></span>
+          <span id="go4aiGenStatusText">Đang xử lý sinh video tự động...</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-2 border-t border-slate-800 pt-3">
+        <button onclick="hideModals()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300">Hủy</button>
+        <button id="btnSubmitGo4aiAuto" onclick="submitGo4aiAutoGenerate()" class="gradient-btn px-5 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-2 shadow-lg shadow-blue-500/25">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i>
+          <span>🚀 Bắt Đầu Tạo Video 1-Click</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic JS -->
+  <script>
+    let projects = [];
+    let templates = [];
+    let currentProject = null;
+    let activeSceneIndex = 0;
+    let currentViewMode = 'preview';
+    let estimateDebounceTimer = null;
+
+    // Badge phiên bản — lấy từ version.json qua API, không hardcode trong HTML
+    // để mỗi lần cập nhật chỉ phải sửa đúng một chỗ.
+    (async function loadVersionBadge() {
+      try {
+        const r = await fetch('/api/system/status');
+        const d = await r.json();
+        const el = document.getElementById('versionBadge');
+        if (!el || !d.success) return;
+        const isBeta = (d.mode || '').toUpperCase() === 'FREE_BETA';
+        // Bỏ hậu tố "-beta" trong version để badge không đọc thành "Beta 1.0.0-beta".
+        const num = String(d.version || '').replace(/-beta.*$/i, '');
+        el.textContent = isBeta ? `Beta ${num} • Miễn Phí` : num;
+        if (d.notes) el.title = d.notes;
+      } catch {}
+    })();
+
+    // Feedback Modal Functions
+    function showFeedbackModal() {
+      const m = document.getElementById('modalFeedback');
+      if (m) m.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function hideFeedbackModal() {
+      const m = document.getElementById('modalFeedback');
+      if (m) m.classList.add('hidden');
+    }
+
+    async function submitFeedback() {
+      const type = document.getElementById('fbType').value;
+      const contact = document.getElementById('fbContact').value.trim();
+      const message = document.getElementById('fbMessage').value.trim();
+      const attachLogs = document.getElementById('fbAttachLogs').checked;
+
+      if (!message) {
+        alert('Vui lòng nhập nội dung phản hồi!');
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmitFeedback');
+      btn.disabled = true;
+      btn.innerText = 'Đang gửi...';
+
+      try {
+        const res = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type,
+            contact,
+            message,
+            attachLogs,
+            currentProject: currentProject ? currentProject.name : null,
+            userAgent: navigator.userAgent,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Cảm ơn bạn! Phản hồi đã được ghi nhận và gửi đến đội ngũ phát triển GO4AI.');
+          document.getElementById('fbMessage').value = '';
+          hideFeedbackModal();
+        } else {
+          alert('Lỗi: ' + (data.error || 'Không thể gửi phản hồi'));
+        }
+      } catch (err) {
+        alert('Lỗi kết nối: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Gửi Phản Hồi';
+      }
+    }
+
+    // Sample Narration Scripts Presets
+    const SAMPLE_SCRIPTS = {
+      saas_intro: `Chào mừng bạn đến với GO4AI, nền tảng chuyển đổi HTML và CSS thành video chuyển động 60fps mượt mà chỉ trong tích tắc.
+Không cần kinh nghiệm dựng phim phức tạp. Bạn có thể tự do tùy chỉnh bố cục, biểu đồ và hiệu ứng trực quan trên trình duyệt.
+Bắt đầu sáng tạo video chuyên nghiệp ngay hôm nay cùng GO4AI Studio.`,
+
+      tiktok_viral: `Dừng lại 3 giây nếu bạn đang tìm kiếm cách tạo video ngắn siêu cuốn hút mà không cần tốn hàng giờ học Premiere.
+Với công nghệ HTML-to-Video, mọi slide thuyết trình hay đoạn code của bạn đều tự động biến thành video viral sắc nét.
+Tất cả đã có sẵn mẫu chuyển động và giọng đọc AI chuẩn Nam Nữ cực kỳ tự nhiên.
+Hãy thử ngay hôm nay để bùng nổ tương tác trên kênh của bạn!`,
+
+      market_data: `Báo cáo thị trường quý này ghi nhận mức tăng trưởng vượt bậc 45% trong mảng tự động hóa nội dung số.
+Các doanh nghiệp tiên phong đã giảm hơn 70% thời gian sản xuất video giới thiệu sản phẩm nhờ áp dụng mô hình AI Director.
+Hiệu suất chuyển đổi tăng gấp 3 lần khi kết hợp đồ họa trực quan và kịch bản súc tích.
+Đây chính là đòn bẩy chiến lược cho mọi đội ngũ sáng tạo nội dung hiện đại.`,
+
+      explainer_tech: `Bạn có bao giờ tự hỏi làm sao để biến mã nguồn HTML và TailwindCSS thành video MP4 chất lượng cao?
+Bí mật nằm ở việc điều khiển Chromium không đầu kết hợp cùng bộ render FFmpeg theo từng khung hình chuẩn xác.
+Nhờ đó, mọi hiệu ứng keyframe CSS đều được ghi lại với độ mượt 60 khung hình mỗi giây hoàn hảo.`,
+
+      business_vision: `Giá trị cốt lõi của chuyển đổi số không nằm ở việc sở hữu bao nhiêu công cụ mới.
+Giá trị thực sự chỉ xuất hiện khi công nghệ được gắn chặt vào quy trình vận hành và mang lại trải nghiệm đột phá.
+GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ công nghệ vững vàng cho tương lai.`
+    };
+
+    async function loadAll() {
+      await Promise.all([loadProjects(), loadTemplates()]);
+      lucide.createIcons();
+    }
+
+    // --- PROJECTS MANAGEMENT ---
+    async function loadProjects() {
+      try {
+        const res = await fetch('/api/projects');
+        const data = await res.json();
+        if (data.success) {
+          projects = data.projects;
+          renderProjectsList();
+          if (currentProject) {
+            const found = projects.find(p => p.name === currentProject.name);
+            if (found) selectProject(found.name);
+            else if (projects.length > 0) selectProject(projects[0].name);
+          } else if (projects.length > 0) {
+            selectProject(projects[0].name);
+          }
+        }
+      } catch (err) {
+        console.error('Lỗi tải projects:', err);
+      }
+    }
+
+    function renderProjectsList() {
+      const container = document.getElementById('projectsList');
+      if (projects.length === 0) {
+        container.innerHTML = `<div class="text-center py-10 text-slate-500 text-xs">Chưa có dự án nào</div>`;
+        return;
+      }
+
+      container.innerHTML = projects.map(p => {
+        const isSelected = currentProject && currentProject.name === p.name;
+        const videoCount = (p.exportedVideos && p.exportedVideos.length) || (p.hasOutput ? 1 : 0);
+        return `
+          <div onclick="selectProject('${p.name}')" class="p-2.5 rounded-xl cursor-pointer transition flex items-center justify-between group ${
+            isSelected 
+              ? 'bg-indigo-600/20 border border-indigo-500/40 text-white shadow-sm' 
+              : 'hover:bg-slate-800/60 border border-transparent text-slate-300'
+          }">
+            <div class="flex items-center gap-2.5 truncate">
+              <i data-lucide="${videoCount > 0 ? 'video' : 'folder'}" class="w-4 h-4 shrink-0 ${videoCount > 0 ? 'text-emerald-400' : 'text-slate-400'}"></i>
+              <div class="truncate">
+                <div class="text-xs font-bold truncate">${p.name}</div>
+                <div class="text-[10px] text-slate-400">${p.htmlCount} cảnh • ${p.config?.aspect || '16:9'} • ${videoCount} video</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
+              <button onclick="event.stopPropagation(); duplicateProject('${p.name}')" class="p-1 hover:text-white text-slate-400 rounded" title="Nhân bản dự án">
+                <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              </button>
+              <button onclick="event.stopPropagation(); deleteProject('${p.name}')" class="p-1 hover:text-rose-400 text-slate-400 rounded" title="Xoá dự án">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    async function selectProject(name) {
+      try {
+        const res = await fetch(`/api/projects/${name}`);
+        const data = await res.json();
+        if (data.success) {
+          currentProject = data.project;
+          activeSceneIndex = 0;
+          renderProjectUI();
+          renderProjectsList();
+          renderProjectVideos();
+        }
+      } catch (err) {
+        console.error('Lỗi chọn project:', err);
+      }
+    }
+
+    function renderProjectUI() {
+      document.getElementById('emptyProjectView').classList.add('hidden');
+      document.getElementById('activeProjectView').classList.remove('hidden');
+      document.getElementById('btnOpenFolder').classList.remove('hidden');
+      document.getElementById('btnOpenGallery').classList.remove('hidden');
+      document.getElementById('btnQuickAddScene').classList.remove('hidden');
+      document.getElementById('btnRenderVideo').classList.remove('hidden');
+
+      document.getElementById('projHeaderTitle').textContent = currentProject.name;
+      document.getElementById('selectAspect').value = currentProject.config.aspect || '16:9';
+      document.getElementById('selectFps').value = String(currentProject.config.fps || '60');
+
+      if (currentProject.config.ttsVoice) {
+        document.getElementById('globalVoiceSelect').value = currentProject.config.ttsVoice;
+      }
+      if (currentProject.config.ttsRate !== undefined) {
+        setVoiceRate(currentProject.config.ttsRate, false);
+      }
+      if (currentProject.config.ttsPitch !== undefined) {
+        document.getElementById('voicePitchSlider').value = currentProject.config.ttsPitch;
+        document.getElementById('pitchSliderVal').textContent = `${currentProject.config.ttsPitch}Hz`;
+      }
+
+      const videoCount = currentProject.exportedVideos ? currentProject.exportedVideos.length : (currentProject.hasOutput ? 1 : 0);
+      document.getElementById('topExportCount').textContent = videoCount;
+      document.getElementById('panelExportCount').textContent = videoCount;
+
+      updateAspectFrameDimensions();
+      renderTimeline();
+      loadActiveScene();
+    }
+
+    function updateAspectFrameDimensions() {
+      const aspect = document.getElementById('selectAspect')?.value || (currentProject?.config?.aspect) || '16:9';
+      const frame = document.getElementById('previewFrameWrapper');
+      const iframe = document.getElementById('mainPreviewIframe');
+      if (!frame || !iframe) return;
+
+      let baseW = 1920, baseH = 1080;
+      let targetW = 780, targetH = 438;
+
+      if (aspect === '9:16') {
+        baseW = 1080; baseH = 1920;
+        targetW = 340; targetH = 604;
+      } else if (aspect === '1:1') {
+        baseW = 1080; baseH = 1080;
+        targetW = 460; targetH = 460;
+      } else {
+        baseW = 1920; baseH = 1080;
+        targetW = 780; targetH = 438;
+      }
+
+      frame.style.width = targetW + 'px';
+      frame.style.height = targetH + 'px';
+
+      const scale = targetW / baseW;
+      iframe.style.width = baseW + 'px';
+      iframe.style.height = baseH + 'px';
+      iframe.style.transform = `scale(${scale})`;
+      iframe.style.transformOrigin = '0 0';
+      iframe.style.pointerEvents = 'auto';
+    }
+
+    // --- TIMELINE & SCENES ---
+    function renderTimeline() {
+      const track = document.getElementById('timelineTrack');
+      const statsEl = document.getElementById('timelineStats');
+      const scenes = currentProject.scenes || [];
+
+      let totalSec = 0;
+      scenes.forEach(s => totalSec += Number(s.duration || 5));
+      statsEl.textContent = `${scenes.length} cảnh • ${totalSec.toFixed(1)}s`;
+
+      if (scenes.length === 0) {
+        track.innerHTML = `
+          <div class="text-xs text-slate-500 py-4 flex items-center gap-2">
+            <span>Chưa có cảnh nào trong dự án này.</span>
+            <button onclick="showAddSceneModal()" class="text-indigo-400 font-bold hover:underline">+ Thêm Mẫu Mới</button>
+          </div>
+        `;
+        return;
+      }
+
+      track.innerHTML = scenes.map((s, idx) => {
+        const isActive = idx === activeSceneIndex;
+        const hasVoice = s.hasVoice || (s.script && s.script.trim().length > 0 && !s.isSilenceOnly);
+        const isSilence = s.isSilenceOnly || !hasVoice;
+
+        return `
+          <div onclick="selectScene(${idx})" class="timeline-card shrink-0 w-48 h-26 rounded-xl glass-card border border-slate-800 p-2.5 cursor-pointer flex flex-col justify-between select-none ${isActive ? 'active' : 'hover:border-slate-700'}">
+            <button
+              class="card-delete-btn"
+              onclick="deleteScene(${idx}, event)"
+              title="Xoá cảnh #${idx + 1}"
+              aria-label="Xoá cảnh ${idx + 1}"
+            >✕</button>
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-800 text-indigo-400 font-mono">
+                #${idx + 1}
+              </span>
+              <span class="text-[10px] font-mono text-slate-300 font-semibold flex items-center gap-1">
+                <i data-lucide="clock" class="w-3 h-3 text-slate-500"></i>
+                ${s.duration}s
+              </span>
+            </div>
+
+            <div class="text-xs font-bold text-slate-200 truncate my-0.5" title="${s.file}">${s.file}</div>
+
+            <!-- Audio & Silence Timing Badges -->
+            <div class="flex items-center justify-between pt-1 border-t border-slate-800/80 text-[10px]">
+              ${
+                isSilence
+                  ? '<span class="text-slate-400 font-semibold flex items-center gap-0.5"><i data-lucide="volume-x" class="w-3 h-3"></i> Không lời</span>'
+                  : `<span class="text-emerald-400 font-bold flex items-center gap-0.5"><i data-lucide="mic" class="w-3 h-3"></i> ${s.speechDuration ? s.speechDuration + 's' : 'Voice'}</span>`
+              }
+              <span class="text-slate-500 font-mono">Đệm: ${s.introPause || 0.3}s</span>
+            </div>
+          </div>
+        `;
+      }).join('') + `
+        <button onclick="showAddSceneModal()" class="shrink-0 w-24 h-24 rounded-xl border-2 border-dashed border-slate-800 hover:border-indigo-500/50 hover:bg-indigo-500/5 text-slate-500 hover:text-indigo-400 flex flex-col items-center justify-center gap-1 transition text-xs font-bold">
+          <i data-lucide="plus" class="w-5 h-5"></i>
+          <span>Thêm</span>
+        </button>
+      `;
+
+      lucide.createIcons();
+    }
+
+    function selectScene(index) {
+      if (!currentProject || !currentProject.scenes[index]) return;
+      activeSceneIndex = index;
+      renderTimeline();
+      loadActiveScene();
+    }
+
+    async function loadActiveScene() {
+      const scene = currentProject.scenes[activeSceneIndex];
+      if (!scene) return;
+
+      document.getElementById('inspectorSceneNum').textContent = `#${activeSceneIndex + 1}`;
+      document.getElementById('inspectorSceneFile').textContent = scene.file;
+      document.getElementById('inputCurrentDuration').value = scene.duration;
+      document.getElementById('editorFileName').textContent = scene.file;
+      document.getElementById('sceneScriptInput').value = scene.script || '';
+      document.getElementById('inputIntroPause').value = scene.introPause !== undefined ? scene.introPause : 0.3;
+      document.getElementById('inputOutroPause').value = scene.outroPause !== undefined ? scene.outroPause : 0.5;
+
+      document.getElementById('sceneVoiceDurationTag').textContent = scene.speechDuration ? `Audio: ${scene.speechDuration}s` : 'Chưa có audio';
+
+      // Load Per-scene Voice settings
+      const sceneSetting = (currentProject.config?.sceneSettings && currentProject.config.sceneSettings[scene.file]) || {};
+      const sceneVoiceSelect = document.getElementById('sceneVoiceSelect');
+      const sceneRateSelect = document.getElementById('sceneRateSelect');
+      const sceneVoiceBadge = document.getElementById('sceneVoiceBadge');
+
+      if (sceneSetting.voice) {
+        sceneVoiceSelect.value = sceneSetting.voice;
+        sceneVoiceBadge.textContent = sceneSetting.voice.includes('nu') || sceneSetting.voice.includes('my') ? '👩 Giọng Nữ' : '👨 Giọng Nam';
+      } else {
+        sceneVoiceSelect.value = 'inherit';
+        sceneVoiceBadge.textContent = 'Dùng mặc định';
+      }
+
+      if (sceneSetting.rate !== undefined) {
+        sceneRateSelect.value = String(sceneSetting.rate);
+      } else {
+        sceneRateSelect.value = 'inherit';
+      }
+
+      updateSceneMetricsLive();
+
+      // Update Preview iframe
+      const iframe = document.getElementById('mainPreviewIframe');
+      iframe.src = `/preview/${currentProject.name}/${scene.file}?t=${Date.now()}`;
+
+      // Update Code Editor
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/scenes/${scene.file}`);
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('codeEditorTextarea').value = data.content;
+        }
+      } catch (err) {
+        console.error('Lỗi nạp mã scene:', err);
+      }
+    }
+
+    function updateSceneMetricsLive() {
+      const text = document.getElementById('sceneScriptInput').value.trim();
+      const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
+      document.getElementById('sceneWordCountBadge').textContent = `${words} từ`;
+
+      const rateVal = Number(document.getElementById('voiceRateSlider').value) || 0;
+      const baseWps = 2.65 * (1 + rateVal / 100);
+      const estSec = words > 0 ? (words / baseWps + 0.3).toFixed(1) : '0.0';
+      document.getElementById('sceneMinEstimatedDuration').textContent = `Tối thiểu: ~${estSec}s`;
+    }
+
+    function reloadPreview() {
+      const iframe = document.getElementById('mainPreviewIframe');
+      if (!iframe) return;
+      updateAspectFrameDimensions();
+      let targetSrc = '';
+      const currentSrc = iframe.src;
+      if (currentSrc && !currentSrc.includes('about:blank')) {
+        try {
+          const url = new URL(currentSrc, window.location.origin);
+          url.searchParams.set('t', Date.now());
+          targetSrc = url.pathname + url.search;
+        } catch {
+          targetSrc = currentSrc.split('?')[0] + '?t=' + Date.now();
+        }
+      } else if (currentProject && currentProject.scenes && currentProject.scenes[activeSceneIndex]) {
+        const scene = currentProject.scenes[activeSceneIndex];
+        targetSrc = `/preview/${currentProject.name}/${scene.file}?t=${Date.now()}`;
+      }
+      if (targetSrc) {
+        iframe.src = 'about:blank';
+        setTimeout(() => { iframe.src = targetSrc; }, 30);
+      }
+    }
+
+    // --- TTS & TIMING LOGIC ---
+    async function generateSceneTTS() {
+      const scene = currentProject?.scenes[activeSceneIndex];
+      if (!scene) return;
+
+      const text = document.getElementById('sceneScriptInput').value.trim();
+      if (!text) return alert('Vui lòng nhập lời thoại cho riêng cảnh này');
+
+      // Check per-scene voice or fallback to global
+      const perSceneVoice = document.getElementById('sceneVoiceSelect').value;
+      const voicePresetId = perSceneVoice === 'inherit' ? document.getElementById('globalVoiceSelect').value : perSceneVoice;
+
+      const perSceneRate = document.getElementById('sceneRateSelect').value;
+      const rate = perSceneRate === 'inherit' ? (Number(document.getElementById('voiceRateSlider').value) || 0) : Number(perSceneRate);
+
+      const pitch = Number(document.getElementById('voicePitchSlider').value) || 0;
+      const introPause = Number(document.getElementById('inputIntroPause').value) || 0.3;
+      const outroPause = Number(document.getElementById('inputOutroPause').value) || 0.5;
+
+      const btn = document.getElementById('btnSceneTTS');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Đang tạo giọng đọc...`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/tts`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            text,
+            voicePresetId,
+            rate,
+            pitch,
+            sceneFile: scene.file,
+            autoSyncDuration: true,
+            introPause,
+            outroPause,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          scene.duration = data.totalDurationSec;
+          scene.script = text;
+          scene.speechDuration = data.speechDurationSec;
+          scene.hasVoice = true;
+          scene.introPause = introPause;
+          scene.outroPause = outroPause;
+          scene.isSilenceOnly = false;
+          scene.voice = voicePresetId;
+
+          document.getElementById('inputCurrentDuration').value = data.totalDurationSec;
+          document.getElementById('sceneVoiceDurationTag').textContent = `Audio: ${data.speechDurationSec}s`;
+          renderTimeline();
+          alert(`✓ Đã tạo giọng đọc cho Cảnh #${activeSceneIndex + 1} thành công!\n🎙️ Giọng đọc: ${voicePresetId}\n⏱️ Thời lượng đọc: ${data.speechDurationSec}s\n⏱️ Tổng cảnh đã khớp: ${data.totalDurationSec}s (kèm ${introPause}s đệm đầu & ${outroPause}s nghỉ đuôi)`);
+        } else {
+          alert('Lỗi TTS: ' + data.error);
+        }
+      } catch (err) {
+        alert('Lỗi kết nối TTS: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="mic" class="w-3.5 h-3.5"></i> <span>Tạo Giọng & Khớp Thời Lượng Cảnh Này</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    async function applyGlobalVoiceToCurrentScene() {
+      if (!currentProject || !currentProject.scenes || !currentProject.scenes[activeSceneIndex]) {
+        return alert('Vui lòng chọn một cảnh trên dòng thời gian trước!');
+      }
+      const voicePresetId = document.getElementById('globalVoiceSelect').value;
+      const rate = document.getElementById('voiceRateSlider').value;
+      
+      document.getElementById('sceneVoiceSelect').value = voicePresetId;
+      document.getElementById('sceneRateSelect').value = rate;
+      
+      const text = document.getElementById('sceneScriptInput').value.trim();
+      if (text) {
+        await generateSceneTTS();
+      } else {
+        alert(`✓ Đã gán giọng đọc "${voicePresetId}" cho Cảnh #${activeSceneIndex + 1}!\nHãy nhập lời thoại ở cột bên phải rồi bấm "Tạo Giọng & Khớp Thời Lượng".`);
+      }
+    }
+
+    async function saveVoiceAsProjectDefault() {
+      if (!currentProject) return alert('Vui lòng chọn một dự án trước!');
+      const voice = document.getElementById('globalVoiceSelect').value;
+      const rate = Number(document.getElementById('voiceRateSlider').value) || 0;
+      const pitch = Number(document.getElementById('voicePitchSlider').value) || 0;
+
+      try {
+        await fetch(`/api/projects/${currentProject.name}/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ttsVoice: voice,
+            ttsRate: rate,
+            ttsPitch: pitch,
+          })
+        });
+        currentProject.config.ttsVoice = voice;
+        currentProject.config.ttsRate = rate;
+        currentProject.config.ttsPitch = pitch;
+        alert(`✓ Đã lưu giọng "${voice}" làm Giọng Mặc Định cho toàn bộ dự án "${currentProject.name}"!`);
+      } catch (err) {
+        alert('Lỗi lưu cấu hình: ' + err.message);
+      }
+    }
+
+    async function onTimingChange() {
+      const introPause = Number(document.getElementById('inputIntroPause').value) || 0.3;
+      const outroPause = Number(document.getElementById('inputOutroPause').value) || 0.5;
+      const scene = currentProject?.scenes[activeSceneIndex];
+      if (!scene) return;
+
+      if (scene.speechDuration) {
+        const newTotal = Number((introPause + scene.speechDuration + outroPause).toFixed(1));
+        document.getElementById('inputCurrentDuration').value = newTotal;
+      }
+      await saveCurrentSceneDuration();
+    }
+
+    async function stepSceneDuration(step) {
+      const input = document.getElementById('inputCurrentDuration');
+      let val = parseFloat(input.value) + step;
+      if (val < 0.5) val = 0.5;
+      input.value = val;
+      await saveCurrentSceneDuration();
+    }
+
+    async function setQuickDuration(sec) {
+      document.getElementById('inputCurrentDuration').value = sec;
+      await saveCurrentSceneDuration();
+    }
+
+    async function saveCurrentSceneDuration() {
+      const scene = currentProject?.scenes[activeSceneIndex];
+      if (!scene) return;
+      const duration = parseFloat(document.getElementById('inputCurrentDuration').value);
+      if (isNaN(duration) || duration <= 0) return;
+      const script = document.getElementById('sceneScriptInput').value;
+      const introPause = Number(document.getElementById('inputIntroPause').value) || 0.3;
+      const outroPause = Number(document.getElementById('inputOutroPause').value) || 0.5;
+
+      try {
+        const code = document.getElementById('codeEditorTextarea').value;
+        await fetch(`/api/projects/${currentProject.name}/scenes/${scene.file}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: code, duration, script, introPause, outroPause })
+        });
+        scene.duration = duration;
+        scene.script = script;
+        scene.introPause = introPause;
+        scene.outroPause = outroPause;
+        renderTimeline();
+      } catch (err) {
+        console.error('Lỗi lưu thời lượng:', err);
+      }
+    }
+
+    async function saveSceneCode() {
+      const scene = currentProject?.scenes[activeSceneIndex];
+      if (!scene) return;
+      const content = document.getElementById('codeEditorTextarea').value;
+      const duration = parseFloat(document.getElementById('inputCurrentDuration').value);
+      const script = document.getElementById('sceneScriptInput').value;
+
+      try {
+        await fetch(`/api/projects/${currentProject.name}/scenes/${scene.file}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content, duration, script })
+        });
+        reloadPreview();
+        alert('✓ Đã lưu mã nguồn cảnh!');
+      } catch (err) {
+        alert('Lỗi lưu mã: ' + err.message);
+      }
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveSceneCode();
+      }
+    });
+
+    // --- GLOBAL VOICE & ESTIMATION WORKBENCH ---
+    let currentActiveAudio = null;
+
+    function stopAuditionAudio() {
+      if (currentActiveAudio) {
+        currentActiveAudio.pause();
+        currentActiveAudio = null;
+      }
+      const btnStop = document.getElementById('btnStopAudition');
+      if (btnStop) btnStop.classList.add('hidden');
+      const txtVoice = document.getElementById('txtBtnVoiceAudition');
+      if (txtVoice) txtVoice.textContent = '🔊 Nghe Thử Giọng Này (Voice Sample)';
+      const txtScript = document.getElementById('txtBtnScriptAudition');
+      if (txtScript) txtScript.textContent = '▶️ Nghe Đọc Thử Đoạn Văn Này';
+    }
+
+    async function playVoiceAudition() {
+      stopAuditionAudio();
+      const voicePresetId = document.getElementById('globalVoiceSelect').value;
+      const rate = Number(document.getElementById('voiceRateSlider').value) || 0;
+      const pitch = Number(document.getElementById('voicePitchSlider').value) || 0;
+
+      const txtBtn = document.getElementById('txtBtnVoiceAudition');
+      txtBtn.innerHTML = '<span class="inline-flex items-center gap-1"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Đang tải mẫu giọng...</span>';
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/tts-preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ voicePresetId, rate, pitch })
+        });
+        if (!res.ok) throw new Error('Không tải được audio mẫu');
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        currentActiveAudio = new Audio(audioUrl);
+
+        document.getElementById('btnStopAudition').classList.remove('hidden');
+        txtBtn.innerHTML = '<span class="text-emerald-400 font-bold">🔊 Đang phát giọng mẫu...</span>';
+
+        currentActiveAudio.onended = () => {
+          stopAuditionAudio();
+        };
+        await currentActiveAudio.play();
+      } catch (err) {
+        alert('Lỗi nghe thử giọng: ' + err.message);
+        stopAuditionAudio();
+      }
+    }
+
+    async function playScriptAudition() {
+      stopAuditionAudio();
+      const text = document.getElementById('fullNarrationInput').value.trim();
+      if (!text) return alert('Vui lòng chọn một văn mẫu hoặc nhập kịch bản để nghe đọc thử.');
+
+      const voicePresetId = document.getElementById('globalVoiceSelect').value;
+      const rate = Number(document.getElementById('voiceRateSlider').value) || 0;
+      const pitch = Number(document.getElementById('voicePitchSlider').value) || 0;
+
+      const txtBtn = document.getElementById('txtBtnScriptAudition');
+      txtBtn.innerHTML = '<span class="inline-flex items-center gap-1"><i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Đang tổng hợp giọng đọc...</span>';
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/tts-preview', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, voicePresetId, rate, pitch })
+        });
+        if (!res.ok) throw new Error('Không tạo được audio');
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        currentActiveAudio = new Audio(audioUrl);
+
+        document.getElementById('btnStopAudition').classList.remove('hidden');
+        txtBtn.innerHTML = '<span class="text-emerald-400 font-bold">▶️ Đang đọc kịch bản...</span>';
+
+        currentActiveAudio.onended = () => {
+          stopAuditionAudio();
+        };
+        await currentActiveAudio.play();
+      } catch (err) {
+        alert('Lỗi nghe thử kịch bản: ' + err.message);
+        stopAuditionAudio();
+      }
+    }
+
+    async function playSceneAudioLive() {
+      stopAuditionAudio();
+      const scene = currentProject?.scenes[activeSceneIndex];
+      if (!scene) return;
+
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/scene-audio/${scene.file}`);
+        if (!res.ok) {
+          return alert(`Cảnh "${scene.file}" chưa có file audio. Hãy bấm nút "Tạo Giọng & Khớp Thời Lượng" ở bên dưới để tạo audio trước!`);
+        }
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        currentActiveAudio = new Audio(audioUrl);
+        await currentActiveAudio.play();
+      } catch (err) {
+        alert('Lỗi phát audio cảnh: ' + err.message);
+      }
+    }
+
+    function onVoiceChange() {
+      const val = document.getElementById('globalVoiceSelect').value;
+      const isFemale = val.includes('nu') || val.includes('my') || val.includes('jenny') || val.includes('aria');
+      const isEnglish = val.startsWith('en');
+      document.getElementById('badgeVoiceType').textContent = `${isFemale ? '👩 Nữ' : '👨 Nam'} • ${isEnglish ? 'English' : 'Tiếng Việt'}`;
+      debounceEstimate();
+    }
+
+    function loadSampleScript() {
+      const key = document.getElementById('sampleScriptSelect').value;
+      if (key && SAMPLE_SCRIPTS[key]) {
+        document.getElementById('fullNarrationInput').value = SAMPLE_SCRIPTS[key];
+        document.getElementById('aiDirectorScript').value = SAMPLE_SCRIPTS[key];
+        debounceEstimate();
+      }
+    }
+
+    function setVoiceRate(rate, triggerEstimate = true) {
+      document.getElementById('voiceRateSlider').value = rate;
+      document.getElementById('rateSliderVal').textContent = rate >= 0 ? `+${rate}%` : `${rate}%`;
+
+      const speedLabel = rate === -15 ? '0.85x (Chậm)' : rate === 0 ? '1.0x (Chuẩn)' : rate === 15 ? '1.15x (Nhanh)' : rate === 30 ? '1.3x (Rất nhanh)' : `${(1 + rate/100).toFixed(2)}x`;
+      document.getElementById('labelSpeedRate').textContent = speedLabel;
+
+      ['Slow', 'Normal', 'Fast', 'VeryFast'].forEach(s => {
+        const el = document.getElementById(`btnRate${s}`);
+        if (el) el.className = 'py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] font-bold text-slate-300 border border-slate-800 transition';
+      });
+      if (rate === -15) document.getElementById('btnRateSlow').className = 'py-1 rounded bg-indigo-600 text-[10px] font-bold text-white border border-indigo-500 transition';
+      else if (rate === 0) document.getElementById('btnRateNormal').className = 'py-1 rounded bg-indigo-600 text-[10px] font-bold text-white border border-indigo-500 transition';
+      else if (rate === 15) document.getElementById('btnRateFast').className = 'py-1 rounded bg-indigo-600 text-[10px] font-bold text-white border border-indigo-500 transition';
+      else if (rate === 30) document.getElementById('btnRateVeryFast').className = 'py-1 rounded bg-indigo-600 text-[10px] font-bold text-white border border-indigo-500 transition';
+
+      if (triggerEstimate) debounceEstimate();
+    }
+
+    function onRateSliderChange(val) {
+      setVoiceRate(Number(val));
+    }
+
+    function onPitchSliderChange(val) {
+      const p = Number(val);
+      document.getElementById('pitchSliderVal').textContent = p === 0 ? '0Hz (Tự nhiên)' : p > 0 ? `+${p}Hz (Tươi vui)` : `${p}Hz (Trầm sâu)`;
+    }
+
+    function debounceEstimate() {
+      clearTimeout(estimateDebounceTimer);
+      estimateDebounceTimer = setTimeout(runTtsEstimate, 250);
+    }
+
+    async function runTtsEstimate() {
+      const text = document.getElementById('fullNarrationInput').value.trim();
+      const voicePresetId = document.getElementById('globalVoiceSelect').value;
+      const rate = Number(document.getElementById('voiceRateSlider').value) || 0;
+      const isEnglish = voicePresetId.startsWith('en');
+
+      if (!text) {
+        document.getElementById('summaryWordCount').textContent = '0 từ • 0 cảnh';
+        document.getElementById('estTotalSpeechTime').textContent = '0.0s';
+        document.getElementById('estTotalMinTime').textContent = '0.0s';
+        document.getElementById('segmentsBreakdownList').innerHTML = `<div class="text-center py-3 text-slate-500 text-[10px]">Nhập kịch bản để xem phân đoạn tự động</div>`;
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/tts-estimate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, lang: isEnglish ? 'en' : 'vi', rate })
+        });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('summaryWordCount').textContent = `${data.totalWords} từ • ${data.sceneCount} cảnh`;
+          document.getElementById('estTotalSpeechTime').textContent = `${data.estimatedTotalSpeechSec}s`;
+          document.getElementById('estTotalMinTime').textContent = `${data.minRecommendedSec}s`;
+
+          const listContainer = document.getElementById('segmentsBreakdownList');
+          listContainer.innerHTML = data.scenes.map(sc => `
+            <div class="p-2 rounded bg-slate-900/90 border border-slate-800 flex items-start justify-between gap-2">
+              <div class="flex-1 truncate">
+                <div class="font-bold text-slate-300 flex items-center gap-1.5">
+                  <span class="text-indigo-400 font-mono">Cảnh 0${sc.index}</span>
+                  <span class="text-[9px] text-slate-500 font-mono">(${sc.wordCount} từ)</span>
+                </div>
+                <div class="text-[10px] text-slate-400 truncate mt-0.5" title="${sc.text}">${sc.text}</div>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="font-mono text-emerald-400 font-bold text-[11px]">${sc.speechSec}s</span>
+                <div class="text-[9px] text-slate-500 font-mono">Min: ${sc.minSec}s</div>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error('Lỗi tính thời lượng:', err);
+      }
+    }
+
+    async function applyAutoSplitAndTTS() {
+      if (!currentProject) return alert('Vui lòng chọn hoặc tạo dự án trước.');
+      const text = document.getElementById('fullNarrationInput').value.trim();
+      if (!text) return alert('Vui lòng nhập kịch bản trước khi phân cảnh');
+
+      const voicePresetId = document.getElementById('globalVoiceSelect').value;
+      const rate = Number(document.getElementById('voiceRateSlider').value) || 0;
+      const pitch = Number(document.getElementById('voicePitchSlider').value) || 0;
+
+      const btn = document.getElementById('btnAutoSplitTTS');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang phân cảnh & tạo toàn bộ giọng đọc...`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/auto-generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            script: text,
+            topic: currentProject.name,
+            voicePresetId,
+            rate,
+            pitch,
+            aspect: currentProject.config?.aspect || '16:9',
+            fps: currentProject.config?.fps || 60,
+            generateVoice: true,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          await selectProject(currentProject.name);
+          alert(`✓ Đã phân chia thành công ${data.metrics.sceneCount} cảnh với đầy đủ giọng đọc và thời lượng khớp hoàn hảo!`);
+        } else {
+          alert('Lỗi: ' + data.error);
+        }
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="zap" class="w-3.5 h-3.5 fill-white"></i> <span>⚡ Phân Cảnh & Tạo Toàn Bộ Giọng Đọc</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    // --- AI AUTO DIRECTOR ---
+    async function runAiAutoDirector() {
+      if (!currentProject) return alert('Vui lòng chọn hoặc tạo dự án trước.');
+      const topic = document.getElementById('aiDirectorTopic').value.trim() || currentProject.name;
+      let script = document.getElementById('aiDirectorScript').value.trim();
+      if (!script) script = document.getElementById('fullNarrationInput').value.trim();
+      if (!script) return alert('Vui lòng nhập kịch bản hoặc chủ đề video.');
+
+      const aspect = document.getElementById('aiDirectorAspect').value;
+      const generateVoice = document.getElementById('aiDirectorVoiceOption').value === 'yes';
+      const voicePresetId = document.getElementById('globalVoiceSelect').value;
+      const rate = Number(document.getElementById('voiceRateSlider').value) || 0;
+      const pitch = Number(document.getElementById('voicePitchSlider').value) || 0;
+
+      const btn = document.getElementById('btnRunAiDirector');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> AI Auto-Director đang xây dựng video...`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/auto-generate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            script,
+            topic,
+            voicePresetId,
+            rate,
+            pitch,
+            aspect,
+            fps: 60,
+            generateVoice,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          await selectProject(currentProject.name);
+          switchSidebarTab('projects');
+          alert(`🎉 AI Auto-Director đã tạo xong toàn bộ video (${data.metrics.sceneCount} cảnh, tỉ lệ ${aspect})!\nBạn có thể bấm "Xuất Video 60fps" để tải file MP4 ngay lập tức.`);
+        } else {
+          alert('Lỗi AI Director: ' + data.error);
+        }
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="wand-2" class="w-4 h-4"></i> <span>🤖 Bắt Đầu Tạo Toàn Bộ Video Bằng AI</span>`;
+        lucide.createIcons();
+      }
+    }
+
+    // --- TEMPLATES GALLERY ---
+    async function loadTemplates() {
+      try {
+        const res = await fetch('/api/templates');
+        const data = await res.json();
+        if (data.success) {
+          templates = data.templates;
+          document.getElementById('templateCountBadge').textContent = `${templates.length} mẫu`;
+          renderTemplatesPanel();
+          renderModalTemplates();
+        }
+      } catch (err) {
+        console.error('Lỗi load templates:', err);
+      }
+    }
+
+    function renderTemplatesPanel() {
+      const container = document.getElementById('templatesList');
+      const cat = document.getElementById('templateCategorySelect').value;
+      const filtered = cat === 'all' ? templates : templates.filter(t => t.category === cat || t.tags.includes(cat));
+
+      container.innerHTML = filtered.map(t => {
+        return `
+          <div class="glass-card rounded-xl p-3 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 uppercase font-mono">
+                  ${t.category}
+                </span>
+                <span class="text-[10px] text-slate-500 font-mono">${t.minSec}s - ${t.maxSec}s</span>
+              </div>
+              <h4 class="text-xs font-bold text-white mb-1">${t.name}</h4>
+              <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed mb-2">${t.description}</p>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2 border-t border-slate-800">
+              <button onclick="previewTemplateLive('${t.id}')" class="text-[11px] font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg flex items-center gap-1 transition">
+                <i data-lucide="play" class="w-3 h-3 text-indigo-400"></i>
+                Xem
+              </button>
+              <button onclick="addTemplateToCurrentProject('${t.id}')" class="flex-1 gradient-btn text-[11px] font-bold text-white py-1 rounded-lg flex items-center justify-center gap-1 shadow">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+                Thêm vào video
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function filterTemplates() {
+      renderTemplatesPanel();
+    }
+
+    function renderModalTemplates() {
+      const container = document.getElementById('modalTemplateGrid');
+      container.innerHTML = templates.map(t => {
+        return `
+          <div class="glass-card rounded-xl p-3.5 border border-slate-800 hover:border-indigo-500/50 transition flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 uppercase font-mono">
+                  ${t.category}
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">${t.minSec}s - ${t.maxSec}s</span>
+              </div>
+              <h4 class="text-xs font-bold text-white mb-1">${t.name}</h4>
+              <p class="text-[11px] text-slate-400 line-clamp-2 mb-3">${t.description}</p>
+            </div>
+            <button onclick="addTemplateToCurrentProject('${t.id}')" class="gradient-btn text-xs font-bold text-white py-1.5 rounded-lg flex items-center justify-center gap-1.5 shadow">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Chọn Mẫu Này</span>
+            </button>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    async function addTemplateToCurrentProject(templateId) {
+      if (!currentProject) return alert('Vui lòng chọn dự án trước.');
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/add-template`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ templateId, duration: 5 })
+        });
+        const data = await res.json();
+        if (data.success) {
+          hideModals();
+          await selectProject(currentProject.name);
+          selectScene(currentProject.scenes.length - 1);
+        } else {
+          alert('Lỗi: ' + data.error);
+        }
+      } catch (err) {
+        alert('Lỗi thêm mẫu: ' + err.message);
+      }
+    }
+
+    async function addBlankScene(isSilenceOnly = false) {
+      if (!currentProject) return alert('Vui lòng chọn dự án.');
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/scenes/new`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sceneName: isSilenceOnly ? 'visual-break' : 'scene', duration: 5, isSilenceOnly })
+        });
+        const data = await res.json();
+        if (data.success) {
+          hideModals();
+          await selectProject(currentProject.name);
+          selectScene(currentProject.scenes.length - 1);
+        } else {
+          alert('Lỗi: ' + data.error);
+        }
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      }
+    }
+
+    async function addSilenceOnlyScene() {
+      await addBlankScene(true);
+    }
+
+    function previewTemplateLive(templateId) {
+      const iframe = document.getElementById('mainPreviewIframe');
+      if (!iframe) return;
+      updateAspectFrameDimensions();
+      iframe.src = `/preview-template/${templateId}?t=${Date.now()}`;
+      switchViewMode('preview');
+    }
+
+    // --- TIMELINE REORDER & SCENE ACTIONS ---
+    async function moveCurrentScene(direction) {
+      if (!currentProject || currentProject.scenes.length <= 1) return;
+      const newIdx = activeSceneIndex + direction;
+      if (newIdx < 0 || newIdx >= currentProject.scenes.length) return;
+
+      const order = currentProject.scenes.map(s => s.file);
+      const temp = order[activeSceneIndex];
+      order[activeSceneIndex] = order[newIdx];
+      order[newIdx] = temp;
+
+      try {
+        await fetch(`/api/projects/${currentProject.name}/scenes/reorder`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ order })
+        });
+        await selectProject(currentProject.name);
+        selectScene(newIdx);
+      } catch (err) {
+        console.error('Lỗi sắp xếp cảnh:', err);
+      }
+    }
+
+    async function duplicateCurrentScene() {
+      const scene = currentProject?.scenes[activeSceneIndex];
+      if (!scene) return;
+      try {
+        await fetch(`/api/projects/${currentProject.name}/scenes/${scene.file}/duplicate`, { method: 'POST' });
+        await selectProject(currentProject.name);
+      } catch (err) {
+        alert('Lỗi nhân bản cảnh: ' + err.message);
+      }
+    }
+
+    async function deleteCurrentScene() {
+      const scene = currentProject?.scenes[activeSceneIndex];
+      if (!scene) return;
+      if (!confirm(`Bạn có chắc muốn xoá cảnh "${scene.file}"?`)) return;
+
+      try {
+        await fetch(`/api/projects/${currentProject.name}/scenes/${scene.file}`, { method: 'DELETE' });
+        await selectProject(currentProject.name);
+      } catch (err) {
+        alert('Lỗi xoá cảnh: ' + err.message);
+      }
+    }
+
+    // Pending delete callback
+    let _pendingDeleteFn = null;
+
+    function showDeleteConfirm(sceneName, onConfirm) {
+      document.getElementById('deleteConfirmSceneName').textContent = sceneName;
+      const btn = document.getElementById('deleteConfirmBtn');
+      // Remove previous listener
+      const freshBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(freshBtn, btn);
+      freshBtn.addEventListener('click', async () => {
+        hideModals();
+        await onConfirm();
+      });
+      lucide.createIcons();
+      document.getElementById('modalDeleteConfirm').classList.remove('hidden');
+    }
+
+    async function deleteScene(idx, event) {
+      if (event) event.stopPropagation();
+      const scene = currentProject?.scenes[idx];
+      if (!scene) return;
+
+      showDeleteConfirm(scene.file, async () => {
+        try {
+          const res = await fetch(`/api/projects/${currentProject.name}/scenes/${scene.file}`, { method: 'DELETE' });
+          const data = await res.json();
+          if (!data.success) throw new Error(data.error || 'Lỗi không xác định');
+          const nextIdx = Math.max(0, Math.min(idx, currentProject.scenes.length - 2));
+          await selectProject(currentProject.name);
+          if (currentProject.scenes.length > 0) selectScene(nextIdx);
+        } catch (err) {
+          alert('Lỗi xoá cảnh: ' + err.message);
+        }
+      });
+    }
+
+    // --- EXPORTS GALLERY ---
+    async function loadProjectVideos() {
+      if (!currentProject) return;
+      try {
+        const res = await fetch(`/api/projects/${currentProject.name}/videos`);
+        const data = await res.json();
+        if (data.success) {
+          currentProject.exportedVideos = data.videos;
+          renderProjectVideos();
+        }
+      } catch (err) {
+        console.error('Lỗi tải video:', err);
+      }
+    }
+
+    function renderProjectVideos() {
+      const count = (currentProject?.exportedVideos && currentProject.exportedVideos.length) || 0;
+      document.getElementById('panelExportCount').textContent = count;
+      document.getElementById('topExportCount').textContent = count;
+
+      const panelContainer = document.getElementById('projectVideosList');
+      const modalGrid = document.getElementById('galleryVideosGrid');
+      document.getElementById('galleryProjectTitle').textContent = currentProject?.name || '';
+
+      if (!currentProject?.exportedVideos || currentProject.exportedVideos.length === 0) {
+        const emptyHtml = `
+          <div class="col-span-full text-center py-12 px-6 rounded-2xl border-2 border-dashed border-slate-800 bg-slate-900/30">
+            <div class="w-12 h-12 rounded-2xl bg-slate-800 text-slate-500 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="video-off" class="w-6 h-6"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-300">Chưa có video nào được xuất cho dự án này</h4>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto mb-4">Bấm "Xuất Video 60fps" để bắt đầu render video đầu tiên từ các cảnh HTML của bạn.</p>
+            <button onclick="openExportsFolder()" class="text-xs font-bold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-xl inline-flex items-center gap-2 transition shadow-sm">
+              <i data-lucide="folder-open" class="w-4 h-4 text-amber-400"></i>
+              <span>Mở Thư Mục Chứa Video Trên Máy</span>
+            </button>
+          </div>
+        `;
+        panelContainer.innerHTML = emptyHtml;
+        modalGrid.innerHTML = emptyHtml;
+        lucide.createIcons();
+        return;
+      }
+
+      const itemsHtml = currentProject.exportedVideos.map(v => {
+        return `
+          <div class="glass-card rounded-xl p-3 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between">
+            <div class="flex items-start justify-between mb-2">
+              <div>
+                <div class="text-xs font-bold text-white flex items-center gap-1.5 truncate max-w-[180px]" title="${v.filename}">
+                  <i data-lucide="video" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>${v.filename}</span>
+                </div>
+                <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                  ${v.sizeMb} MB ${v.durationSec ? '• ' + v.durationSec + 's' : ''} • ${new Date(v.mtime).toLocaleTimeString()}
+                </div>
+              </div>
+              ${v.isLatest ? '<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 uppercase">Mới nhất</span>' : ''}
+            </div>
+
+            <div class="flex items-center gap-1.5 pt-2 border-t border-slate-800/80">
+              <button onclick="playExportedVideo('${v.url}')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 py-1.5 rounded-lg flex items-center justify-center gap-1 transition">
+                <i data-lucide="play" class="w-3 h-3 text-indigo-400"></i>
+                <span>Xem</span>
+              </button>
+              <a href="${v.url}" download="${v.filename}" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-emerald-400 transition" title="Tải về">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              </a>
+              <button onclick="deleteExportedVideo('${v.filename}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-rose-900/40 text-slate-400 hover:text-rose-400 transition" title="Xoá">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      panelContainer.innerHTML = itemsHtml;
+      modalGrid.innerHTML = itemsHtml;
+      lucide.createIcons();
+    }
+
+    function playExportedVideo(url) {
+      hideModals();
+      switchViewMode('video');
+      const video = document.getElementById('finalVideoPlayer');
+      video.src = url;
+      video.play();
+      document.getElementById('btnDownloadFinalVideo').href = url;
+    }
+
+    async function deleteExportedVideo(filename) {
+      if (!confirm(`Bạn có chắc muốn xoá video "${filename}"?`)) return;
+      try {
+        await fetch(`/api/projects/${currentProject.name}/videos/${filename}`, { method: 'DELETE' });
+        await loadProjectVideos();
+      } catch (err) {
+        alert('Lỗi xoá video: ' + err.message);
+      }
+    }
+
+    function showExportGalleryModal() {
+      renderProjectVideos();
+      document.getElementById('modalExportGallery').classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    // --- CONFIG & ACTIONS ---
+    async function updateProjectConfig() {
+      if (!currentProject) return;
+      const aspect = document.getElementById('selectAspect').value;
+      const fps = Number(document.getElementById('selectFps').value);
+
+      updateAspectFrameDimensions();
+      try {
+        await fetch(`/api/projects/${currentProject.name}/config`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ aspect, fps })
+        });
+      } catch (err) {
+        console.error('Lỗi lưu cấu hình:', err);
+      }
+    }
+
+    async function openCurrentFolder() {
+      if (!currentProject) return;
+      try {
+        await fetch(`/api/projects/${currentProject.name}/open`, { method: 'POST' });
+      } catch (err) {
+        console.error('Lỗi mở folder:', err);
+      }
+    }
+
+    async function openExportsFolder() {
+      if (!currentProject) return;
+      try {
+        await fetch(`/api/projects/${currentProject.name}/open-exports`, { method: 'POST' });
+      } catch (err) {
+        console.error('Lỗi mở folder video:', err);
+      }
+    }
+
+    async function duplicateProject(name) {
+      try {
+        const res = await fetch(`/api/projects/${name}/duplicate`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          await loadProjects();
+          selectProject(data.newName);
+        }
+      } catch (err) {
+        alert('Lỗi nhân bản: ' + err.message);
+      }
+    }
+
+    async function deleteProject(name) {
+      if (!confirm(`Bạn có chắc chắn muốn xoá vĩnh viễn dự án "${name}"?`)) return;
+      try {
+        await fetch(`/api/projects/${name}`, { method: 'DELETE' });
+        currentProject = null;
+        await loadProjects();
+      } catch (err) {
+        alert('Lỗi xoá: ' + err.message);
+      }
+    }
+
+    async function createNewProject() {
+      const name = document.getElementById('inputNewProjectName').value.trim();
+      const aspect = document.getElementById('inputNewProjectAspect').value;
+      if (!name) return alert('Vui lòng nhập tên dự án');
+      try {
+        const res = await fetch('/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, aspect })
+        });
+        const data = await res.json();
+        if (data.success) {
+          hideModals();
+          await loadProjects();
+          selectProject(name);
+        } else {
+          alert('Lỗi: ' + data.error);
+        }
+      } catch (err) {
+        alert('Lỗi: ' + err.message);
+      }
+    }
+
+    // --- VIEW MODE SWITCHER ---
+    function switchViewMode(mode) {
+      currentViewMode = mode;
+      document.getElementById('stagePreview').classList.toggle('hidden', mode !== 'preview');
+      document.getElementById('stageEditor').classList.toggle('hidden', mode !== 'editor');
+      document.getElementById('stageVideo').classList.toggle('hidden', mode !== 'video');
+
+      document.getElementById('btnModePreview').className = mode === 'preview' 
+        ? 'text-xs font-bold px-3 py-1 rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 transition'
+        : 'text-xs font-semibold px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition';
+
+      document.getElementById('btnModeEditor').className = mode === 'editor' 
+        ? 'text-xs font-bold px-3 py-1 rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 transition'
+        : 'text-xs font-semibold px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition';
+
+      document.getElementById('btnModeVideo').className = mode === 'video' 
+        ? 'text-xs font-bold px-3 py-1 rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 transition'
+        : 'text-xs font-semibold px-3 py-1 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition';
+
+      if (mode === 'preview') {
+        updateAspectFrameDimensions();
+      }
+
+      if (mode === 'video' && currentProject) {
+        const video = document.getElementById('finalVideoPlayer');
+        video.src = `/video/${currentProject.name}/output.mp4?t=${Date.now()}`;
+        document.getElementById('btnDownloadFinalVideo').href = `/video/${currentProject.name}/output.mp4`;
+      }
+    }
+
+    function switchSidebarTab(tab) {
+      document.getElementById('panelProjects').classList.toggle('hidden', tab !== 'projects');
+      document.getElementById('panelAudio').classList.toggle('hidden', tab !== 'audio');
+      document.getElementById('panelAiDirector').classList.toggle('hidden', tab !== 'aiDirector');
+      document.getElementById('panelTemplates').classList.toggle('hidden', tab !== 'templates');
+      document.getElementById('panelExports').classList.toggle('hidden', tab !== 'exports');
+
+      ['projects', 'audio', 'aiDirector', 'templates', 'exports'].forEach(t => {
+        const btn = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (btn) {
+          if (t === tab) {
+            btn.className = 'w-9 h-9 rounded-xl flex items-center justify-center text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 transition';
+          } else {
+            btn.className = 'w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-indigo-400 hover:bg-slate-800/60 border border-transparent transition';
+          }
+        }
+
+        const topBtn = document.getElementById(`tabTop${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (topBtn) {
+          if (t === tab) {
+            topBtn.className = 'text-xs font-bold px-3 py-1.5 rounded-lg bg-indigo-600 text-white flex items-center gap-1.5 transition';
+          } else {
+            topBtn.className = 'text-xs font-semibold px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center gap-1.5 transition';
+          }
+        }
+      });
+
+      if (tab === 'exports') loadProjectVideos();
+    }
+
+    // --- MODALS ---
+    function showGo4aiAutoModal() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, '0');
+      const defaultName = `go4ai-video-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+      document.getElementById('inputGo4aiProjectName').value = defaultName;
+      document.getElementById('inputGo4aiTopic').value = 'Mẹo Công Nghệ AI Đột Phá';
+      document.getElementById('modalGo4aiAuto').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function fillGo4aiSampleScript() {
+      const sample = `Dừng lại 3 giây nếu bạn đang muốn xây dựng AI Agent tự động hóa công việc cho doanh nghiệp!
+Đầu tiên, hãy định nghĩa rõ ràng Input và Output của từng tác vụ thay vì bắt AI làm mọi thứ chung chung.
+Thứ hai, kết hợp công cụ tra cứu cơ sở dữ liệu để câu trả lời của AI luôn chính xác và không bị bịa đặt.
+Hãy theo dõi GO4AI để cập nhật những công nghệ AI và workflow thực chiến mới nhất nhé!`;
+      document.getElementById('textareaGo4aiScript').value = sample;
+    }
+
+    async function submitGo4aiAutoGenerate() {
+      const projectName = document.getElementById('inputGo4aiProjectName').value.trim();
+      const topic = document.getElementById('inputGo4aiTopic').value.trim();
+      const aspect = document.getElementById('selectGo4aiAspect').value;
+      const voicePresetId = document.getElementById('selectGo4aiVoice').value;
+      const bgmId = document.getElementById('selectGo4aiBgm').value;
+      const rawText = document.getElementById('textareaGo4aiScript').value.trim();
+
+      if (!projectName) return alert('Vui lòng nhập tên dự án!');
+      if (!rawText) return alert('Vui lòng nhập nội dung kịch bản!');
+
+      const btn = document.getElementById('btnSubmitGo4aiAuto');
+      const statusDiv = document.getElementById('go4aiGenStatus');
+      const statusText = document.getElementById('go4aiGenStatusText');
+
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Đang khởi tạo...`;
+      statusDiv.classList.remove('hidden');
+      statusText.textContent = 'Đang phân đoạn kịch bản và sinh giọng đọc AI tiếng Việt...';
+      if (window.lucide) lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/go4ai/generate-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectName,
+            topic,
+            aspect,
+            voicePresetId,
+            bgmId,
+            rawText,
+            script: rawText,
+            text: rawText,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          statusText.textContent = `Tạo thành công ${data.sceneCount} cảnh! Đang mở dự án...`;
+          setTimeout(async () => {
+            hideModals();
+            await loadProjects();
+            await selectProject(projectName);
+            alert(`🎉 Dự án "${projectName}" đã được tạo hoàn tất!\n- Số cảnh: ${data.sceneCount}\n- Tỉ lệ: ${data.aspect}\n- Tổng thời lượng: ${data.totalDurationSec}s (Đã đồng bộ giọng đọc & BGM)`);
+          }, 800);
+        } else {
+          alert('Lỗi tạo video: ' + (data.error || 'Không xác định'));
+        }
+      } catch (err) {
+        alert('Lỗi kết nối máy chủ: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> <span>🚀 Bắt Đầu Tạo Video 1-Click</span>`;
+        statusDiv.classList.add('hidden');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function showNewProjectModal() {
+      document.getElementById('inputNewProjectName').value = '';
+      document.getElementById('modalNewProject').classList.remove('hidden');
+      document.getElementById('inputNewProjectName').focus();
+    }
+
+    function showAddSceneModal() {
+      document.getElementById('modalAddScene').classList.remove('hidden');
+    }
+
+    function hideModals() {
+      document.getElementById('modalGo4aiAuto').classList.add('hidden');
+      document.getElementById('modalGo4aiSuccess').classList.add('hidden');
+      document.getElementById('modalVideoFinished').classList.add('hidden');
+      document.getElementById('modalNewProject').classList.add('hidden');
+      document.getElementById('modalAddScene').classList.add('hidden');
+      document.getElementById('modalRenderProgress').classList.add('hidden');
+      document.getElementById('modalExportGallery').classList.add('hidden');
+      document.getElementById('modalDeleteConfirm').classList.add('hidden');
+      const finishedPlayer = document.getElementById('modalFinishedVideoPlayer');
+      if (finishedPlayer) {
+        finishedPlayer.pause();
+      }
+    }
+
+    // --- LIVE SYNC MOTION + AUDIO ENGINE ---
+    let isPlayingSync = false;
+    let isPlayingAllSync = false;
+    let syncPlaybackTimer = null;
+
+    function stopAllPlayback() {
+      if (syncPlaybackTimer) {
+        clearTimeout(syncPlaybackTimer);
+        syncPlaybackTimer = null;
+      }
+      if (currentActiveAudio) {
+        try {
+          currentActiveAudio.pause();
+          currentActiveAudio.currentTime = 0;
+        } catch {}
+        currentActiveAudio = null;
+      }
+      isPlayingSync = false;
+      isPlayingAllSync = false;
+
+      const btnScene = document.getElementById('btnPlaySceneSync');
+      if (btnScene) {
+        btnScene.className = 'text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-500 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-sm';
+        btnScene.innerHTML = '<i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> <span id="labelPlaySceneSync">Phát Cảnh Này + Giọng Đọc</span>';
+      }
+
+      const btnAll = document.getElementById('btnPlayAllSync');
+      if (btnAll) {
+        btnAll.className = 'text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition';
+        btnAll.innerHTML = '<i data-lucide="film" class="w-3.5 h-3.5"></i> <span id="labelPlayAllSync">Phát Toàn Bộ Dự Án</span>';
+      }
+      if (window.lucide) lucide.createIcons();
+    }
+
+    async function togglePlaySceneWithAudio() {
+      if (isPlayingSync || isPlayingAllSync) {
+        stopAllPlayback();
+        return;
+      }
+
+      if (!currentProject || !currentProject.scenes || !currentProject.scenes[activeSceneIndex]) return;
+      const scene = currentProject.scenes[activeSceneIndex];
+
+      isPlayingSync = true;
+      const btnScene = document.getElementById('btnPlaySceneSync');
+      btnScene.className = 'text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow-sm animate-pulse';
+      btnScene.innerHTML = '<i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i> <span id="labelPlaySceneSync">Dừng Phát Cảnh</span>';
+      if (window.lucide) lucide.createIcons();
+
+      // 1. Reload animation iframe
+      reloadPreview();
+
+      // 2. Play audio after introPause
+      const introDelay = ((scene.introPause !== undefined ? scene.introPause : 0.3) * 1000) || 300;
+      syncPlaybackTimer = setTimeout(async () => {
+        if (!isPlayingSync) return;
+        try {
+          const res = await fetch(`/api/projects/${currentProject.name}/scene-audio/${scene.file}`);
+          if (res.ok) {
+            const blob = await res.blob();
+            currentActiveAudio = new Audio(URL.createObjectURL(blob));
+            currentActiveAudio.onended = () => {
+              const outroDelay = ((scene.outroPause !== undefined ? scene.outroPause : 0.5) * 1000) || 500;
+              syncPlaybackTimer = setTimeout(() => {
+                stopAllPlayback();
+              }, outroDelay);
+            };
+            await currentActiveAudio.play();
+          } else {
+            const totalMs = (Number(scene.duration || 5)) * 1000;
+            syncPlaybackTimer = setTimeout(() => {
+              stopAllPlayback();
+            }, totalMs);
+          }
+        } catch (e) {
+          console.warn('Sync audio play error:', e);
+          stopAllPlayback();
+        }
+      }, introDelay);
+    }
+
+    async function togglePlayAllScenesWithAudio() {
+      if (isPlayingAllSync) {
+        stopAllPlayback();
+        return;
+      }
+
+      if (!currentProject || !currentProject.scenes || currentProject.scenes.length === 0) {
+        return alert('Dự án chưa có cảnh nào!');
+      }
+
+      stopAllPlayback();
+      isPlayingAllSync = true;
+
+      const btnAll = document.getElementById('btnPlayAllSync');
+      btnAll.className = 'text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 border border-rose-500/40 px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 transition shadow animate-pulse';
+      btnAll.innerHTML = '<i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i> <span id="labelPlayAllSync">Dừng Phát Toàn Bộ</span>';
+      if (window.lucide) lucide.createIcons();
+
+      let currentIdx = 0;
+
+      async function playNextScene() {
+        if (!isPlayingAllSync || currentIdx >= currentProject.scenes.length) {
+          stopAllPlayback();
+          return;
+        }
+
+        selectScene(currentIdx);
+        const scene = currentProject.scenes[currentIdx];
+        const sceneDurationMs = (Number(scene.duration) || 5) * 1000;
+        const introDelay = ((scene.introPause !== undefined ? scene.introPause : 0.3) * 1000) || 300;
+
+        syncPlaybackTimer = setTimeout(async () => {
+          if (!isPlayingAllSync) return;
+          try {
+            const res = await fetch(`/api/projects/${currentProject.name}/scene-audio/${scene.file}`);
+            if (res.ok) {
+              const blob = await res.blob();
+              currentActiveAudio = new Audio(URL.createObjectURL(blob));
+              await currentActiveAudio.play();
+            }
+          } catch {}
+        }, introDelay);
+
+        syncPlaybackTimer = setTimeout(() => {
+          if (currentActiveAudio) {
+            try { currentActiveAudio.pause(); } catch {}
+          }
+          currentIdx++;
+          playNextScene();
+        }, sceneDurationMs);
+      }
+
+      playNextScene();
+    }
+
+    async function openCurrentProjectFolder() {
+      if (!currentProject) return;
+      try {
+        await fetch(`/api/projects/${currentProject.name}/open`, { method: 'POST' });
+      } catch (err) {
+        console.error('Lỗi mở folder:', err);
+      }
+    }
+
+    // --- AUTO GENERATE SUBMISSION ---
+    async function submitGo4aiAutoGenerate() {
+      const projectName = document.getElementById('inputGo4aiProjectName').value.trim();
+      const topic = document.getElementById('inputGo4aiTopic').value.trim();
+      const aspect = document.getElementById('selectGo4aiAspect').value;
+      const voicePresetId = document.getElementById('selectGo4aiVoice').value;
+      const bgmId = document.getElementById('selectGo4aiBgm').value;
+      const rawText = document.getElementById('textareaGo4aiScript').value.trim();
+
+      if (!projectName) return alert('Vui lòng nhập tên dự án!');
+      if (!rawText) return alert('Vui lòng nhập nội dung kịch bản!');
+
+      const btn = document.getElementById('btnSubmitGo4aiAuto');
+      const statusDiv = document.getElementById('go4aiGenStatus');
+      const statusText = document.getElementById('go4aiGenStatusText');
+
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i> Đang khởi tạo...`;
+      statusDiv.classList.remove('hidden');
+      statusText.textContent = 'Đang phân đoạn kịch bản và sinh giọng đọc AI tiếng Việt...';
+      if (window.lucide) lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/go4ai/generate-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectName,
+            topic,
+            aspect,
+            voicePresetId,
+            bgmId,
+            rawText,
+            script: rawText,
+            text: rawText,
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          statusText.textContent = `Tạo thành công ${data.sceneCount} cảnh! Đang mở dự án...`;
+          setTimeout(async () => {
+            hideModals();
+            await loadProjects();
+            await selectProject(projectName);
+
+            // Open Rich Success Modal
+            document.getElementById('successSceneCount').textContent = `${data.sceneCount} cảnh`;
+            document.getElementById('successDuration').textContent = `${data.totalDurationSec}s`;
+            document.getElementById('successAspect').textContent = data.aspect || '9:16';
+            document.getElementById('successProjectPath').textContent = `projects/${projectName}/`;
+            document.getElementById('modalGo4aiSuccess').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+          }, 600);
+        } else {
+          alert('Lỗi tạo video: ' + (data.error || 'Không xác định'));
+        }
+      } catch (err) {
+        alert('Lỗi kết nối máy chủ: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-300"></i> <span>🚀 Bắt Đầu Tạo Video 1-Click</span>`;
+        statusDiv.classList.add('hidden');
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+
+    function showNewProjectModal() {
+      document.getElementById('inputNewProjectName').value = '';
+      document.getElementById('modalNewProject').classList.remove('hidden');
+      document.getElementById('inputNewProjectName').focus();
+    }
+
+    function showAddSceneModal() {
+      document.getElementById('modalAddScene').classList.remove('hidden');
+    }
+
+    // --- RENDER SSE PIPELINE ---
+    function startRender() {
+      if (!currentProject) return;
+
+      const modal = document.getElementById('modalRenderProgress');
+      const bar = document.getElementById('renderProgressBar');
+      const pctText = document.getElementById('renderPercentText');
+      const stageText = document.getElementById('renderStageText');
+      const logs = document.getElementById('renderLogs');
+
+      bar.style.width = '0%';
+      pctText.textContent = '0%';
+      stageText.textContent = 'Đang xử lý đồng bộ âm thanh & khoảng trống...';
+      logs.innerHTML = '<div>[System] Bắt đầu pipeline render project: ' + currentProject.name + '</div>';
+      modal.classList.remove('hidden');
+
+      const es = new EventSource(`/api/projects/${currentProject.name}/render`);
+
+      es.addEventListener('status', (e) => {
+        const data = JSON.parse(e.data);
+        stageText.textContent = data.stage;
+        bar.style.width = `${data.percent}%`;
+        pctText.textContent = `${data.percent}%`;
+        
+        const logLine = document.createElement('div');
+        logLine.textContent = `[Progress] ${data.percent}% - ${data.stage}`;
+        logs.appendChild(logLine);
+        logs.scrollTop = logs.scrollHeight;
+      });
+
+      es.addEventListener('log', (e) => {
+        const data = JSON.parse(e.data);
+        const logLine = document.createElement('div');
+        logLine.textContent = `[Info] ${data.message}`;
+        logs.appendChild(logLine);
+        logs.scrollTop = logs.scrollHeight;
+      });
+
+      es.addEventListener('complete', (e) => {
+        es.close();
+        stageText.textContent = 'Render hoàn tất!';
+        bar.style.width = '100%';
+        pctText.textContent = '100%';
+        
+        let data = {};
+        try { if (e.data) data = JSON.parse(e.data); } catch {}
+
+        setTimeout(async () => {
+          modal.classList.add('hidden');
+          await selectProject(currentProject.name);
+          await loadProjectVideos();
+          switchViewMode('preview');
+
+          // Show Finished Video Modal
+          const videoPlayer = document.getElementById('modalFinishedVideoPlayer');
+          videoPlayer.src = data.videoUrl || `/video/${currentProject.name}/output.mp4?t=${Date.now()}`;
+          document.getElementById('modalFinishedVideoPath').textContent = data.filePath || `projects/${currentProject.name}/output.mp4`;
+          document.getElementById('modalFinishedVideoSize').textContent = `${data.sizeMb || '0'} MB`;
+          document.getElementById('modalFinishedDownloadBtn').href = `/video/${currentProject.name}/output.mp4`;
+          document.getElementById('modalFinishedDownloadBtn').download = `${currentProject.name}.mp4`;
+          document.getElementById('modalVideoFinished').classList.remove('hidden');
+          if (window.lucide) lucide.createIcons();
+        }, 800);
+      });
+
+      es.addEventListener('error', (e) => {
+        es.close();
+        let msg = 'Lỗi không xác định';
+        try {
+          if (e.data) msg = JSON.parse(e.data).message;
+        } catch {}
+        alert('Render thất bại: ' + msg);
+        modal.classList.add('hidden');
+      });
+    }
+
+    // --- DRAG & DROP FILE UPLOAD ---
+    window.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      document.body.classList.add('dragging');
+    });
+
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    window.addEventListener('dragleave', (e) => {
+      if (e.clientX === 0 || e.clientY === 0) {
+        document.body.classList.remove('dragging');
+      }
+    });
+
+    window.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      document.body.classList.remove('dragging');
+
+      if (!currentProject) {
+        return alert('Vui lòng chọn một dự án trước khi thả file vào.');
+      }
+
+      const files = Array.from(e.dataTransfer.files);
+      for (const file of files) {
+        const reader = new FileReader();
+        reader.onload = async () => {
+          try {
+            await fetch(`/api/projects/${currentProject.name}/upload`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                filename: file.name,
+                base64Content: reader.result
+              })
+            });
+            await selectProject(currentProject.name);
+          } catch (err) {
+            console.error('Lỗi upload file:', err);
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Start App
+    loadAll();
+  </script>
+</body>
+</html>

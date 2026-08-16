@@ -1,0 +1,15 @@
+id: go4ai-course-slide
+name: "GO4AI Course & Tech Slide (16:9)"
+description: "Mẫu video ngang 16:9 chuẩn 1920x1080 cho bài giảng GO4AI Academy, video thuyết trình kỹ thuật, slide 2 cột có code box và dữ liệu trực quan."
+category: "education-tech"
+tags: ["go4ai", "course", "slide", "16:9", "horizontal", "academy", "code", "tech"]
+min_sec: 4
+max_sec: 15
+engine: hyperframes
+aspect_ratio: "16:9"
+resolution:
+  width: 1920
+  height: 1080
+source_entry: "source/index.html"
+author: "GO4AI Academy Team"
+license: "Apache-2.0"

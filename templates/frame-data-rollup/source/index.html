@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=1080">
+  <meta name="duration" content="6">
+  <title>Data Rollup · Animated Metrics Bar Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800;900&family=JetBrains+Mono:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background-color: #0E0E10;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(255, 90, 44, 0.15) 0%, transparent 60%),
+        radial-gradient(#1f1f26 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px;
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      color: #F5F5F2;
+      position: relative;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      padding: 100px 140px 120px 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Header */
+    .header {
+      opacity: 0;
+      transform: translateY(-30px);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(255, 90, 44, 0.12);
+      border: 1px solid rgba(255, 90, 44, 0.3);
+      color: #FF5A2C;
+      font-size: 16px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #FF5A2C;
+      box-shadow: 0 0 12px #FF5A2C;
+    }
+    .title {
+      font-size: 54px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #FFFFFF;
+      line-height: 1.15;
+    }
+
+    /* Chart Area */
+    .chart-stage {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 48px;
+      margin-top: 40px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #272730;
+      position: relative;
+    }
+
+    .grid-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.06);
+      pointer-events: none;
+    }
+    .grid-line-1 { bottom: 25%; }
+    .grid-line-2 { bottom: 50%; }
+    .grid-line-3 { bottom: 75%; }
+
+    /* Bar Column */
+    .bar-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      position: relative;
+    }
+
+    .rolled-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 38px;
+      font-weight: 800;
+      color: #FF5A2C;
+      text-shadow: 0 0 20px rgba(255, 90, 44, 0.4);
+      margin-bottom: 16px;
+      opacity: 0;
+      transform: translateY(20px);
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      width: 100%;
+      max-width: 160px;
+      height: 480px;
+      display: flex;
+      align-items: flex-end;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 20px 20px 0 0;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .bar-fill {
+      width: 100%;
+      height: 0%;
+      border-radius: 20px 20px 0 0;
+      background: linear-gradient(180deg, #FF7A50 0%, #FF5A2C 40%, #D83B10 100%);
+      box-shadow: 0 -4px 30px rgba(255, 90, 44, 0.5);
+      position: relative;
+    }
+
+    .bar-glow {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: #FFE0D6;
+      border-radius: 20px 20px 0 0;
+    }
+
+    .bar-label {
+      margin-top: 24px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #9E9EA8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header" id="headerSection">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span>Data Performance • 2026</span>
+      </div>
+      <h1 class="title">Báo Cáo Tăng Trưởng & Hiệu Suất Số Liệu</h1>
+    </div>
+
+    <!-- Chart Stage -->
+    <div class="chart-stage">
+      <div class="grid-line grid-line-1"></div>
+      <div class="grid-line grid-line-2"></div>
+      <div class="grid-line grid-line-3"></div>
+
+      <!-- Column 1 -->
+      <div class="bar-column">
+        <div class="rolled-value" id="val-1" data-target="14200">0</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-1" data-height="45%">
+            <div class="bar-glow"></div>
+          </div>
+        </div>
+        <div class="bar-label" id="lbl-1">Người Dùng Mới</div>
+      </div>
+
+      <!-- Column 2 -->
+      <div class="bar-column">
+        <div class="rolled-value" id="val-2" data-target="48500">0</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-2" data-height="68%">
+            <div class="bar-glow"></div>
+          </div>
+        </div>
+        <div class="bar-label" id="lbl-2">Phiên AI Chạy</div>
+      </div>
+
+      <!-- Column 3 -->
+      <div class="bar-column">
+        <div class="rolled-value" id="val-3" data-target="96800">0</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-3" data-height="95%">
+            <div class="bar-glow"></div>
+          </div>
+        </div>
+        <div class="bar-label" id="lbl-3">Tác Vụ Tự Động</div>
+      </div>
+
+      <!-- Column 4 -->
+      <div class="bar-column">
+        <div class="rolled-value" id="val-4" data-target="82400">0</div>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-4" data-height="82%">
+            <div class="bar-glow"></div>
+          </div>
+        </div>
+        <div class="bar-label" id="lbl-4">Doanh Thu ($)</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      // 1. Header fades & drops in
+      tl.to("#headerSection", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "back.out(1.2)"
+      }, 0.1);
+
+      // 2. Animate each column staggered
+      const columns = [1, 2, 3, 4];
+      columns.forEach((idx, i) => {
+        const delay = 0.4 + i * 0.15;
+        const valEl = document.getElementById(`val-${idx}`);
+        const barEl = document.getElementById(`bar-${idx}`);
+        const lblEl = document.getElementById(`lbl-${idx}`);
+        const targetVal = parseFloat(valEl.getAttribute('data-target')) || 0;
+        const targetHeight = barEl.getAttribute('data-height') || '50%';
+
+        // Label in
+        tl.to(lblEl, { opacity: 1, y: 0, duration: 0.6 }, delay);
+
+        // Value text in
+        tl.to(valEl, { opacity: 1, y: 0, duration: 0.6 }, delay);
+
+        // Bar growth
+        tl.to(barEl, {
+          height: targetHeight,
+          duration: 1.4,
+          ease: "elastic.out(1, 0.6)"
+        }, delay);
+
+        // Number rolling counter
+        const counter = { val: 0 };
+        tl.to(counter, {
+          val: targetVal,
+          duration: 1.4,
+          ease: "power2.out",
+          onUpdate: () => {
+            valEl.textContent = Math.round(counter.val).toLocaleString('en-US');
+          }
+        }, delay);
+      });
+    });
+  </script>
+</body>
+</html>

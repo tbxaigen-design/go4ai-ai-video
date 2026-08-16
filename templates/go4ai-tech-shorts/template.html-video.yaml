@@ -1,0 +1,15 @@
+id: go4ai-tech-shorts
+name: "GO4AI Tech Shorts (9:16)"
+description: "Mẫu video dọc 9:16 phong cách hiện đại cho TikTok/Reels/Shorts nội bộ GO4AI. Tối ưu cho video chia sẻ mẹo công nghệ, tin vắn AI và giới thiệu tính năng."
+category: "social-shorts"
+tags: ["go4ai", "shorts", "tiktok", "reels", "tech", "dark-mode", "vertical", "9:16"]
+min_sec: 3
+max_sec: 12
+engine: hyperframes
+aspect_ratio: "9:16"
+resolution:
+  width: 1080
+  height: 1920
+source_entry: "source/index.html"
+author: "GO4AI Design Team"
+license: "Apache-2.0"
