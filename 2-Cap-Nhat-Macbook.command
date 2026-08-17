@@ -2,6 +2,11 @@
 # GO4AI AI Video Studio — Script cap nhat OTA cho Macbook
 cd "$(dirname "$0")"
 
+# Ban cap nhat vua tai ve cung bi macOS gan nhan co lap. Khong go thi lan
+# chay sau se lai bi chan boi hop thoai "nha phat trien chua duoc xac dinh".
+xattr -dr com.apple.quarantine . 2>/dev/null || true
+chmod +x ./*.command 2>/dev/null || true
+
 echo ""
 echo " =========================================="
 echo "   GO4AI AI VIDEO STUDIO — CAP NHAT"
@@ -55,6 +60,10 @@ rsync -av --progress \
 
 # Don dep
 rm -rf "$TEMP_EXTRACT"
+
+# File .command vua bi ghi de — cap lai quyen chay, neu khong Finder se
+# mo bang trinh soan thao thay vi chay.
+chmod +x ./*.command 2>/dev/null || true
 
 # Cai lai thu vien neu package.json thay doi
 # Phai dung pnpm (giao thuc workspace:* npm khong hieu) — xem chu thich

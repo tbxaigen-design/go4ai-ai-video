@@ -2222,38 +2222,66 @@ const server = http.createServer(async (req, res) => {
   res.end('Not Found');
 });
 
+function openInBrowser(url) {
+  try {
+    const startCmd = process.platform === 'win32'
+      ? `start "" "${url}"`
+      : process.platform === 'darwin'
+        ? `open "${url}"`
+        : `xdg-open "${url}"`;
+    exec(startCmd, () => {});
+  } catch {}
+}
+
+/**
+ * Khi cổng đã bận thì CHUYỂN SANG CỔNG KHÁC, không mở lại bản đang chạy.
+ *
+ * Trước đây gặp EADDRINUSE là mở trình duyệt vào tiến trình cũ rồi thoát.
+ * Hậu quả: user cập nhật bản mới, chạy lại, nhưng vẫn đang dùng BẢN CŨ còn
+ * sót trong máy — họ tưởng bản vá không có tác dụng. Đây là cái bẫy khó đoán
+ * nhất vì mọi thứ trông như bình thường.
+ */
+const MAX_PORT_TRIES = 10;
+let portAttempt = 0;
+
 server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.error(`\n[!] Port ${PORT} dang duoc su dung boi mot tien trinh khac.`);
-    console.log(`[i] Mo Studio dang chay san tai: http://localhost:${PORT}\n`);
-    try {
-      const openUrl = `http://localhost:${PORT}`;
-      const startCmd = process.platform === 'win32' ? `start "" "${openUrl}"` : process.platform === 'darwin' ? `open "${openUrl}"` : `xdg-open "${openUrl}"`;
-      exec(startCmd, () => {});
-    } catch {}
-  } else {
+  if (err.code !== 'EADDRINUSE') {
     console.error('[Error] Server error:', err.message);
+    return;
   }
+
+  portAttempt += 1;
+  if (portAttempt > MAX_PORT_TRIES) {
+    console.error(`\n[LOI] Da thu ${MAX_PORT_TRIES} cong deu ban. Vui long dong bot ung dung roi chay lai.`);
+    process.exit(1);
+  }
+
+  const nextPort = Number(PORT) + portAttempt;
+  console.log(`[!] Cong ${Number(PORT) + portAttempt - 1} dang ban (co the la ban CU cua app con chay).`);
+  console.log(`[*] Dang thu cong ${nextPort}...`);
+  server.listen(nextPort, '127.0.0.1');
 });
 
 // Bind vào 127.0.0.1 (loopback nội bộ) thay vì 0.0.0.0
 // → Windows Firewall và macOS Firewall sẽ KHÔNG hiện cảnh báo khi mở app lần đầu
-server.listen(PORT, '127.0.0.1', () => {
-  const openUrl = `http://127.0.0.1:${PORT}`;
+server.on('listening', () => {
+  const actualPort = server.address().port;
+  const openUrl = `http://127.0.0.1:${actualPort}`;
+
   console.log(`\n======================================================`);
   console.log(`🚀 GO4AI AI Video Studio đang chạy!`);
   console.log(`🌐 Địa chỉ: ${openUrl}`);
+  console.log(`   Phiên bản: ${APP_VERSION.version}`);
   console.log(`======================================================\n`);
 
-  try {
-    const startCmd = process.platform === 'win32'
-      ? `start "" "${openUrl}"`
-      : process.platform === 'darwin'
-      ? `open "${openUrl}"`
-      : `xdg-open "${openUrl}"`;
-    setTimeout(() => {
-      exec(startCmd, () => {});
-    }, 800);
-  } catch {}
+  if (actualPort !== Number(PORT)) {
+    console.log(`[LUU Y] Cong mac dinh ${PORT} dang bi mot ban khac chiem.`);
+    console.log(`        Ban DANG XEM o dia chi ${openUrl} — hay dung dia chi nay.`);
+    console.log(`        Neu muon dong ban cu: dong cua so Terminal cu di.\n`);
+  }
+
+  setTimeout(() => openInBrowser(openUrl), 800);
 });
+
+server.listen(PORT, '127.0.0.1');
 

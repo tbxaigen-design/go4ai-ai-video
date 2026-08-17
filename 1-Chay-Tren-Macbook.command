@@ -5,6 +5,22 @@
 # Chuyen vao thu muc chua script nay
 cd "$(dirname "$0")"
 
+# -------------------------------------------------------
+# Go co lap (quarantine) cua macOS cho ca thu muc.
+#
+# Moi file tai bang trinh duyet deu bi macOS gan nhan com.apple.quarantine.
+# Khi do nhap doi vao file .command se bao:
+#   "Khong the mo ... vi ung dung nay den tu mot nha phat trien chua duoc
+#    xac dinh"
+# va KHONG co nut nao de mo — user tuong app hong.
+#
+# Script nay chay duoc nghia la user da vuot qua rao can cho chinh no roi,
+# nen tien the go nhan cho 2-Cap-Nhat-Macbook.command va cac file con lai,
+# de lan sau ho khong gap lai hop thoai do nua.
+# -------------------------------------------------------
+xattr -dr com.apple.quarantine . 2>/dev/null || true
+chmod +x ./*.command 2>/dev/null || true
+
 echo ""
 echo " =========================================="
 echo "   GO4AI AI VIDEO STUDIO"
