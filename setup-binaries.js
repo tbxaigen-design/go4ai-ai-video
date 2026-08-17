@@ -22,7 +22,7 @@ import https from 'node:https';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { execFileSync, execSync } from 'node:child_process';
-import { BINARIES_DIR, checkBinaries } from './resolve-binaries.js';
+import { BINARIES_DIR, VENV_DIR, checkBinaries, hasNeuralVoice } from './resolve-binaries.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isWin = process.platform === 'win32';
@@ -216,15 +216,30 @@ function findPython() {
   return null;
 }
 
+/**
+ * Hỏi đúng nơi app sẽ gọi lúc chạy (venv → PATH), chứ không gọi `edge-tts`
+ * trần — nếu không sẽ báo "đã cài" trong khi app vẫn không tìm thấy.
+ */
 function hasEdgeTts() {
-  try {
-    execFileSync('edge-tts', ['--version'], { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
-  }
+  return hasNeuralVoice();
 }
 
+/**
+ * Cài edge-tts vào MÔI TRƯỜNG ẢO RIÊNG trong thư mục app (.venv-tts).
+ *
+ * Trước đây dùng `pip install --user`, hỏng trên macOS vì hai lẽ:
+ *   1. Python của Homebrew/hệ thống chặn cài ngoài venv (PEP 668,
+ *      lỗi "externally-managed-environment") → cài thất bại.
+ *   2. Kể cả khi thành công, binary nằm ở ~/Library/Python/3.x/bin —
+ *      KHÔNG có trong PATH mặc định của macOS → app vẫn không tìm thấy.
+ *
+ * Hậu quả im lặng: mọi giọng rơi về Google TTS, mà Google chỉ có đúng một
+ * giọng nữ tiếng Việt, nên "Nam Minh (Nam)" phát ra giọng nữ và cả 6 giọng
+ * tiếng Việt nghe y hệt nhau.
+ *
+ * Venv giải quyết cả hai: không bị PEP 668 chặn, và đường dẫn cố định nên
+ * không phụ thuộc PATH.
+ */
 function installEdgeTts() {
   if (hasEdgeTts()) {
     log('[OK] edge-tts đã sẵn sàng (giọng neural tiếng Việt).');
@@ -233,27 +248,53 @@ function installEdgeTts() {
 
   const python = findPython();
   if (!python) {
-    log('');
-    log('[!] Không tìm thấy Python nên chưa cài được edge-tts.');
-    log('    App vẫn chạy được, nhưng sẽ dùng giọng Google thay cho');
-    log('    giọng neural Nam Minh / Hoài My (chất lượng thấp hơn).');
-    log('    Muốn có giọng hay nhất: cài Python tại https://python.org');
-    log('    rồi chạy lại file này.');
+    warnNoNeuralVoice('Không tìm thấy Python trên máy.');
+    if (isMac) {
+      log('    Trên macOS, cách nhanh nhất là cài Xcode Command Line Tools:');
+      log('        xcode-select --install');
+    }
+    log('    Hoặc tải Python tại https://python.org rồi chạy lại file này.');
     return false;
   }
 
   log('[*] Đang cài edge-tts (giọng neural tiếng Việt)...');
   try {
-    execFileSync(python, ['-m', 'pip', 'install', '--user', '--quiet', 'edge-tts'], {
+    // Tạo venv (idempotent — đã có thì python bỏ qua).
+    execFileSync(python, ['-m', 'venv', VENV_DIR], { stdio: 'pipe' });
+
+    const venvPython = path.join(VENV_DIR, isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python');
+    execFileSync(venvPython, ['-m', 'pip', 'install', '--quiet', '--upgrade', 'edge-tts'], {
       stdio: 'inherit',
     });
-    log('[OK] Đã cài edge-tts.');
-    return true;
-  } catch {
-    log('[!] Cài edge-tts thất bại. App vẫn chạy với giọng Google dự phòng.');
-    log('    Có thể thử thủ công:  pip install edge-tts');
+
+    if (hasEdgeTts()) {
+      log('[OK] Đã cài edge-tts (giọng Nam Minh / Hoài My đã dùng được).');
+      return true;
+    }
+    warnNoNeuralVoice('Cài xong nhưng không gọi được edge-tts.');
+    return false;
+  } catch (err) {
+    warnNoNeuralVoice(`Cài edge-tts thất bại: ${String(err.message).split('\n')[0]}`);
+    log('    Có thể thử thủ công trong thư mục app:');
+    log(`        ${isWin ? 'py' : 'python3'} -m venv .venv-tts`);
+    log(`        ${isWin ? '.venv-tts\\Scripts\\pip' : '.venv-tts/bin/pip'} install edge-tts`);
     return false;
   }
+}
+
+/** Cảnh báo rõ hậu quả, vì đây là thứ user sẽ nghe thấy ngay. */
+function warnNoNeuralVoice(reason) {
+  log('');
+  log('  ┌──────────────────────────────────────────────────────────────┐');
+  log('  │  CẢNH BÁO: CHƯA CÓ GIỌNG ĐỌC NEURAL TIẾNG VIỆT               │');
+  log('  └──────────────────────────────────────────────────────────────┘');
+  log(`  Lý do: ${reason}`);
+  log('');
+  log('  App vẫn chạy và vẫn xuất được video, NHƯNG mọi giọng tiếng Việt');
+  log('  sẽ dùng chung một giọng nữ Google dự phòng. Nghĩa là:');
+  log('    - Chọn "Nam Minh (Nam)" vẫn phát ra giọng NỮ');
+  log('    - Cả 6 giọng tiếng Việt nghe GIỐNG HỆT nhau');
+  log('');
 }
 
 /**

@@ -1288,6 +1288,23 @@
     let currentViewMode = 'preview';
     let estimateDebounceTimer = null;
 
+    // Chỉ cảnh báo một lần mỗi phiên, tránh làm phiền khi user thử nhiều giọng.
+    let voiceFallbackWarned = false;
+    function showVoiceFallbackWarning() {
+      if (voiceFallbackWarned) return;
+      voiceFallbackWarned = true;
+      alert(
+        'CHÚ Ý: Máy bạn chưa cài bộ giọng đọc neural (edge-tts).\n\n' +
+        'Vì vậy MỌI giọng tiếng Việt đều đang phát bằng một giọng nữ Google dự phòng — ' +
+        'chọn "Nam Minh (Nam)" vẫn ra giọng nữ, và các giọng nghe giống hệt nhau.\n\n' +
+        'Cách khắc phục: đóng app, chạy lại file cài đặt (1-Chay-Tren-Macbook.command ' +
+        'hoặc 1-Chay-Tren-Windows.bat). Nếu vẫn báo thiếu Python:\n' +
+        '  • macOS: mở Terminal, chạy  xcode-select --install\n' +
+        '  • Windows: cài Python tại https://python.org\n' +
+        'rồi chạy lại file cài đặt.'
+      );
+    }
+
     // Badge phiên bản — lấy từ version.json qua API, không hardcode trong HTML
     // để mỗi lần cập nhật chỉ phải sửa đúng một chỗ.
     (async function loadVersionBadge() {
@@ -1923,12 +1940,22 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
           body: JSON.stringify({ voicePresetId, rate, pitch })
         });
         if (!res.ok) throw new Error('Không tải được audio mẫu');
+
+        // Server báo lại giọng THỰC SỰ được dùng. Khi máy thiếu edge-tts, mọi
+        // giọng tiếng Việt đều rơi về một giọng nữ Google — phải nói cho user
+        // biết, thay vì để họ nghe "Nam Minh" ra giọng nữ và tưởng app hỏng.
+        const isFallback = res.headers.get('X-Voice-Fallback') === '1';
+
         const blob = await res.blob();
         const audioUrl = URL.createObjectURL(blob);
         currentActiveAudio = new Audio(audioUrl);
 
         document.getElementById('btnStopAudition').classList.remove('hidden');
-        txtBtn.innerHTML = '<span class="text-emerald-400 font-bold">🔊 Đang phát giọng mẫu...</span>';
+        txtBtn.innerHTML = isFallback
+          ? '<span class="text-amber-400 font-bold">🔊 Đang phát GIỌNG DỰ PHÒNG (không phải giọng đã chọn)</span>'
+          : '<span class="text-emerald-400 font-bold">🔊 Đang phát giọng mẫu...</span>';
+
+        if (isFallback) showVoiceFallbackWarning();
 
         currentActiveAudio.onended = () => {
           stopAuditionAudio();

@@ -24,8 +24,17 @@ const require = createRequire(import.meta.url);
 
 export const BINARIES_DIR = path.join(__dirname, 'binaries');
 
+/**
+ * Môi trường ảo Python chứa edge-tts, do setup-binaries.js tạo.
+ * Phải tìm theo đường dẫn cố định chứ không dựa vào PATH: trên macOS,
+ * thư mục bin của Python người dùng không nằm trong PATH mặc định.
+ */
+export const VENV_DIR = path.join(__dirname, '.venv-tts');
+
 const isWin = process.platform === 'win32';
 const exe = (name) => (isWin ? `${name}.exe` : name);
+
+const venvBin = (name) => path.join(VENV_DIR, isWin ? 'Scripts' : 'bin', exe(name));
 
 /**
  * Lấy đường dẫn từ package installer.
@@ -58,7 +67,26 @@ function resolve(name, envVar, installerPkg) {
 
 export const FFMPEG_BIN = resolve('ffmpeg', 'FFMPEG_PATH', '@ffmpeg-installer/ffmpeg');
 export const FFPROBE_BIN = resolve('ffprobe', 'FFPROBE_PATH', '@ffprobe-installer/ffprobe');
-export const EDGE_TTS_BIN = resolve('edge-tts', 'EDGE_TTS_PATH', null);
+/** edge-tts: ưu tiên env → venv riêng của app → PATH. */
+export const EDGE_TTS_BIN = (() => {
+  const fromEnv = process.env.EDGE_TTS_PATH;
+  if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
+
+  const fromVenv = venvBin('edge-tts');
+  if (fs.existsSync(fromVenv)) return fromVenv;
+
+  return 'edge-tts';
+})();
+
+/** Giọng neural có dùng được không — dùng để cảnh báo user thay vì im lặng. */
+export function hasNeuralVoice() {
+  try {
+    execFileSync(EDGE_TTS_BIN, ['--version'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 /** Binary có thật sự chạy được không (tồn tại + execute được + đúng kiến trúc). */
 function isRunnable(bin) {

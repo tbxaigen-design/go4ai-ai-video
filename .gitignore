@@ -120,3 +120,6 @@ binaries/
 # cơ chế bật/tắt từ xa; CLAUDE.md là working notes nội bộ.
 COMMERCIALIZATION_PLAN.md
 CLAUDE.md
+
+# Môi trường ảo Python chứa edge-tts (setup-binaries.js tự tạo trên máy user)
+.venv-tts/

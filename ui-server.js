@@ -1070,7 +1070,7 @@ const server = http.createServer(async (req, res) => {
         if (!fs.existsSync(scratchDir)) fs.mkdirSync(scratchDir, { recursive: true });
         const tempOutFile = path.join(scratchDir, `preview_${Date.now()}_${Math.random().toString(36).slice(2)}.mp3`);
 
-        await synthesizeVoiceSpeech({
+        const synth = await synthesizeVoiceSpeech({
           text: auditionText,
           voicePresetId,
           rate,
@@ -1080,10 +1080,20 @@ const server = http.createServer(async (req, res) => {
 
         if (fs.existsSync(tempOutFile) && fs.statSync(tempOutFile).size > 0) {
           const stat = fs.statSync(tempOutFile);
+
+          // Nếu engine phải thay giọng khác thì PHẢI báo cho user biết.
+          // Im lặng sẽ khiến họ nghe "Nam Minh" ra giọng nữ mà không hiểu vì sao.
+          const wantedVoice = preset.voiceId;
+          const isFallback = synth.voiceId !== wantedVoice;
+
           res.writeHead(200, {
             'Content-Type': 'audio/mpeg',
             'Content-Length': stat.size,
             'Cache-Control': 'no-cache',
+            'X-Voice-Requested': encodeURIComponent(wantedVoice),
+            'X-Voice-Actual': encodeURIComponent(synth.voiceId),
+            'X-Voice-Fallback': isFallback ? '1' : '0',
+            'Access-Control-Expose-Headers': 'X-Voice-Requested, X-Voice-Actual, X-Voice-Fallback',
           });
           const stream = fs.createReadStream(tempOutFile);
           stream.pipe(res);
