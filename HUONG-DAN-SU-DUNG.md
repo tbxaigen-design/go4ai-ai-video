@@ -155,9 +155,15 @@ Hoàn toàn được! Chỉ cần copy toàn bộ thư mục hoặc tải lại 
 
 Gặp vấn đề không tự giải quyết được? Liên hệ GO4AI:
 
+- 📧 **Email hỗ trợ:** **hocvien@go4ai.life** ← kênh chính, phản hồi nhanh nhất
+- 💬 **Ngay trong app:** bấm nút **Góp ý & Báo lỗi** ở góc trên. App sẽ mở
+  sẵn cửa sổ soạn email kèm thông số máy (phiên bản, hệ điều hành) để GO4AI
+  tìm lỗi nhanh hơn — bạn chỉ cần bấm **Gửi**.
 - 🌐 **Website:** [go4ai.life](https://go4ai.life)
-- 💬 **Cộng đồng Zalo/Telegram:** *(link cập nhật sau)*
-- 📧 **Email hỗ trợ:** hocvien@go4ai.life
+
+> Nếu máy chưa cài ứng dụng email, nội dung góp ý vẫn được lưu trong file
+> `feedback.json` cạnh ứng dụng — bạn có thể mở ra và gửi thủ công tới
+> hocvien@go4ai.life.
 
 ---
 

@@ -13,10 +13,10 @@
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square" /></a>
   <a href="#supported-agents"><img alt="Agents" src="https://img.shields.io/badge/agents-14%20backends-111?style=flat-square" /></a>
-  <a href="#showcase"><img alt="Templates" src="https://img.shields.io/badge/templates-21-3ce6ac?style=flat-square" /></a>
+  <a href="#showcase"><img alt="Templates" src="https://img.shields.io/badge/templates-26-3ce6ac?style=flat-square" /></a>
   <a href="#turn-a-link-into-a-video"><img alt="Sources" src="https://img.shields.io/badge/from-article%20%C2%B7%20repo%20%C2%B7%20prompt-9b59b6?style=flat-square" /></a>
   <a href="#soundtrack"><img alt="Soundtrack" src="https://img.shields.io/badge/soundtrack-AI%20music%20%2B%20narration-e67e22?style=flat-square" /></a>
-  <a href="#quick-start"><img alt="Quickstart" src="https://img.shields.io/badge/quickstart-3%20commands-22a34a?style=flat-square" /></a>
+  <a href="#quick-start"><img alt="Quickstart" src="https://img.shields.io/badge/setup-double--click-22a34a?style=flat-square" /></a>
 </p>
 
 <p align="center">
@@ -58,7 +58,7 @@ Every template below is a real, animated single-file HTML video — these are li
 </tr>
 </table>
 
-…and 15 more, including multi-scene product promos, kinetic type, Swiss-grid and Vignelli data cards, decision-tree explainers, Takram-organic motion, and warm-grain editorial. Browse all 21 live in the studio gallery.
+…and 20 more, including multi-scene product promos, kinetic type, Swiss-grid and Vignelli data cards, decision-tree explainers, Takram-organic motion, and warm-grain editorial. Browse all 26 live in the studio gallery.
 
 ---
 
@@ -90,7 +90,7 @@ The same idea powers [Open Design](https://github.com/nexu-io/open-design) in th
 | **Coding agents (14)** | Open Design (Vela) · Windsurf CLI · Trae CLI · Claude Code · Cursor Agent · Codex CLI · Gemini CLI · Grok Build · Qwen Code · OpenCode · GitHub Copilot CLI · Aider · Hermes · Anthropic Messages API — auto-detected on your `PATH`, switchable from the top bar. |
 | **Real MP4 render** | Headless Chromium records the animated HTML and ffmpeg encodes it (libx264) — locally, no cloud render, no per-clip fee. |
 | **Article / repo → video** | Paste a URL or GitHub repo; the studio fetches it server-side (handles WeChat 公众号 articles) and builds the video from the real content. |
-| **21 templates** | Curated, license-clean patterns: data viz, product promos, social shorts, explainers, kinetic type, transitions — previewed live in the gallery. |
+| **26 templates** | Curated, license-clean patterns: data viz, product promos, social shorts, explainers, kinetic type, transitions — previewed live in the gallery. |
 | **Multi-frame storyboards** | A content-graph drives multi-scene videos; edit per-frame text inline, reorder, re-render. |
 | **AI soundtrack** | Optional background music + narration via MiniMax, mixed into the MP4 at export. |
 | **Studio + CLI** | A local browser studio *and* a scriptable `html-video` CLI. |
@@ -228,7 +228,7 @@ Both are mixed into the exported MP4 (music ducked under the voice, optional fad
 
 ## Template gallery
 
-The 21 templates aren't a random grab-bag — each one is a self-contained, agent-readable unit described by a `template.html-video.yaml` manifest the studio scans at startup. A manifest carries everything the agent needs to pick and drive the template without opening the HTML:
+The 26 templates aren't a random grab-bag — each one is a self-contained, agent-readable unit described by a `template.html-video.yaml` manifest the studio scans at startup. A manifest carries everything the agent needs to pick and drive the template without opening the HTML:
 
 - **What it's for** — `category`, `tags`, and a `best_for` list (e.g. *"Corporate slide"*, *"Minimal report card"*) that `search-templates` matches your intent against.
 - **What it outputs** — supported resolutions, aspect ratios, fps, duration bounds, whether it has an alpha channel or audio.
@@ -251,7 +251,7 @@ packages/
 ├── adapter-hyperframes/   Hyperframes engine adapter — real render via Chromium + ffmpeg
 ├── cli/                   `html-video` command + the studio HTTP server + source fetching
 └── project-studio/        Browser studio UI (chat, template gallery, frames, soundtrack, export)
-templates/                 21 curated, license-clean video templates
+templates/                 26 curated, license-clean video templates
 research/                  RFCs (engine adapter / template metadata / agent skill / content-graph)
 ```
 
@@ -288,4 +288,4 @@ research/                  RFCs (engine adapter / template metadata / agent skil
 
 **GO4AI**. This is a derivative work of [html-video](https://github.com/nexu-io/html-video) by nexu-io (Apache-2.0), substantially modified and extended. GO4AI is **not affiliated with, sponsored by, or endorsed by** nexu-io or the Open Design team.
 
-Found a bug? Open an [issue](../../issues), or use the **💬 Góp ý & Báo lỗi** button inside the app.
+Found a bug? Email **hocvien@go4ai.life**, open an [issue](../../issues), or use the **💬 Góp ý & Báo lỗi** button inside the app — it opens a prefilled email with your system details attached.
