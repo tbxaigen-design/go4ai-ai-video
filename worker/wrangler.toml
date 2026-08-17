@@ -1,0 +1,14 @@
+name = "go4ai-feedback-relay"
+main = "src/index.js"
+compatibility_date = "2026-08-17"
+
+# Biến thường (không phải bí mật) — sửa thoải mái rồi deploy lại.
+[vars]
+FEEDBACK_TO = "hocvien@go4ai.life"
+# Đổi thành địa chỉ trên tên miền đã xác minh ở Resend khi có.
+# Mặc định dùng tên miền dùng thử của Resend để chạy được ngay.
+FEEDBACK_FROM = "GO4AI Video <onboarding@resend.dev>"
+
+# RESEND_API_KEY là BÍ MẬT — KHÔNG khai báo ở đây và không commit vào repo.
+# Nạp bằng lệnh riêng, khoá được lưu mã hoá phía Cloudflare:
+#     npx wrangler secret put RESEND_API_KEY

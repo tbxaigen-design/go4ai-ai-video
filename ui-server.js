@@ -823,6 +823,7 @@ const server = http.createServer(async (req, res) => {
           userAgent: payload.userAgent || '',
           platform: process.platform,
           nodeVersion: process.version,
+          appVersion: APP_VERSION.version,
         };
 
         currentFeedbacks.push(newEntry);
