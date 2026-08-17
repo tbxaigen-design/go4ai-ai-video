@@ -346,7 +346,7 @@ export class ProjectOrchestrator {
         variables: project.variables,
         config: {
           format: 'mp4',
-          resolution: project.preferences.resolution ?? { width: 1920, height: 1080 },
+          resolution: resolveRenderResolution(project, tmpl ?? undefined),
           fps: project.preferences.fps ?? 60,
           duration: 'auto',
           outputPath: join(projectDir, 'output.mp4'),
@@ -402,7 +402,7 @@ export class ProjectOrchestrator {
             variables: f.data !== undefined ? { ...project.variables, data: f.data } : project.variables,
             config: {
               format: 'mp4',
-              resolution: project.preferences.resolution ?? { width: 1920, height: 1080 },
+              resolution: resolveRenderResolution(project, tmpl ?? undefined),
               fps: project.preferences.fps ?? 60,
               duration: f.durationSec,
               // The user set per-frame length on the format card — honor it as a
@@ -449,7 +449,7 @@ export class ProjectOrchestrator {
         variables: project.variables,
         config: {
           format: 'mp4',
-          resolution: project.preferences.resolution ?? { width: 1920, height: 1080 },
+          resolution: resolveRenderResolution(project, tmpl ?? undefined),
           fps: project.preferences.fps ?? 60,
           duration: 'auto',
           outputPath,
@@ -620,7 +620,7 @@ export class ProjectOrchestrator {
         variables: frame.data !== undefined ? { ...project.variables, data: frame.data } : project.variables,
         config: {
           format: 'mp4',
-          resolution: project.preferences.resolution ?? { width: 1920, height: 1080 },
+          resolution: resolveRenderResolution(project, tmpl ?? undefined),
           fps: project.preferences.fps ?? 60,
           duration: frame.durationSec,
           durationMode: 'explicit',
@@ -929,6 +929,28 @@ function recordExport(project: Project, outputPath: string): void {
   list.push({ path: outputPath, filename: basename(outputPath), createdAt: new Date().toISOString() });
   // Keep the most recent 20.
   project.exports = list.slice(-20);
+}
+
+/**
+ * Độ phân giải khi render.
+ *
+ * Thứ tự: user chọn gì dùng nấy → nếu không thì theo template khai báo →
+ * cuối cùng mới tới 1920x1080.
+ *
+ * Trước đây bỏ qua bước giữa nên mẫu dọc 9:16 (1080x1920) bị nhồi vào khung
+ * ngang 1920x1080: nội dung dồn nửa trái, nửa phải đen, video không dùng
+ * được cho TikTok/Reels.
+ */
+function resolveRenderResolution(
+  project: Project,
+  tmpl?: TemplateMetadata,
+): { width: number; height: number } {
+  if (project.preferences.resolution) return project.preferences.resolution;
+
+  const fromTemplate = tmpl?.output?.resolution?.default;
+  if (fromTemplate?.width && fromTemplate?.height) return fromTemplate;
+
+  return { width: 1920, height: 1080 };
 }
 
 function templateRefFromMeta(meta: TemplateMetadata) {

@@ -8,13 +8,35 @@ best_for:
   - "mẹo công nghệ"
   - "tin vắn AI"
   - "giới thiệu tính năng"
-min_sec: 3
-max_sec: 12
 engine: hyperframes
-aspect_ratio: "9:16"
-resolution:
-  width: 1080
-  height: 1920
 source_entry: "source/index.html"
 author: "GO4AI Design Team"
-license: "Apache-2.0"
+
+spec_version: 1
+version: 0.1.0
+engine_version: ^0.4.0
+subcategory: social-vertical
+
+output:
+  formats: [mp4, webm]
+  default_format: mp4
+  resolution:
+    default: { width: 1080, height: 1920 }
+    supported_aspects: ["9:16"]
+  fps:
+    default: 60
+    supported: [30, 60]
+  duration:
+    type: variable
+    min_sec: 3
+    max_sec: 12
+  alpha: false
+  audio:
+    supported: true
+    expected_inputs: [bgm, narration]
+
+license:
+  spdx: Apache-2.0
+  attribution_required: true
+  redistribution_allowed: true
+  commercial_use: true

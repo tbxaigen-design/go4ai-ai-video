@@ -29,6 +29,72 @@ const APP_VERSION = (() => {
   }
 })();
 
+// ── Kênh nhận góp ý ──
+const SUPPORT_EMAIL = process.env.GO4AI_SUPPORT_EMAIL || 'hocvien@go4ai.life';
+
+const FEEDBACK_TYPE_LABEL = {
+  bug: 'Báo lỗi',
+  feature: 'Đề xuất tính năng',
+  feedback: 'Góp ý trải nghiệm',
+  general: 'Góp ý',
+};
+
+/**
+ * Dựng link mailto điền sẵn nội dung góp ý.
+ *
+ * Vì sao không gửi mail thẳng từ app: gửi SMTP cần tài khoản và mật khẩu,
+ * mà app chạy trên máy user nên bất kỳ khoá nào đóng gói kèm đều bị lộ.
+ * Mở mail client của chính user vừa không cần bí mật, vừa cho họ thấy rõ
+ * mình đang gửi gì cho ai.
+ */
+function buildFeedbackMailto(entry) {
+  const label = FEEDBACK_TYPE_LABEL[entry.type] || FEEDBACK_TYPE_LABEL.general;
+  const subject = `[GO4AI Video ${APP_VERSION.version}] ${label}`;
+  const body = [
+    entry.message,
+    '',
+    '---',
+    'Thông tin kỹ thuật (giúp GO4AI tìm lỗi nhanh hơn):',
+    `- Mã góp ý: ${entry.id}`,
+    `- Loại: ${entry.type}`,
+    `- Liên hệ: ${entry.contact}`,
+    `- Phiên bản: ${APP_VERSION.version} (${APP_VERSION.channel})`,
+    `- Hệ điều hành: ${entry.platform}`,
+    `- Node.js: ${entry.nodeVersion}`,
+    `- Thời gian: ${entry.timestamp}`,
+  ].join('\n');
+
+  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+/** POST JSON tối giản, dùng cho relay góp ý. */
+function postJson(url, data) {
+  return new Promise((resolve, reject) => {
+    const payload = JSON.stringify(data);
+    const client = url.startsWith('http://') ? http : https;
+    const req = client.request(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(payload),
+        },
+        timeout: 10000,
+      },
+      (res) => {
+        res.resume();
+        if (res.statusCode >= 200 && res.statusCode < 300) resolve();
+        else reject(new Error(`HTTP ${res.statusCode}`));
+      },
+    );
+    req.on('timeout', () => req.destroy(new Error('hết thời gian chờ')));
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
 // ── Directory paths ──
 // Mặc định nằm cạnh app; có thể trỏ đi nơi khác bằng biến môi trường
 // nếu sau này đóng gói installer và muốn tách dữ liệu user ra thư mục riêng.
@@ -764,27 +830,31 @@ const server = http.createServer(async (req, res) => {
 
         console.log(`\n[📢 FEEDBACK RECEIVED] [${newEntry.type.toUpperCase()}] from ${newEntry.contact}: ${newEntry.message}`);
 
-        // Optional: Telegram webhook forward
-        const botToken = process.env.TELEGRAM_BOT_TOKEN;
-        const chatId = process.env.TELEGRAM_CHAT_ID;
-        if (botToken && chatId) {
+        // Chuyển tiếp qua relay nếu có (dành cho Cloudflare Worker sau này).
+        // Relay giữ mọi khoá bí mật ở phía server — app trên máy user KHÔNG
+        // bao giờ được cầm token, vì ai cũng đọc được file trên máy mình.
+        const relayUrl = process.env.GO4AI_FEEDBACK_RELAY;
+        if (relayUrl) {
           try {
-            const teleMsg = `🔔 <b>GO4AI AI Video Feedback</b>\n<b>Loại:</b> ${newEntry.type}\n<b>Từ:</b> ${newEntry.contact}\n<b>Nội dung:</b> ${newEntry.message}\n<b>Thời gian:</b> ${newEntry.timestamp}`;
-            const teleUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-            const postData = JSON.stringify({ chat_id: chatId, text: teleMsg, parse_mode: 'HTML' });
-            const reqTele = https.request(teleUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(postData) }
-            });
-            reqTele.write(postData);
-            reqTele.end();
-          } catch (teleErr) {
-            console.error('Telegram notification error:', teleErr.message);
+            await postJson(relayUrl, newEntry);
+            newEntry.relayed = true;
+          } catch (relayErr) {
+            console.error('[feedback] relay lỗi:', relayErr.message);
           }
         }
 
+        // Không có relay thì đường gửi thật là mail client của user: server
+        // dựng sẵn link mailto điền đủ nội dung, UI chỉ việc mở.
+        const mailto = buildFeedbackMailto(newEntry);
+
         res.writeHead(200, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ success: true, id: newEntry.id }));
+        return res.end(JSON.stringify({
+          success: true,
+          id: newEntry.id,
+          relayed: Boolean(newEntry.relayed),
+          supportEmail: SUPPORT_EMAIL,
+          mailto,
+        }));
       } catch (err) {
         res.writeHead(500, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ error: err.message }));
