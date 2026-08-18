@@ -52,9 +52,9 @@ rsync -av --progress \
     --exclude="runtime-node/" \
     --exclude="projects/" \
     --exclude=".html-video/" \
-    --exclude="*.mp4" \
-    --exclude="*.wav" \
-    --exclude="*.mp3" \
+    --exclude="/*.mp4" \
+    --exclude="/*.wav" \
+    --exclude="/*.mp3" \
     --exclude=".env" \
     "$EXTRACTED_SUBDIR/" "$APP_DIR/"
 
