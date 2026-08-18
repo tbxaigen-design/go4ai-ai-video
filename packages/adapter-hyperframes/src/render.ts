@@ -21,6 +21,7 @@ import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type {
   HtmlSceneOutput,
+  RenderConfig,
   RenderContext,
   RenderInput,
   RenderOutput,
@@ -346,6 +347,7 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
   // target. -t then trims to the precise length. For 'auto' we keep the old
   // behavior (just -t, no padding) — there the duration is a soft fallback.
   const explicit = input.config.durationMode === 'explicit';
+  const qualityParams = resolveQualityParams(input.config.quality);
   await runFfmpeg([
     '-y',
     // -ss before -i = fast input seek, drops the frozen lead-in entirely.
@@ -361,8 +363,8 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
     '-r', String(fps),
     '-c:v', 'libx264',
     '-pix_fmt', 'yuv420p',
-    '-preset', 'medium',
-    '-crf', '20',
+    '-preset', qualityParams.preset,
+    '-crf', String(qualityParams.crf),
     '-movflags', '+faststart',
     input.config.outputPath,
   ]);
@@ -383,8 +385,31 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
       renderWallClockSec: (Date.now() - t0) / 1000,
       engineVersion: `hyperframes-playwright@${ADAPTER_VERSION}`,
     },
-    diagnostics: [`recorded via playwright/chromium then encoded with ffmpeg (libx264 crf20)`],
+    diagnostics: [`recorded via playwright/chromium then encoded with ffmpeg (libx264 crf${qualityParams.crf}, preset ${qualityParams.preset})`],
   };
+}
+
+/**
+ * Map the user-facing quality knob (RenderConfig.quality) to concrete libx264
+ * `-crf`/`-preset` values. Lower CRF = sharper/heavier; slower preset = better
+ * compression at the same CRF but longer encode time. Defaults to the pre-RFC
+ * 'medium' behavior (crf 20) when unset, so existing callers are unaffected.
+ */
+function resolveQualityParams(quality: RenderConfig['quality']): { crf: number; preset: string } {
+  if (typeof quality === 'number') {
+    return { crf: Math.min(51, Math.max(0, Math.round(quality))), preset: 'medium' };
+  }
+  switch (quality) {
+    case 'low':
+      return { crf: 26, preset: 'fast' };
+    case 'high':
+      return { crf: 17, preset: 'slow' };
+    case 'lossless':
+      return { crf: 12, preset: 'slower' };
+    case 'medium':
+    default:
+      return { crf: 20, preset: 'medium' };
+  }
 }
 
 function runFfmpeg(args: string[]): Promise<void> {

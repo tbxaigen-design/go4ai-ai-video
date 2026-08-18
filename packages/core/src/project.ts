@@ -409,6 +409,7 @@ export class ProjectOrchestrator {
               // hard cap so one runaway animation can't stretch a 4s frame to ~30s.
               durationMode: 'explicit',
               outputPath: frameOut,
+              quality: project.preferences.quality,
             },
           },
           {
@@ -453,6 +454,7 @@ export class ProjectOrchestrator {
           fps: project.preferences.fps ?? 60,
           duration: 'auto',
           outputPath,
+          quality: project.preferences.quality,
         },
       },
       {

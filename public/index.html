@@ -31,6 +31,18 @@
     }
   </script>
   <style>
+    /* Toàn app là dark UI, nhưng thẻ <select> gốc không tự biết điều đó —
+       trình duyệt vẫn vẽ popup danh sách option theo theme SÁNG mặc định của
+       hệ điều hành (nền trắng, chữ đen) vì thiếu khai báo color-scheme. Đây là
+       lỗi chung cho toàn bộ 15 dropdown trong app (tỉ lệ khung hình, FPS, chất
+       lượng, giọng đọc, văn mẫu kịch bản, danh mục template...), không riêng
+       một ô nào — fix một lần ở gốc thay vì từng <select>. */
+    html, body {
+      color-scheme: dark;
+    }
+    select {
+      color-scheme: dark;
+    }
     body {
       background-color: #070a12;
       color: #f1f5f9;
@@ -585,6 +597,17 @@
               <select id="selectFps" onchange="updateProjectConfig()" class="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
                 <option value="60">60 FPS (Siêu Mượt)</option>
                 <option value="30">30 FPS</option>
+              </select>
+            </div>
+
+            <!-- Quality Selector -->
+            <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1" title="Chất lượng cao hơn = hình nét hơn, đặc biệt khi xem full-screen trên laptop/màn lớn — nhưng file nặng hơn và render lâu hơn.">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
+              <select id="selectQuality" onchange="updateProjectConfig()" class="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
+                <option value="low">Nhanh (file nhẹ)</option>
+                <option value="medium" selected>Chuẩn (khuyến nghị)</option>
+                <option value="high">Cao (nét hơn, chậm hơn)</option>
+                <option value="lossless">Cực nét (nặng, chậm nhất)</option>
               </select>
             </div>
           </div>
@@ -1620,6 +1643,7 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
       document.getElementById('projHeaderTitle').textContent = currentProject.name;
       document.getElementById('selectAspect').value = currentProject.config.aspect || '16:9';
       document.getElementById('selectFps').value = String(currentProject.config.fps || '60');
+      document.getElementById('selectQuality').value = currentProject.config.quality || 'medium';
 
       if (currentProject.config.ttsVoice) {
         document.getElementById('globalVoiceSelect').value = currentProject.config.ttsVoice;
@@ -2670,13 +2694,14 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
       if (!currentProject) return;
       const aspect = document.getElementById('selectAspect').value;
       const fps = Number(document.getElementById('selectFps').value);
+      const quality = document.getElementById('selectQuality').value;
 
       updateAspectFrameDimensions();
       try {
         await fetch(`/api/projects/${currentProject.name}/config`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ aspect, fps })
+          body: JSON.stringify({ aspect, fps, quality })
         });
       } catch (err) {
         console.error('Lỗi lưu cấu hình:', err);

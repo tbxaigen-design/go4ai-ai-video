@@ -322,6 +322,8 @@ export interface UserPreferences {
   fontFamilies?: string[];
   language?: string;
   commercial?: boolean;
+  /** User-facing export quality knob; see RenderConfig.quality for how each level maps to encoder settings. */
+  quality?: RenderConfig['quality'];
 }
 
 export type ProjectStatus = 'draft' | 'previewed' | 'rendered';

@@ -2146,6 +2146,9 @@ const server = http.createServer(async (req, res) => {
       let resolution = { width: 1920, height: 1080 };
       let fps = 60;
       let defaultDuration = 5;
+      // 'low' | 'medium' | 'high' | 'lossless' — người dùng chọn ở dropdown
+      // "Chất lượng xuất video", mặc định 'medium' giữ đúng hành vi cũ (CRF20).
+      let quality = 'medium';
 
       let cfg = {};
       const configFile = path.join(dir, 'config.json');
@@ -2157,10 +2160,12 @@ const server = http.createServer(async (req, res) => {
           else if (cfg.width && cfg.height) resolution = { width: Number(cfg.width), height: Number(cfg.height) };
           if (cfg.fps) fps = Number(cfg.fps);
           if (cfg.defaultDuration) defaultDuration = Number(cfg.defaultDuration);
+          if (cfg.quality && ['low', 'medium', 'high', 'lossless'].includes(cfg.quality)) quality = cfg.quality;
         } catch {}
       }
 
-      sendEvent('log', { message: `Độ phân giải: ${resolution.width}x${resolution.height} (${fps}fps), ${htmlFiles.length} scenes` });
+      const qualityLabel = { low: 'Nhanh', medium: 'Chuẩn', high: 'Cao (nét hơn)', lossless: 'Cực nét' }[quality];
+      sendEvent('log', { message: `Độ phân giải: ${resolution.width}x${resolution.height} (${fps}fps), chất lượng: ${qualityLabel}, ${htmlFiles.length} scenes` });
 
       // Gather scenes metadata for audio assembly
       const sceneObjects = htmlFiles.map((file) => {
@@ -2186,7 +2191,7 @@ const server = http.createServer(async (req, res) => {
       const project = await ctx.orchestrator.create({
         name: projectName,
         intent: `UI Render ${projectName}`,
-        preferences: { resolution, fps },
+        preferences: { resolution, fps, quality },
       });
 
       const nodes = [];
