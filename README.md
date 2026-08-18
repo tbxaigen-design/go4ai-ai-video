@@ -75,40 +75,33 @@ node packages/cli/dist/bin.js search-templates --intent "github stars race" --to
 
 <p align="center">Cùng một pipeline — prompt hoặc link vào, MP4 ra — vận hành tốt như nhau ở cả 4 nhóm nội dung dưới đây. Đổi nội dung, giữ nguyên phong cách thương hiệu, xuất hàng loạt.</p>
 
-<table>
-<tr>
-<td width="50%" valign="top">
-<img src="docs/assets/templates/frame-glitch-title.png" width="100%" alt="Ví dụ phong cách Social video" />
+<p align="center">
+<img src="docs/assets/templates/frame-glitch-title.png" width="480" alt="Ví dụ phong cách Social video" />
+</p>
 
 ### A · 🎬 Social video
 Video ngắn cho TikTok, Reels, LinkedIn, YouTube Shorts — dựng từ một dòng ý tưởng hoặc một bài viết có sẵn. Nhiều cảnh, nhịp nhanh, tiêu đề bắt mắt, xuất theo tỷ lệ dọc/ngang tuỳ nền tảng.
 
-</td>
-<td width="50%" valign="top">
-<img src="docs/assets/templates/frame-data-chart-nyt.png" width="100%" alt="Ví dụ phong cách eLearning" />
+<p align="center">
+<img src="docs/assets/templates/frame-data-chart-nyt.png" width="480" alt="Ví dụ phong cách eLearning" />
+</p>
 
 ### B · 🎓 eLearning
 Bài giảng, module đào tạo, giải thích khái niệm — kịch bản được chia thành các cảnh có trình tự logic, đúng dữ liệu, có giọng đọc AI đi kèm nếu cần.
 
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-<img src="docs/assets/templates/frame-build-minimal.png" width="100%" alt="Ví dụ phong cách SOP / hướng dẫn nội bộ" />
+<p align="center">
+<img src="docs/assets/templates/frame-build-minimal.png" width="480" alt="Ví dụ phong cách SOP / hướng dẫn nội bộ" />
+</p>
 
 ### C · 📋 SOP / hướng dẫn nội bộ
 Quy trình vận hành, hướng dẫn dùng phần mềm, onboarding nhân sự mới — biến một tài liệu văn bản khô khan thành video các bước rõ ràng, dễ theo dõi hơn nhiều so với một file Word.
 
-</td>
-<td width="50%" valign="top">
-<img src="docs/assets/templates/frame-liquid-bg-hero.png" width="100%" alt="Ví dụ phong cách Product demo" />
+<p align="center">
+<img src="docs/assets/templates/frame-liquid-bg-hero.png" width="480" alt="Ví dụ phong cách Product demo" />
+</p>
 
 ### D · 🚀 Product demo
 Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu tư hoặc khách hàng — dán link repo hoặc landing page, AI tự đọc và dựng thành video giới thiệu có cấu trúc.
-
-</td>
-</tr>
-</table>
 
 <p align="center">Bốn nhóm trên dùng chung 26 mẫu, chung engine render, chung vòng lặp AI — không có bản riêng "giá cao hơn" cho từng use case.</p>
 
@@ -131,20 +124,35 @@ Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu t
 
 Mỗi mẫu dưới đây là một video HTML thật, có chuyển động thật — không phải ảnh dựng. Chọn một mẫu, để AI điền nội dung của bạn vào, rồi xuất ra MP4.
 
-<table>
-<tr>
-<td width="50%"><img src="docs/assets/templates/frame-data-chart-nyt.png" alt="Biểu đồ dữ liệu phong cách NYT" /><br/><b>frame-data-chart-nyt</b> · biểu đồ dữ liệu — cho câu chuyện "con số này đã tăng"</td>
-<td width="50%"><img src="docs/assets/templates/frame-glitch-title.png" alt="Tiêu đề hiệu ứng glitch" /><br/><b>frame-glitch-title</b> · tiêu đề mở đầu — cảm giác "hệ thống đã sẵn sàng"</td>
-</tr>
-<tr>
-<td><img src="docs/assets/templates/frame-liquid-bg-hero.png" alt="Nền hero dạng chất lỏng" /><br/><b>frame-liquid-bg-hero</b> · hero — cho ra mắt sản phẩm, tuyên ngôn mạnh</td>
-<td><img src="docs/assets/templates/frame-light-leak-cinema.png" alt="Hiệu ứng ánh sáng điện ảnh" /><br/><b>frame-light-leak-cinema</b> · điện ảnh — cho video cảm xúc, phim thương hiệu</td>
-</tr>
-<tr>
-<td><img src="docs/assets/templates/vfx-text-cursor.png" alt="Hiệu ứng con trỏ đánh máy" /><br/><b>vfx-text-cursor</b> · hiệu ứng — chữ đánh máy, demo kiểu terminal</td>
-<td><img src="docs/assets/templates/frame-logo-outro.png" alt="Kết thúc bằng logo" /><br/><b>frame-logo-outro</b> · kết thúc — thẻ logo động, sign-off gọn gàng</td>
-</tr>
-</table>
+<p align="center">
+<img src="docs/assets/templates/frame-data-chart-nyt.png" width="480" alt="Biểu đồ dữ liệu phong cách NYT" /><br/>
+<b>frame-data-chart-nyt</b> · biểu đồ dữ liệu — cho câu chuyện "con số này đã tăng"
+</p>
+
+<p align="center">
+<img src="docs/assets/templates/frame-glitch-title.png" width="480" alt="Tiêu đề hiệu ứng glitch" /><br/>
+<b>frame-glitch-title</b> · tiêu đề mở đầu — cảm giác "hệ thống đã sẵn sàng"
+</p>
+
+<p align="center">
+<img src="docs/assets/templates/frame-liquid-bg-hero.png" width="480" alt="Nền hero dạng chất lỏng" /><br/>
+<b>frame-liquid-bg-hero</b> · hero — cho ra mắt sản phẩm, tuyên ngôn mạnh
+</p>
+
+<p align="center">
+<img src="docs/assets/templates/frame-light-leak-cinema.png" width="480" alt="Hiệu ứng ánh sáng điện ảnh" /><br/>
+<b>frame-light-leak-cinema</b> · điện ảnh — cho video cảm xúc, phim thương hiệu
+</p>
+
+<p align="center">
+<img src="docs/assets/templates/vfx-text-cursor.png" width="480" alt="Hiệu ứng con trỏ đánh máy" /><br/>
+<b>vfx-text-cursor</b> · hiệu ứng — chữ đánh máy, demo kiểu terminal
+</p>
+
+<p align="center">
+<img src="docs/assets/templates/frame-logo-outro.png" width="480" alt="Kết thúc bằng logo" /><br/>
+<b>frame-logo-outro</b> · kết thúc — thẻ logo động, sign-off gọn gàng
+</p>
 
 …và 20 mẫu khác: quảng cáo sản phẩm nhiều cảnh, chữ động, thẻ dữ liệu Thụy Sĩ/Vignelli, sơ đồ giải thích quyết định, chuyển động hữu cơ kiểu Takram, phong cách báo chí hạt film ấm. Xem đầy đủ 26 mẫu ngay trong thư viện của studio.
 
@@ -164,24 +172,16 @@ Mục tiêu của GO4AI: mang công nghệ AI tạo video mã nguồn mở đế
 
 Một câu mô tả (hoặc một đường link) đi vào; một file MP4 thật đi ra:
 
-```
-  prompt / link / repo
-        │
-        ▼
-  ① lấy nguồn            studio tự tải nội dung từ URL hoặc repo, chuyển thành văn bản Markdown
-        ▼
-  ② vòng lặp agent       AI đọc nội dung + phong cách mẫu đã chọn, tạo ra kịch bản + HTML từng khung hình
-        ▼
-  ③ content-graph        cấu trúc trung gian đa khung hình — tự sắp xếp thứ tự & thời lượng
-        ▼
-  ④ HTML từng khung hình  mỗi cảnh trở thành một khung hình HTML động, độc lập
-        ▼
-  ⑤ Hyperframes render   Chromium chạy ẩn ghi lại từng khung hình → webm
-        ▼
-  ⑥ ffmpeg               mỗi webm → mp4, ghép lại thành một video; nhạc + giọng đọc AI (nếu có) trộn vào
-        ▼
-      video-cua-ban.mp4
-```
+**`prompt / link / repo`** ⬇️
+
+1. **Lấy nguồn** — studio tự tải nội dung từ URL hoặc repo, chuyển thành văn bản Markdown
+2. **Vòng lặp agent** — AI đọc nội dung + phong cách mẫu đã chọn, tạo ra kịch bản + HTML từng khung hình
+3. **Content-graph** — cấu trúc trung gian đa khung hình, tự sắp xếp thứ tự & thời lượng
+4. **HTML từng khung hình** — mỗi cảnh trở thành một khung hình HTML động, độc lập
+5. **Hyperframes render** — Chromium chạy ẩn ghi lại từng khung hình → webm
+6. **ffmpeg** — mỗi webm → mp4, ghép lại thành một video; nhạc + giọng đọc AI (nếu có) trộn vào
+
+⬇️ **`video-cua-ban.mp4`**
 
 Mọi thứ chạy trên máy bạn — chỉ 2 việc cần mạng: lấy nội dung nguồn (khi dán link/repo) và tạo nhạc/giọng đọc AI (khi dùng tính năng đó). Video một khung hình đi theo đường tắt, bỏ qua content-graph — một mẫu, một HTML, render thẳng.
 
