@@ -91,12 +91,14 @@ Mỗi mẫu dưới đây là một video HTML thật, có chuyển động th�
 <table>
 <tr>
 <td width="50%" valign="top">
+<img src="docs/assets/templates/frame-glitch-title.png" width="100%" alt="Ví dụ phong cách Social video" />
 
 ### A · 🎬 Social video
 Video ngắn cho TikTok, Reels, LinkedIn, YouTube Shorts — dựng từ một dòng ý tưởng hoặc một bài viết có sẵn. Nhiều cảnh, nhịp nhanh, tiêu đề bắt mắt, xuất theo tỷ lệ dọc/ngang tuỳ nền tảng.
 
 </td>
 <td width="50%" valign="top">
+<img src="docs/assets/templates/frame-data-chart-nyt.png" width="100%" alt="Ví dụ phong cách eLearning" />
 
 ### B · 🎓 eLearning
 Bài giảng, module đào tạo, giải thích khái niệm — kịch bản được chia thành các cảnh có trình tự logic, đúng dữ liệu, có giọng đọc AI đi kèm nếu cần.
@@ -105,12 +107,14 @@ Bài giảng, module đào tạo, giải thích khái niệm — kịch bản đ
 </tr>
 <tr>
 <td width="50%" valign="top">
+<img src="docs/assets/templates/frame-build-minimal.png" width="100%" alt="Ví dụ phong cách SOP / hướng dẫn nội bộ" />
 
 ### C · 📋 SOP / hướng dẫn nội bộ
 Quy trình vận hành, hướng dẫn dùng phần mềm, onboarding nhân sự mới — biến một tài liệu văn bản khô khan thành video các bước rõ ràng, dễ theo dõi hơn nhiều so với một file Word.
 
 </td>
 <td width="50%" valign="top">
+<img src="docs/assets/templates/frame-liquid-bg-hero.png" width="100%" alt="Ví dụ phong cách Product demo" />
 
 ### D · 🚀 Product demo
 Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu tư hoặc khách hàng — dán link repo hoặc landing page, AI tự đọc và dựng thành video giới thiệu có cấu trúc.

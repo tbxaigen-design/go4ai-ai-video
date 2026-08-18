@@ -1054,6 +1054,27 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // --- API: STATIC PRE-CACHED VOICE SAMPLE (FAST DIRECT GET) ---
+  if (pathname.startsWith('/api/voice-sample/') && req.method === 'GET') {
+    const rawVoiceId = pathname.replace('/api/voice-sample/', '').replace(/\.mp3$/, '');
+    const preset = findVoicePreset(rawVoiceId);
+    const samplePath = path.resolve('./assets/audio/voice-samples', `${preset.id}.mp3`);
+    if (fs.existsSync(samplePath) && fs.statSync(samplePath).size > 1000) {
+      const audioBuffer = fs.readFileSync(samplePath);
+      res.writeHead(200, {
+        'Content-Type': 'audio/mpeg',
+        'Content-Length': audioBuffer.length,
+        'Cache-Control': 'public, max-age=86400',
+        'X-Voice-Requested': encodeURIComponent(preset.voiceId),
+        'X-Voice-Actual': encodeURIComponent(preset.voiceId),
+        'X-Voice-Fallback': '0',
+        'X-Voice-Precached': '1',
+        'Access-Control-Expose-Headers': 'X-Voice-Requested, X-Voice-Actual, X-Voice-Fallback, X-Voice-Precached',
+      });
+      return res.end(audioBuffer);
+    }
+  }
+
   // --- API: INSTANT TTS AUDIO PREVIEW (STREAM / AUDITION) ---
   if (pathname === '/api/tts-preview' && req.method === 'POST') {
     let body = '';
@@ -1063,9 +1084,28 @@ const server = http.createServer(async (req, res) => {
         const { text, voicePresetId = 'vi-nam-minh', rate = 0, pitch = 0 } = JSON.parse(body || '{}');
         const preset = findVoicePreset(voicePresetId);
 
+        const hasCustomText = (text && text.trim().length > 0);
+        const isStandardSample = !hasCustomText && Number(rate) === 0 && Number(pitch) === 0;
 
-        // Sample sentence if none provided
-        let auditionText = (text && text.trim().length > 0) ? text.trim() : '';
+        // Nếu là nghe thử giọng mẫu tiêu chuẩn và đã có file mẫu offline: trả về tức thì (<2ms)
+        const sampleFile = path.resolve('./assets/audio/voice-samples', `${preset.id}.mp3`);
+        if (isStandardSample && fs.existsSync(sampleFile) && fs.statSync(sampleFile).size > 1000) {
+          const audioBuffer = fs.readFileSync(sampleFile);
+          res.writeHead(200, {
+            'Content-Type': 'audio/mpeg',
+            'Content-Length': audioBuffer.length,
+            'Cache-Control': 'public, max-age=86400',
+            'X-Voice-Requested': encodeURIComponent(preset.voiceId),
+            'X-Voice-Actual': encodeURIComponent(preset.voiceId),
+            'X-Voice-Fallback': '0',
+            'X-Voice-Precached': '1',
+            'Access-Control-Expose-Headers': 'X-Voice-Requested, X-Voice-Actual, X-Voice-Fallback, X-Voice-Precached',
+          });
+          return res.end(audioBuffer);
+        }
+
+        // Nếu là kịch bản tùy chỉnh hoặc tốc độ tùy chỉnh: tổng hợp audio
+        let auditionText = hasCustomText ? text.trim() : '';
         if (!auditionText) {
           if (preset.lang === 'en') {
             auditionText = `Hello! I am ${preset.name}. Welcome to GO4AI HTML to Video Studio.`;
@@ -1090,7 +1130,11 @@ const server = http.createServer(async (req, res) => {
           const audioBuffer = fs.readFileSync(tempOutFile);
           try { fs.unlinkSync(tempOutFile); } catch {}
 
-          // Nếu engine phải thay giọng khác thì PHẢI báo cho user biết.
+          // Tự động lưu cache nếu là mẫu chuẩn
+          if (isStandardSample && audioBuffer.length > 1000 && synth.voiceId === preset.voiceId) {
+            try { fs.writeFileSync(sampleFile, audioBuffer); } catch {}
+          }
+
           const wantedVoice = preset.voiceId;
           const isFallback = synth.voiceId !== wantedVoice;
 
@@ -1101,7 +1145,8 @@ const server = http.createServer(async (req, res) => {
             'X-Voice-Requested': encodeURIComponent(wantedVoice),
             'X-Voice-Actual': encodeURIComponent(synth.voiceId),
             'X-Voice-Fallback': isFallback ? '1' : '0',
-            'Access-Control-Expose-Headers': 'X-Voice-Requested, X-Voice-Actual, X-Voice-Fallback',
+            'X-Voice-Precached': '0',
+            'Access-Control-Expose-Headers': 'X-Voice-Requested, X-Voice-Actual, X-Voice-Fallback, X-Voice-Precached',
           });
           return res.end(audioBuffer);
         } else {
