@@ -18,9 +18,13 @@
 ✅ <b>26 mẫu video sẵn có</b> — sạch bản quyền, dùng được cho công việc thương mại, không cần audit lại
 </p>
 
-> **HTML biến thành video — ngay trên laptop của bạn, không cần biết code.** GO4AI AI Video là công cụ giúp bạn dùng AI để biến một ý tưởng, một bài viết, hay một repo GitHub thành video hoàn chỉnh — chỉ bằng **double-click** một file. Chọn mẫu, mô tả video bạn muốn, và trợ lý AI (Claude Code, Cursor, Gemini, hay bất kỳ agent nào bạn đang dùng) sẽ tự viết, tự dựng khung hình, rồi render ra file MP4 thật ngay trên máy bạn.
->
-> *Lưu ý minh bạch: bản thân công cụ này 100% miễn phí. Nếu bạn muốn dùng thêm nhạc/giọng đọc AI (MiniMax) hoặc một AI agent trả phí (Claude/Cursor/…), đó là lựa chọn tuỳ chọn — không bắt buộc để dùng app.*
+<p align="center">
+<video src="docs/assets/demo/go4ai-linkedin-60s-mien-nam.mp4" controls muted width="720" poster="docs/assets/hero.png">
+Trình duyệt của bạn không hỗ trợ xem video trực tiếp — <a href="docs/assets/demo/go4ai-linkedin-60s-mien-nam.mp4">tải video mẫu tại đây</a>.
+</video>
+</p>
+
+<p align="center"><i>Video thật, render bằng chính app này — giọng đọc AI Miền Nam, 9 cảnh, 60 giây, không qua chỉnh sửa hậu kỳ.</i></p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square" /></a>
@@ -39,48 +43,39 @@
 
 ---
 
-## Vì sao GO4AI làm bản này
+<h2 id="quick-start">🚀 Bắt đầu ngay — chỉ cần double-click</h2>
 
-Bản gốc [html-video](https://github.com/nexu-io/html-video) là một công cụ rất mạnh, nhưng được thiết kế cho **lập trình viên** — muốn dùng phải mở terminal, gõ `pnpm install`, tự cấu hình agent, tự đọc log lỗi. Với đa số người dùng Việt Nam làm nội dung, marketing, giáo dục — những người **không biết code và không có nhu cầu học code** — rào cản đó đủ để họ bỏ cuộc ngay từ bước cài đặt.
+Tải repo này về (nút xanh **Code** ở đầu trang → **Download ZIP**), giải nén, rồi:
 
-Toàn bộ lớp vận hành đã được viết lại từ gốc: dòng lệnh terminal trở thành **một file để double-click**; thông báo lỗi tiếng Anh trở thành hướng dẫn tiếng Việt rõ ràng từng bước; việc tự tay cài Node.js, FFmpeg, Chromium trở thành **quy trình tự tải và tự cài đặt** ngay trong lần chạy đầu tiên. Không có bước nào trong đó là dịch giao diện — mỗi bước là một phần được dựng lại để phù hợp với người dùng chưa từng mở terminal.
+| Máy bạn dùng | Double-click file này |
+|---|---|
+| **Windows** | `1-Chay-Tren-Windows.bat` |
+| **MacBook** | `1-Chay-Tren-Macbook.command` — lần đầu chuột phải → **Open** |
 
-Mục tiêu của GO4AI: mang công nghệ AI tạo video mã nguồn mở đến gần hơn với cộng đồng người Việt — miễn phí, chạy ngay trên máy cá nhân, dữ liệu không rời khỏi máy bạn trừ khi bạn chủ động dùng tính năng có gọi mạng (lấy nội dung từ link/repo, tạo nhạc AI).
+Lần chạy đầu tự tải mọi thứ cần thiết (Node.js nếu chưa có, thư viện, FFmpeg, trình render Chromium — khoảng **300MB**, 5–10 phút). Các lần sau khởi động trong vài giây. Trình duyệt tự mở studio tại `http://127.0.0.1:3075`.
 
----
+Muốn cập nhật, double-click `2-Cap-Nhat-Windows.bat` / `2-Cap-Nhat-Macbook.command`.
 
-<h2 id="showcase">Thư viện mẫu</h2>
+> Hướng dẫn chi tiết từng bước, có ảnh minh hoạ: **[HUONG-DAN-SU-DUNG.md](HUONG-DAN-SU-DUNG.md)**
 
-Mỗi mẫu dưới đây là một video HTML thật, có chuyển động thật — không phải ảnh dựng. Chọn một mẫu, để AI điền nội dung của bạn vào, rồi xuất ra MP4.
+<details>
+<summary><b>Dành cho lập trình viên — chạy bằng dòng lệnh</b></summary>
 
-<table>
-<tr>
-<td width="50%"><img src="docs/assets/templates/frame-data-chart-nyt.png" alt="Biểu đồ dữ liệu phong cách NYT" /></td>
-<td width="50%"><img src="docs/assets/templates/frame-glitch-title.png" alt="Tiêu đề hiệu ứng glitch" /></td>
-</tr>
-<tr>
-<td><b>frame-data-chart-nyt</b> · biểu đồ dữ liệu<br/>Biểu đồ đường động, phong cách báo chí kiểu New York Times — tiêu đề, điểm dữ liệu chú thích, dòng nguồn. Hợp cho câu chuyện kiểu "con số này đã tăng".</td>
-<td><b>frame-glitch-title</b> · thẻ tiêu đề<br/>Tiêu đề hiệu ứng glitch (méo màu, scanline). Hợp cho phần mở đầu, hoặc cảm giác "hệ thống đã sẵn sàng".</td>
-</tr>
-<tr>
-<td><img src="docs/assets/templates/frame-liquid-bg-hero.png" alt="Nền hero dạng chất lỏng" /></td>
-<td><img src="docs/assets/templates/frame-light-leak-cinema.png" alt="Hiệu ứng ánh sáng điện ảnh" /></td>
-</tr>
-<tr>
-<td><b>frame-liquid-bg-hero</b> · hero<br/>Nền gradient dạng chất lỏng (aurora), tiêu đề căn giữa. Hợp cho ra mắt sản phẩm, tuyên ngôn mạnh.</td>
-<td><b>frame-light-leak-cinema</b> · điện ảnh<br/>Hiệu ứng hạt phim + ánh sáng rò rỉ ấm áp. Hợp cho video cảm xúc, phim thương hiệu.</td>
-</tr>
-<tr>
-<td><img src="docs/assets/templates/vfx-text-cursor.png" alt="Hiệu ứng con trỏ đánh máy" /></td>
-<td><img src="docs/assets/templates/frame-logo-outro.png" alt="Kết thúc bằng logo" /></td>
-</tr>
-<tr>
-<td><b>vfx-text-cursor</b> · hiệu ứng<br/>Chữ hiện dần kiểu đánh máy với con trỏ nhấp nháy. Hợp cho demo kiểu terminal.</td>
-<td><b>frame-logo-outro</b> · kết thúc<br/>Thẻ logo động sạch sẽ. Hợp cho phần kết ở cuối bất kỳ video nào.</td>
-</tr>
-</table>
+```bash
+pnpm install          # bao gồm binary ffmpeg/ffprobe cho hệ điều hành của bạn
+pnpm -r build
+node setup-binaries.js   # kiểm tra FFmpeg, cài Chromium + edge-tts
+node ui-server.js        # studio chạy tại http://127.0.0.1:3075
+```
 
-…và 20 mẫu khác, gồm quảng cáo sản phẩm nhiều cảnh, chữ động (kinetic type), thẻ dữ liệu phong cách Thụy Sĩ/Vignelli, sơ đồ giải thích quyết định, chuyển động hữu cơ kiểu Takram, và phong cách báo chí hạt film ấm. Xem đầy đủ 26 mẫu ngay trong thư viện của studio.
+Biến môi trường tuỳ chọn: `FFMPEG_PATH`, `FFPROBE_PATH`, `EDGE_TTS_PATH`, `PORT`.
+
+```bash
+node packages/cli/dist/bin.js doctor                 # phát hiện agent + engine đã cài
+node packages/cli/dist/bin.js search-templates --intent "github stars race" --top 3
+```
+
+</details>
 
 ---
 
@@ -127,44 +122,69 @@ Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu t
 
 ---
 
+<h2 id="showcase">Thư viện mẫu</h2>
+
+Mỗi mẫu dưới đây là một video HTML thật, có chuyển động thật — không phải ảnh dựng. Chọn một mẫu, để AI điền nội dung của bạn vào, rồi xuất ra MP4.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/templates/frame-data-chart-nyt.png" alt="Biểu đồ dữ liệu phong cách NYT" /><br/><b>frame-data-chart-nyt</b> · biểu đồ dữ liệu — cho câu chuyện "con số này đã tăng"</td>
+<td width="50%"><img src="docs/assets/templates/frame-glitch-title.png" alt="Tiêu đề hiệu ứng glitch" /><br/><b>frame-glitch-title</b> · tiêu đề mở đầu — cảm giác "hệ thống đã sẵn sàng"</td>
+</tr>
+<tr>
+<td><img src="docs/assets/templates/frame-liquid-bg-hero.png" alt="Nền hero dạng chất lỏng" /><br/><b>frame-liquid-bg-hero</b> · hero — cho ra mắt sản phẩm, tuyên ngôn mạnh</td>
+<td><img src="docs/assets/templates/frame-light-leak-cinema.png" alt="Hiệu ứng ánh sáng điện ảnh" /><br/><b>frame-light-leak-cinema</b> · điện ảnh — cho video cảm xúc, phim thương hiệu</td>
+</tr>
+<tr>
+<td><img src="docs/assets/templates/vfx-text-cursor.png" alt="Hiệu ứng con trỏ đánh máy" /><br/><b>vfx-text-cursor</b> · hiệu ứng — chữ đánh máy, demo kiểu terminal</td>
+<td><img src="docs/assets/templates/frame-logo-outro.png" alt="Kết thúc bằng logo" /><br/><b>frame-logo-outro</b> · kết thúc — thẻ logo động, sign-off gọn gàng</td>
+</tr>
+</table>
+
+…và 20 mẫu khác: quảng cáo sản phẩm nhiều cảnh, chữ động, thẻ dữ liệu Thụy Sĩ/Vignelli, sơ đồ giải thích quyết định, chuyển động hữu cơ kiểu Takram, phong cách báo chí hạt film ấm. Xem đầy đủ 26 mẫu ngay trong thư viện của studio.
+
+---
+
+## Vì sao GO4AI làm bản này
+
+Bản gốc [html-video](https://github.com/nexu-io/html-video) là một công cụ rất mạnh, nhưng được thiết kế cho **lập trình viên** — muốn dùng phải mở terminal, gõ `pnpm install`, tự cấu hình agent, tự đọc log lỗi. Với đa số người dùng Việt Nam làm nội dung, marketing, giáo dục — những người **không biết code và không có nhu cầu học code** — rào cản đó đủ để họ bỏ cuộc ngay từ bước cài đặt.
+
+Toàn bộ lớp vận hành đã được viết lại từ gốc: dòng lệnh terminal trở thành **một file để double-click**; thông báo lỗi tiếng Anh trở thành hướng dẫn tiếng Việt rõ ràng từng bước; việc tự tay cài Node.js, FFmpeg, Chromium trở thành **quy trình tự tải và tự cài đặt** ngay trong lần chạy đầu tiên. Không có bước nào trong đó là dịch giao diện — mỗi bước là một phần được dựng lại để phù hợp với người dùng chưa từng mở terminal.
+
+Mục tiêu của GO4AI: mang công nghệ AI tạo video mã nguồn mở đến gần hơn với cộng đồng người Việt — miễn phí, chạy ngay trên máy cá nhân, dữ liệu không rời khỏi máy bạn trừ khi bạn chủ động dùng tính năng có gọi mạng (lấy nội dung từ link/repo, tạo nhạc AI).
+
+---
+
 ## Nó hoạt động thế nào
 
-Một câu mô tả (hoặc một đường link) đi vào; một file MP4 thật đi ra. Quy trình giống nhau dù bạn bắt đầu từ một câu prompt, một bài viết, hay một repo:
+Một câu mô tả (hoặc một đường link) đi vào; một file MP4 thật đi ra:
 
 ```
   prompt / link / repo
         │
         ▼
   ① lấy nguồn            studio tự tải nội dung từ URL hoặc repo, chuyển thành văn bản Markdown
-        │
         ▼
-  ② vòng lặp agent       AI đọc nội dung + phong cách của mẫu đã chọn, rồi tạo ra
-        │                một content-graph (kịch bản phân cảnh) + khối HTML cho mỗi khung hình
+  ② vòng lặp agent       AI đọc nội dung + phong cách mẫu đã chọn, tạo ra kịch bản + HTML từng khung hình
         ▼
-  ③ content-graph        cấu trúc trung gian đa khung hình — node (thực thể / dữ liệu / văn bản)
-        │                + cạnh nối (trình tự / phụ thuộc / đối lập); tự sắp xếp thứ tự & thời lượng
+  ③ content-graph        cấu trúc trung gian đa khung hình — tự sắp xếp thứ tự & thời lượng
         ▼
-  ④ HTML từng khung hình  mỗi node trở thành một khung hình HTML động, độc lập, lưu trên đĩa
-        │
+  ④ HTML từng khung hình  mỗi cảnh trở thành một khung hình HTML động, độc lập
         ▼
-  ⑤ Hyperframes render   Chromium chạy ẩn tải từng khung hình, ghi lại (tự kéo dài đủ thời gian
-        │                chuyển động của khung hình đó) → ra file webm cho mỗi khung
+  ⑤ Hyperframes render   Chromium chạy ẩn ghi lại từng khung hình → webm
         ▼
-  ⑥ ffmpeg               mỗi webm → mp4 (libx264), rồi ghép lại thành một video;
-        │                nhạc nền + lời đọc AI (nếu có) được trộn vào
+  ⑥ ffmpeg               mỗi webm → mp4, ghép lại thành một video; nhạc + giọng đọc AI (nếu có) trộn vào
         ▼
       video-cua-ban.mp4
 ```
 
-Các bước ②–④ là nơi lớp "meta" phát huy: AI quyết định kịch bản, engine quyết định cách vẽ ra, hai phần này không lẫn vào nhau. Bước ⑤ phụ thuộc vào engine cụ thể — sau này thêm Remotion hay Motion Canvas chỉ cần thay bước này, kịch bản và vòng lặp AI giữ nguyên. Mọi thứ chạy trên máy bạn — chỉ có 2 việc cần gọi mạng: lấy nội dung nguồn (khi bạn dán link/repo) và tạo nhạc/giọng đọc AI (khi bạn dùng tính năng đó).
-
-Video một khung hình duy nhất đi theo đường tắt, bỏ qua content-graph — một mẫu, một file HTML, render thẳng.
+Mọi thứ chạy trên máy bạn — chỉ 2 việc cần mạng: lấy nội dung nguồn (khi dán link/repo) và tạo nhạc/giọng đọc AI (khi dùng tính năng đó). Video một khung hình đi theo đường tắt, bỏ qua content-graph — một mẫu, một HTML, render thẳng.
 
 ---
 
-<h2 id="turn-a-link-into-a-video">Biến một đường link thành video</h2>
+<h2 id="turn-a-link-into-a-video">🔗 Biến một đường link thành video</h2>
 
-Đây là cách dùng phổ biến nhất: đưa AI một đường link, nhận lại một video. AI chạy cục bộ trên máy bạn không tự truy cập mạng được, nên studio sẽ **tự lấy nội dung nguồn** ở phía server rồi đưa vào cho AI xử lý — bạn không cần copy-paste nội dung bài viết, và các trang không cần đăng nhập (như bài viết WeChat 公众号) vẫn lấy được bình thường.
+Đưa AI một đường link, nhận lại một video. Studio **tự lấy nội dung nguồn** ở phía server rồi đưa cho AI xử lý — không cần copy-paste, và các trang không cần đăng nhập (như bài viết WeChat 公众号) vẫn lấy được bình thường.
 
 ```
 Bạn:    làm video giải thích bài này  https://mp.weixin.qq.com/s/…
@@ -172,60 +192,46 @@ Agent:  được, mình đã đọc xong bài viết — sẽ dựng video dựa
 →       video giải thích nhiều cảnh, dựng từ đúng nội dung bài viết
 ```
 
-- **Bài viết web** → được tải và chuyển thành Markdown. Các trang render sẵn phía server như bài viết **WeChat 公众号** hoạt động ngay không cần cấu hình thêm.
-- **Repo GitHub** → mô tả, cấu trúc thư mục cấp cao, và README được lấy qua GitHub public API — hợp cho video kiểu "giải thích dự án mã nguồn mở này".
-- **Chỉ cần một câu mô tả** → nêu chủ đề, AI tự viết nội dung từ đầu.
+- **Bài viết web** → tải và chuyển thành Markdown, kể cả trang render sẵn phía server như WeChat 公众号.
+- **Repo GitHub** → mô tả, cấu trúc thư mục, README lấy qua GitHub public API — hợp cho video "giải thích dự án mã nguồn mở này".
+- **Chỉ cần một câu mô tả** → nêu chủ đề, AI viết nội dung từ đầu.
 
-Dù nguồn là gì, nó sẽ trở thành nội dung thật để dựng video — không phải trang trí quanh một mẫu có sẵn. AI đọc nội dung đã lấy được, tự quyết định cần bao nhiêu cảnh, rồi viết ra một **kịch bản dạng content-graph**: các ý chính trở thành khung hình, mối quan hệ giữa chúng (ý này nối tiếp ý kia, ý này đối lập ý kia) trở thành các cạnh nối, và phong cách của mẫu đã chọn được áp cho từng khung hình. Vậy nên một bài viết 1.500 từ trở thành một video giải thích nhiều cảnh có nhịp độ, mỗi câu đều bắt nguồn từ nội dung gốc; một repo trở thành một video giải thích có cấu trúc về việc dự án đó thực sự làm gì.
-
----
-
-<h2 id="quick-start">Bắt đầu nhanh</h2>
-
-### Dành cho mọi người — không cần cài đặt, chỉ cần double-click
-
-Tải repo này về (nút xanh **Code** → **Download ZIP**), giải nén, rồi:
-
-| Máy bạn dùng | Double-click file này |
-|---|---|
-| **Windows** | `1-Chay-Tren-Windows.bat` |
-| **MacBook** | `1-Chay-Tren-Macbook.command` — lần đầu chuột phải → **Open** |
-
-Lần chạy đầu tiên sẽ tự tải mọi thứ cần thiết (Node.js nếu chưa có, các thư viện, FFmpeg, và trình render Chromium — khoảng **300MB**, mất 5–10 phút với mạng bình thường). Các lần chạy sau khởi động chỉ trong vài giây. Trình duyệt sẽ tự mở studio tại `http://127.0.0.1:3075` khi đã sẵn sàng.
-
-Muốn cập nhật phiên bản mới sau này, double-click `2-Cap-Nhat-Windows.bat` / `2-Cap-Nhat-Macbook.command`.
-
-> Hướng dẫn sử dụng chi tiết bằng tiếng Việt: **[HUONG-DAN-SU-DUNG.md](HUONG-DAN-SU-DUNG.md)**
-
-### Dành cho lập trình viên
-
-```bash
-pnpm install          # bao gồm binary ffmpeg/ffprobe cho hệ điều hành của bạn
-pnpm -r build
-node setup-binaries.js   # kiểm tra FFmpeg, cài Chromium + edge-tts
-node ui-server.js        # studio chạy tại http://127.0.0.1:3075
-```
-
-Mọi thứ render cục bộ trên máy — không render qua cloud, không mất phí theo lượt render.
-
-Các biến môi trường tuỳ chọn: `FFMPEG_PATH`, `FFPROBE_PATH`, `EDGE_TTS_PATH`, `PORT`.
-
-Công cụ dòng lệnh (CLI):
-
-```bash
-node packages/cli/dist/bin.js doctor                 # phát hiện agent + engine đã cài
-node packages/cli/dist/bin.js search-templates --intent "github stars race" --top 3
-```
+AI đọc nội dung thật, tự quyết định số cảnh, viết kịch bản theo đúng nội dung nguồn — không phải trang trí quanh một mẫu có sẵn.
 
 ---
 
-<h2 id="supported-agents">Các AI agent được hỗ trợ</h2>
+<h2 id="soundtrack">🎵 Nhạc nền & giọng đọc</h2>
 
-Tự động phát hiện agent đã cài trên máy (`PATH`); đổi agent đang dùng ngay trong thanh trên cùng của studio. Studio ưu tiên **Open Design (Vela)** — một lần đăng nhập, dùng được nhiều model, chi phí thấp hơn — sau đó tự chuyển sang agent khả dụng đầu tiên tìm thấy, để dự án mới luôn có một backend sẵn sàng chạy.
+Cho video thành phẩm một "tiếng nói". Vào **Settings → Audio**, thêm MiniMax API key, sau đó ở bảng **Soundtrack** trong từng dự án:
+
+- **Nhạc nền** — mô tả không khí bạn muốn; MiniMax tự tạo bản nhạc không lời.
+- **Lời đọc (narration)** — gõ kịch bản; MiniMax đọc thành giọng nói.
+
+Cả hai trộn vào MP4 xuất ra (nhạc tự giảm âm khi có giọng đọc, fade in/out tuỳ chọn). Chưa có key? Phần còn lại của studio vẫn hoạt động bình thường.
+
+---
+
+<details>
+<summary><h2 style="display:inline">📎 Chi tiết kỹ thuật — kho mẫu, agent, kiến trúc, lộ trình</h2></summary>
+
+### Kho mẫu (template)
+
+26 mẫu không phải chọn ngẫu nhiên — mỗi mẫu là một đơn vị độc lập, AI đọc được, mô tả bằng file `template.html-video.yaml` mà studio quét khi khởi động:
+
+- **Dùng để làm gì** — `category`, `tags`, danh sách `best_for` mà `search-templates` dùng để khớp ý định của bạn.
+- **Xuất ra gì** — độ phân giải, tỷ lệ khung hình, fps, giới hạn thời lượng, kênh alpha/âm thanh.
+- **Cần nhập gì** — schema JSON `inputs`, AI biết chính xác cần điền văn bản/dữ liệu vào đâu.
+- **Nguồn gốc giấy phép** — mã SPDX cùng cờ `attribution_required` / `redistribution_allowed` / `commercial_use`, và `assets_attribution` trỏ về nguồn gốc.
+
+Mỗi mẫu **sạch về giấy phép ngay từ khi tạo ra**: bản fork giữ nguyên giấy phép gốc, [`NOTICE.md`](templates/NOTICE.md) ghi lại nguồn và SPDX của từng mẫu. Dùng được cho công việc thương mại mà không cần kiểm tra lại.
+
+<h3 id="supported-agents">Các AI agent được hỗ trợ</h3>
+
+Tự động phát hiện agent đã cài trên máy (`PATH`); đổi agent đang dùng ngay trong thanh trên cùng của studio. Studio ưu tiên **Open Design (Vela)** — một lần đăng nhập, dùng nhiều model, chi phí thấp hơn — sau đó tự chuyển sang agent khả dụng đầu tiên tìm thấy.
 
 | Agent | Cách phát hiện | Cách gọi |
 |---|---|---|
-| **Open Design (Vela)** | `vela` / có sẵn trong app Open Design | ACP qua stdio — đăng nhập một lần trong Open Design, chọn model bất kỳ |
+| **Open Design (Vela)** | `vela` / có sẵn trong app Open Design | ACP qua stdio — đăng nhập một lần, chọn model bất kỳ |
 | **Windsurf CLI** | `windsurf` | `windsurf --yolo`, ACP qua stdio |
 | **Trae CLI** | `traecli` | `traecli acp serve --yolo`, ACP qua stdio |
 | **Claude Code** | `claude` | `claude --print`, prompt qua stdin |
@@ -242,40 +248,14 @@ Tự động phát hiện agent đã cài trên máy (`PATH`); đổi agent đan
 
 Chưa cài agent nào? Chỉ cần nhập một Anthropic API key, studio sẽ gọi thẳng Messages API.
 
----
-
-<h2 id="soundtrack">Nhạc nền & giọng đọc</h2>
-
-Cho video thành phẩm một "tiếng nói". Vào **Settings → Audio**, thêm MiniMax API key, sau đó ở bảng **Soundtrack** trong từng dự án:
-
-- **Nhạc nền** — mô tả không khí bạn muốn (`nhạc nền điện ảnh nhẹ nhàng, cao trào chậm`); MiniMax tự tạo bản nhạc không lời.
-- **Lời đọc (narration)** — gõ kịch bản; MiniMax đọc thành giọng nói (TTS).
-
-Cả hai được trộn vào file MP4 xuất ra (nhạc tự giảm âm lượng khi có giọng đọc, có fade in/out tuỳ chọn) qua ffmpeg. Chưa có key? Phần còn lại của studio vẫn hoạt động bình thường.
-
----
-
-## Kho mẫu (template)
-
-26 mẫu không phải chọn ngẫu nhiên — mỗi mẫu là một đơn vị độc lập, AI đọc được, mô tả bằng file `template.html-video.yaml` mà studio quét khi khởi động. Một manifest chứa mọi thứ AI cần để chọn và điều khiển mẫu mà không cần mở file HTML ra xem:
-
-- **Dùng để làm gì** — `category`, `tags`, và danh sách `best_for` (ví dụ *"Slide doanh nghiệp"*, *"Báo cáo tối giản"*) mà `search-templates` dùng để khớp với ý định của bạn.
-- **Xuất ra gì** — độ phân giải hỗ trợ, tỷ lệ khung hình, fps, giới hạn thời lượng, có kênh alpha hay âm thanh không.
-- **Cần nhập gì** — một schema JSON `inputs`, để AI biết chính xác cần điền văn bản/dữ liệu vào đâu.
-- **Nguồn gốc giấy phép** — mã SPDX cùng các cờ rõ ràng `attribution_required` / `redistribution_allowed` / `commercial_use`, và một khối `assets_attribution` trỏ về nguồn gốc.
-
-Phần cuối cùng này là cố ý. Mỗi mẫu đều **sạch về giấy phép ngay từ khi tạo ra**: bản fork giữ nguyên giấy phép gốc, file [`NOTICE.md`](templates/NOTICE.md) ở gốc repo ghi lại nguồn và SPDX của từng mẫu, và không mẫu nào thiếu giấy phép rõ ràng được đưa vào. Nhờ vậy bạn có thể dùng bất kỳ mẫu nào cho công việc thương mại mà không cần kiểm tra lại. Các mẫu trải rộng từ biểu đồ dữ liệu (kiểu NYT, lưới Thụy Sĩ/Vignelli), tiêu đề & hiệu ứng (glitch, chữ động, con trỏ đánh máy), hero & điện ảnh (gradient chất lỏng, ánh sáng rò rỉ, hạt film ấm), quảng cáo sản phẩm (15s / 30s nhiều cảnh), đến khung giải thích (sơ đồ quyết định) — định dạng này mở, nên mẫu do cộng đồng đóng góp cũng gắn vào theo cách tương tự.
-
----
-
-## Kiến trúc
+### Kiến trúc
 
 ```
 packages/
 ├── core/                  Các kiểu dữ liệu Project / Asset / ContentGraph, registry, orchestrator,
 │                          MiniMax provider + trộn âm thanh bằng ffmpeg
 ├── content-graph/         Cấu trúc trung gian đa khung hình (node + cạnh nối, sắp xếp thứ tự)
-│ runtime/               Runtime chạy agent — phát hiện / khởi chạy / stream dữ liệu
+├── runtime/               Runtime chạy agent — phát hiện / khởi chạy / stream dữ liệu
 │                          (Open Design/Vela · Windsurf CLI · Trae CLI · Claude · Cursor · Codex · Gemini · Grok · Qwen · OpenCode · Copilot · Aider · Hermes · Anthropic API)
 ├── adapter-hyperframes/   Adapter cho engine Hyperframes — render thật qua Chromium + ffmpeg
 ├── cli/                   Lệnh `html-video` + HTTP server của studio + lấy nội dung nguồn
@@ -284,9 +264,7 @@ templates/                 26 mẫu video được tuyển chọn, sạch về g
 research/                  RFC (đặc tả adapter engine / metadata mẫu / skill cho agent / content-graph)
 ```
 
----
-
-## Lộ trình phát triển
+### Lộ trình phát triển
 
 - [x] Đặc tả adapter engine — một interface, nhiều backend
 - [x] Định dạng metadata cho mẫu — ưu tiên giấy phép rõ ràng, AI đọc được
@@ -299,15 +277,17 @@ research/                  RFC (đặc tả adapter engine / metadata mẫu / sk
 - [ ] Adapter cho Remotion / Motion Canvas / Revideo
 - [ ] Gói skill cho agent + chợ mẫu (template marketplace)
 
----
-
-## Nguồn gốc & tham chiếu
+### Nguồn gốc & tham chiếu
 
 | Dự án | Vai trò |
 |---|---|
 | [Open Design](https://github.com/nexu-io/open-design) | Dự án anh em — lớp meta-agent cho thiết kế; cùng đội ngũ, cùng triết lý |
 | [HTML Anything](https://github.com/nexu-io/html-anything) | Dự án anh em — HTML cho sản phẩm *tĩnh*; html-video là phần *chuyển động* |
 | [Hyperframes](https://github.com/heygen-com/hyperframes) | Engine adapter đã triển khai; mô hình render HTML+CSS+GSAP và nguồn của nhiều mẫu Apache-2.0 |
+
+</details>
+
+---
 
 ## Giấy phép
 
