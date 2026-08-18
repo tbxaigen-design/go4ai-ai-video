@@ -1087,30 +1087,23 @@ const server = http.createServer(async (req, res) => {
         });
 
         if (fs.existsSync(tempOutFile) && fs.statSync(tempOutFile).size > 0) {
-          const stat = fs.statSync(tempOutFile);
+          const audioBuffer = fs.readFileSync(tempOutFile);
+          try { fs.unlinkSync(tempOutFile); } catch {}
 
           // Nếu engine phải thay giọng khác thì PHẢI báo cho user biết.
-          // Im lặng sẽ khiến họ nghe "Nam Minh" ra giọng nữ mà không hiểu vì sao.
           const wantedVoice = preset.voiceId;
           const isFallback = synth.voiceId !== wantedVoice;
 
           res.writeHead(200, {
             'Content-Type': 'audio/mpeg',
-            'Content-Length': stat.size,
+            'Content-Length': audioBuffer.length,
             'Cache-Control': 'no-cache',
             'X-Voice-Requested': encodeURIComponent(wantedVoice),
             'X-Voice-Actual': encodeURIComponent(synth.voiceId),
             'X-Voice-Fallback': isFallback ? '1' : '0',
             'Access-Control-Expose-Headers': 'X-Voice-Requested, X-Voice-Actual, X-Voice-Fallback',
           });
-          const stream = fs.createReadStream(tempOutFile);
-          stream.pipe(res);
-          stream.on('finish', () => {
-            setTimeout(() => {
-              try { if (fs.existsSync(tempOutFile)) fs.unlinkSync(tempOutFile); } catch {}
-            }, 1000);
-          });
-          return;
+          return res.end(audioBuffer);
         } else {
           res.writeHead(500, { 'Content-Type': 'application/json' });
           return res.end(JSON.stringify({ error: 'Không thể tạo file âm thanh mẫu' }));

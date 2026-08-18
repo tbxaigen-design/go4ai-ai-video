@@ -43,7 +43,7 @@
 
 Bản gốc [html-video](https://github.com/nexu-io/html-video) là một công cụ rất mạnh, nhưng được thiết kế cho **lập trình viên** — muốn dùng phải mở terminal, gõ `pnpm install`, tự cấu hình agent, tự đọc log lỗi. Với đa số người dùng Việt Nam làm nội dung, marketing, giáo dục — những người **không biết code và không có nhu cầu học code** — rào cản đó đủ để họ bỏ cuộc ngay từ bước cài đặt.
 
-GO4AI đã bỏ nhiều công sức để viết lại toàn bộ lớp vận hành: từ dòng lệnh terminal thành **một file để double-click**, từ thông báo lỗi tiếng Anh khó hiểu thành hướng dẫn tiếng Việt rõ ràng, từ việc tự tay cài Node.js/FFmpeg/Chromium thành **tự động tải và cài đặt trong lần chạy đầu tiên**. Đây không phải bản dịch giao diện đơn thuần — là công sức tái cấu trúc để một người chưa từng mở terminal trong đời vẫn có thể tạo video AI chuyên nghiệp trong vài phút.
+Toàn bộ lớp vận hành đã được viết lại từ gốc: dòng lệnh terminal trở thành **một file để double-click**; thông báo lỗi tiếng Anh trở thành hướng dẫn tiếng Việt rõ ràng từng bước; việc tự tay cài Node.js, FFmpeg, Chromium trở thành **quy trình tự tải và tự cài đặt** ngay trong lần chạy đầu tiên. Không có bước nào trong đó là dịch giao diện — mỗi bước là một phần được dựng lại để phù hợp với người dùng chưa từng mở terminal.
 
 Mục tiêu của GO4AI: mang công nghệ AI tạo video mã nguồn mở đến gần hơn với cộng đồng người Việt — miễn phí, chạy ngay trên máy cá nhân, dữ liệu không rời khỏi máy bạn trừ khi bạn chủ động dùng tính năng có gọi mạng (lấy nội dung từ link/repo, tạo nhạc AI).
 
@@ -81,6 +81,45 @@ Mỗi mẫu dưới đây là một video HTML thật, có chuyển động th�
 </table>
 
 …và 20 mẫu khác, gồm quảng cáo sản phẩm nhiều cảnh, chữ động (kinetic type), thẻ dữ liệu phong cách Thụy Sĩ/Vignelli, sơ đồ giải thích quyết định, chuyển động hữu cơ kiểu Takram, và phong cách báo chí hạt film ấm. Xem đầy đủ 26 mẫu ngay trong thư viện của studio.
+
+---
+
+<h2 id="production-scale">Một quy trình, bốn mảng nội dung, không giới hạn số lượng</h2>
+
+<p align="center">Cùng một pipeline — prompt hoặc link vào, MP4 ra — vận hành tốt như nhau ở cả 4 nhóm nội dung dưới đây. Đổi nội dung, giữ nguyên phong cách thương hiệu, xuất hàng loạt.</p>
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### A · 🎬 Social video
+Video ngắn cho TikTok, Reels, LinkedIn, YouTube Shorts — dựng từ một dòng ý tưởng hoặc một bài viết có sẵn. Nhiều cảnh, nhịp nhanh, tiêu đề bắt mắt, xuất theo tỷ lệ dọc/ngang tuỳ nền tảng.
+
+</td>
+<td width="50%" valign="top">
+
+### B · 🎓 eLearning
+Bài giảng, module đào tạo, giải thích khái niệm — kịch bản được chia thành các cảnh có trình tự logic, đúng dữ liệu, có giọng đọc AI đi kèm nếu cần.
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### C · 📋 SOP / hướng dẫn nội bộ
+Quy trình vận hành, hướng dẫn dùng phần mềm, onboarding nhân sự mới — biến một tài liệu văn bản khô khan thành video các bước rõ ràng, dễ theo dõi hơn nhiều so với một file Word.
+
+</td>
+<td width="50%" valign="top">
+
+### D · 🚀 Product demo
+Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu tư hoặc khách hàng — dán link repo hoặc landing page, AI tự đọc và dựng thành video giới thiệu có cấu trúc.
+
+</td>
+</tr>
+</table>
+
+<p align="center">Bốn nhóm trên dùng chung 26 mẫu, chung engine render, chung vòng lặp AI — không có bản riêng "giá cao hơn" cho từng use case.</p>
 
 ---
 

@@ -1,9 +1,13 @@
-import { execFileSync, execSync } from 'node:child_process';
+import { execFile, exec } from 'node:child_process';
+import { promisify } from 'node:util';
 import https from 'node:https';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+const execFileAsync = promisify(execFile);
+const execAsync = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,17 +16,8 @@ const __dirname = path.dirname(__filename);
 // Ưu tiên: env var → binaries/ (do setup-binaries.js tải) → PATH hệ thống.
 import { FFMPEG_BIN, FFPROBE_BIN, EDGE_TTS_BIN, PYTHON_BIN, VIENEU_WORKER_SCRIPT, hasVieNeu } from './resolve-binaries.js';
 
-
-
-/**
- * 100% FREE & GENUINE Multi-Voice Neural TTS Engine
- * - 0 fake presets, 0 cluttered style duplicates
- * - Full manual control over Rate (-30% to +50%) and Pitch (-6Hz to +6Hz)
- * - Authentic Models: Native Vietnamese (Nam Minh, Hoài My), Google Cloud Vietnamese, Multilingual AI (Ava, Andrew, Emma, Brian), English (Guy, Jenny, Aria, Ryan)
- */
-
-export const FREE_VOICE_PRESETS = [
-  // --- 0. TIẾNG VIỆT VIENEU AI LOCAL (100% Cục Bộ • CPU/ONNX • Bản Địa 3 Miền) ---
+// --- 14 GIỌNG ĐỌC VIENEU AI LOCAL (100% Cục Bộ • CPU/ONNX • Bản Địa 3 Miền) ---
+export const VIENEU_PRESET_VOICES = [
   {
     id: 'vieneu-truc-ly',
     name: 'Trúc Ly (Nữ • Chuẩn Bắc • Kể chuyện)',
@@ -233,12 +228,17 @@ export const FREE_VOICE_PRESETS = [
     defaultPitch: '+0Hz',
     style: 'Giọng Nữ miền Trung ngọt ngào, âm điệu êm đềm đặc trưng xứ Huế/Đà Nẵng.',
   },
+];
 
+/**
+ * 100% FREE & GENUINE Multi-Voice Neural TTS Engine (Edge Neural, Google, English)
+ */
+export const FREE_VOICE_PRESETS = [
   // --- 1. TIẾNG VIỆT BẢN ĐỊA (Microsoft Edge Neural • 48kHz Miễn Phí) ---
-
   {
     id: 'vi-nam-minh',
     name: 'Nam Minh (Nam • Chuẩn Bắc)',
+    displayName: '👨 [Nam • Chuẩn Bắc] Nam Minh (Trầm ấm, Công nghệ)',
     gender: 'Nam',
     genderLabel: '👨 Nam',
     lang: 'vi',
@@ -253,6 +253,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'vi-hoai-my',
     name: 'Hoài My (Nữ • Chuẩn Bắc)',
+    displayName: '👩 [Nữ • Chuẩn Bắc] Hoài My (Nhẹ nhàng, Truyền cảm)',
     gender: 'Nữ',
     genderLabel: '👩 Nữ',
     lang: 'vi',
@@ -269,6 +270,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'vi-google-female',
     name: 'Chị Google (Nữ • Phổ Thông)',
+    displayName: '👩 [Nữ • Phổ Thông] Chị Google (Review, TikTok, Tin tức)',
     gender: 'Nữ',
     genderLabel: '👩 Nữ',
     lang: 'vi',
@@ -285,6 +287,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'vi-ai-ava',
     name: 'Ava Multilingual (Nữ AI • Truyền cảm)',
+    displayName: '👩 [Nữ AI] Ava Multilingual (Biểu cảm, Tự nhiên)',
     gender: 'Nữ',
     genderLabel: '👩 Nữ AI',
     lang: 'vi',
@@ -299,6 +302,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'vi-ai-andrew',
     name: 'Andrew Multilingual (Nam AI • Chững chạc)',
+    displayName: '👨 [Nam AI] Andrew Multilingual (Ấm áp, Copilot)',
     gender: 'Nam',
     genderLabel: '👨 Nam AI',
     lang: 'vi',
@@ -313,6 +317,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'vi-ai-emma',
     name: 'Emma Multilingual (Nữ AI • Tươi sáng)',
+    displayName: '👩 [Nữ AI] Emma Multilingual (Tươi sáng, Trẻ trung)',
     gender: 'Nữ',
     genderLabel: '👩 Nữ AI',
     lang: 'vi',
@@ -327,6 +332,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'vi-ai-brian',
     name: 'Brian Multilingual (Nam AI • Gần gũi)',
+    displayName: '👨 [Nam AI] Brian Multilingual (Chân thực, Gần gũi)',
     gender: 'Nam',
     genderLabel: '👨 Nam AI',
     lang: 'vi',
@@ -343,6 +349,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'en-us-guy',
     name: 'Guy (Male • US Tech & Natural)',
+    displayName: '👨 [Male • US] Guy (Tech & Natural)',
     gender: 'Nam',
     genderLabel: '👨 Male',
     lang: 'en',
@@ -357,6 +364,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'en-us-jenny',
     name: 'Jenny (Female • US Storytelling)',
+    displayName: '👩 [Female • US] Jenny (Storytelling & Marketing)',
     gender: 'Nữ',
     genderLabel: '👩 Female',
     lang: 'en',
@@ -371,6 +379,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'en-us-aria',
     name: 'Aria (Female • US News Broadcast)',
+    displayName: '👩 [Female • US] Aria (News Anchor)',
     gender: 'Nữ',
     genderLabel: '👩 Female',
     lang: 'en',
@@ -385,6 +394,7 @@ export const FREE_VOICE_PRESETS = [
   {
     id: 'en-gb-ryan',
     name: 'Ryan (Male • UK Documentary)',
+    displayName: '👨 [Male • UK] Ryan (Documentary)',
     gender: 'Nam',
     genderLabel: '👨 Male',
     lang: 'en',
@@ -398,36 +408,37 @@ export const FREE_VOICE_PRESETS = [
   },
 ];
 
-let _cachedVieneuVoices = null;
+// Mapping alias cho các phiên bản cũ / preset ID cũ để backward compatibility 100%
+const VOICE_ALIASES = {
+  'vi-nam-standard': 'vi-nam-minh',
+  'vi-nam-fast': 'vi-nam-minh',
+  'vi-nam-deep': 'vi-nam-minh',
+  'vi-nu-standard': 'vi-hoai-my',
+  'vi-nu-dynamic': 'vi-hoai-my',
+  'google-vi-fallback': 'vi-google-female',
+  'google-en-fallback': 'en-us-jenny',
+  'en-nam-guy': 'en-us-guy',
+  'en-nam-ryan': 'en-gb-ryan',
+  'en-nu-jenny': 'en-us-jenny',
+  'en-nu-aria': 'en-us-aria',
+  'vi-VN-NamMinhNeural': 'vi-nam-minh',
+  'vi-VN-HoaiMyNeural': 'vi-hoai-my',
+  'en-US-AvaMultilingualNeural': 'vi-ai-ava',
+  'en-US-AndrewMultilingualNeural': 'vi-ai-andrew',
+  'en-US-EmmaMultilingualNeural': 'vi-ai-emma',
+  'en-US-BrianMultilingualNeural': 'vi-ai-brian',
+  'en-US-GuyNeural': 'en-us-guy',
+  'en-US-JennyNeural': 'en-us-jenny',
+  'en-US-AriaNeural': 'en-us-aria',
+  'en-GB-RyanNeural': 'en-gb-ryan',
+};
 
 /**
  * Lấy danh sách giọng VieNeu từ SDK / runtime
  */
 export function getVieneuVoices(forceRefresh = false) {
-  if (!forceRefresh && _cachedVieneuVoices !== null) return _cachedVieneuVoices;
-
-  if (!hasVieNeu()) {
-    _cachedVieneuVoices = [];
-    return [];
-  }
-
-  try {
-    const out = execFileSync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--list-voices'], {
-      stdio: ['ignore', 'pipe', 'ignore'],
-      encoding: 'utf-8',
-      timeout: 30000,
-    });
-    const parsed = JSON.parse(out.trim());
-    if (parsed.status === 'ok' && Array.isArray(parsed.voices)) {
-      _cachedVieneuVoices = parsed.voices;
-      return _cachedVieneuVoices;
-    }
-  } catch (err) {
-    console.warn('[LocalTTS] getVieneuVoices warning:', err.message);
-  }
-
-  _cachedVieneuVoices = [];
-  return [];
+  if (!hasVieNeu()) return [];
+  return VIENEU_PRESET_VOICES;
 }
 
 /**
@@ -447,19 +458,25 @@ export function getAvailableVoices(forceRefresh = false) {
   return unique;
 }
 
-
 /**
- * Tìm preset giọng theo ID hoặc voiceId
+ * Tìm preset giọng theo ID hoặc voiceId (hỗ trợ alias ngược về bản cũ)
  */
 export function findVoicePreset(presetId) {
   if (!presetId) return FREE_VOICE_PRESETS[0];
+  const targetId = VOICE_ALIASES[presetId] || presetId;
   const allVoices = getAvailableVoices();
-  const found = allVoices.find(p => p.id === presetId || p.voiceId === presetId);
-  return found || FREE_VOICE_PRESETS.find(p => p.id === presetId || p.voiceId === presetId) || FREE_VOICE_PRESETS[0];
+  const found = allVoices.find(p => p.id === targetId || p.voiceId === targetId || p.id === presetId || p.voiceId === presetId);
+  if (found) return found;
+
+  const lower = String(presetId).toLowerCase();
+  if (lower.includes('hoai') || lower.includes('nu-') || lower.includes('female') || lower.includes('jenny') || lower.includes('aria')) {
+    return FREE_VOICE_PRESETS.find(p => p.id === 'vi-hoai-my') || FREE_VOICE_PRESETS[1];
+  }
+  return FREE_VOICE_PRESETS[0]; // Mặc định Nam Minh
 }
 
 /**
- * Tổng hợp 1 câu thoại bằng VieNeu-TTS (Python Worker)
+ * Tổng hợp 1 câu thoại bằng VieNeu-TTS (Python Worker) - Asynchronous non-blocking
  */
 export async function synthesizeVieNeuSpeech({
   text,
@@ -484,13 +501,12 @@ export async function synthesizeVieNeuSpeech({
   const tempJson = path.join(outDir, `vieneu_single_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.json`);
   try {
     fs.writeFileSync(tempJson, JSON.stringify(payload), 'utf-8');
-    const out = execFileSync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--synthesize', '--payload-file', tempJson], {
-      stdio: ['ignore', 'pipe', 'pipe'],
-      encoding: 'utf-8',
+    const { stdout } = await execFileAsync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--synthesize', '--payload-file', tempJson], {
       timeout: 60000,
+      encoding: 'utf-8',
     });
 
-    const parsed = JSON.parse(out.trim());
+    const parsed = JSON.parse(stdout.trim());
     if (parsed.status !== 'ok') {
       throw new Error(parsed.message || 'Lỗi không xác định từ VieNeu Worker');
     }
@@ -682,8 +698,8 @@ export async function synthesizeVoiceSpeech({
 
   const preset = findVoicePreset(voicePresetId);
   const activeVoiceId = customVoiceId || preset.voiceId;
-  const isVieNeu = (preset.provider === 'vieneu' || voicePresetId.startsWith('vieneu-')) && hasVieNeu();
-  const isGoogle = preset.provider === 'google-cloud' || voicePresetId.includes('google');
+  const isVieNeu = preset.provider === 'vieneu' && hasVieNeu();
+  const isGoogle = preset.provider === 'google-cloud';
 
   const outDir = path.dirname(outFilePath);
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
@@ -737,8 +753,8 @@ export async function synthesizeVoiceSpeech({
       fs.writeFileSync(outFilePath, buffer);
       let durationSec = 4.0;
       try {
-        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`).toString().trim();
-        const parsed = parseFloat(durOut);
+        const { stdout: durOut } = await execAsync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`);
+        const parsed = parseFloat(durOut.trim());
         if (!isNaN(parsed) && parsed > 0) durationSec = Number(parsed.toFixed(2));
       } catch {}
 
@@ -758,7 +774,7 @@ export async function synthesizeVoiceSpeech({
   // --- 3. Edge Neural TTS (Default & Fallback) ---
   const edgeVoiceId = isVieNeu
     ? (preset.gender === 'Nam' ? 'vi-VN-NamMinhNeural' : 'vi-VN-HoaiMyNeural')
-    : (activeVoiceId.includes('Neural') ? activeVoiceId : 'vi-VN-NamMinhNeural');
+    : (preset.voiceId && preset.voiceId.includes('Neural') ? preset.voiceId : activeVoiceId.includes('Neural') ? activeVoiceId : 'vi-VN-NamMinhNeural');
 
   const tempFile = path.join(outDir, `temp_speech_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.txt`);
   try {
@@ -768,17 +784,18 @@ export async function synthesizeVoiceSpeech({
     
     const cmd = `"${EDGE_TTS_BIN}" --voice "${edgeVoiceId}" ${rateArg} ${pitchArg} -f "${tempFile}" --write-media "${outFilePath}"`;
     try {
-      execSync(cmd, { stdio: 'pipe' });
+      await execAsync(cmd, { timeout: 30000 });
     } catch (firstErr) {
-      // Retry once on transient network glitch
-      execSync(cmd, { stdio: 'pipe' });
+      try {
+        await execAsync(cmd, { timeout: 30000 });
+      } catch {}
     }
 
     if (fs.existsSync(outFilePath) && fs.statSync(outFilePath).size > 100) {
       let durationSec = 5;
       try {
-        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`).toString().trim();
-        const parsed = parseFloat(durOut);
+        const { stdout: durOut } = await execAsync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`);
+        const parsed = parseFloat(durOut.trim());
         if (!isNaN(parsed) && parsed > 0) durationSec = Number(parsed.toFixed(2));
       } catch {}
 
@@ -798,8 +815,8 @@ export async function synthesizeVoiceSpeech({
       fs.writeFileSync(outFilePath, buffer);
       let durationSec = 4.0;
       try {
-        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`).toString().trim();
-        const parsed = parseFloat(durOut);
+        const { stdout: durOut } = await execAsync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`);
+        const parsed = parseFloat(durOut.trim());
         if (!isNaN(parsed) && parsed > 0) durationSec = Number(parsed.toFixed(2));
       } catch {}
       return {
@@ -927,13 +944,12 @@ export async function synthesizeMultiSceneVoice({
     const tempBatchJson = path.join(targetDir, `batch_payload_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.json`);
     try {
       fs.writeFileSync(tempBatchJson, JSON.stringify(batchPayload), 'utf-8');
-      const out = execFileSync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--batch-synthesize', '--payload-file', tempBatchJson], {
-        stdio: ['ignore', 'pipe', 'pipe'],
+      const { stdout } = await execFileAsync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--batch-synthesize', '--payload-file', tempBatchJson], {
+        timeout: 180000,
         encoding: 'utf-8',
-        timeout: 120000,
       });
 
-      const parsed = JSON.parse(out.trim());
+      const parsed = JSON.parse(stdout.trim());
       if (parsed.status === 'ok' && Array.isArray(parsed.scenes)) {
         const sceneMap = new Map(parsed.scenes.map(s => [s.id, s]));
         const results = [];
@@ -949,7 +965,7 @@ export async function synthesizeMultiSceneVoice({
           // Guarantee audioOut exists
           if (!fs.existsSync(audioOut) || fs.statSync(audioOut).size < 50) {
             try {
-              execSync(`"${FFMPEG_BIN}" -y -f lavfi -t 4.0 -i anullsrc=r=44100:cl=stereo -c:a libmp3lame -q:a 2 "${audioOut}"`, { stdio: 'pipe' });
+              await execAsync(`"${FFMPEG_BIN}" -y -f lavfi -t 4.0 -i anullsrc=r=44100:cl=stereo -c:a libmp3lame -q:a 2 "${audioOut}"`);
             } catch {}
           }
 
@@ -1016,7 +1032,7 @@ export async function synthesizeMultiSceneVoice({
     // Guarantee audioOut always exists as valid MP3
     if (!fs.existsSync(audioOut) || fs.statSync(audioOut).size < 50) {
       try {
-        execSync(`"${FFMPEG_BIN}" -y -f lavfi -t 4.0 -i anullsrc=r=44100:cl=stereo -c:a libmp3lame -q:a 2 "${audioOut}"`, { stdio: 'pipe' });
+        await execAsync(`"${FFMPEG_BIN}" -y -f lavfi -t 4.0 -i anullsrc=r=44100:cl=stereo -c:a libmp3lame -q:a 2 "${audioOut}"`);
         synthResult = {
           durationSec: 4.0,
           audioPath: audioOut,
@@ -1025,6 +1041,7 @@ export async function synthesizeMultiSceneVoice({
         };
       } catch {}
     }
+
 
     const visualDurationSec = Math.max(3.5, Number((synthResult.durationSec + 0.4).toFixed(2)));
 
