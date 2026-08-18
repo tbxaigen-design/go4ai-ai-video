@@ -4,7 +4,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { exec, execSync } from 'node:child_process';
-import { bootstrap } from './packages/cli/dist/context.js';
 import {
   FREE_VOICE_PRESETS,
   BGM_PRESETS,
@@ -12,9 +11,12 @@ import {
   synthesizeVoiceSpeech,
   synthesizeMultiSceneVoice,
   mixVoiceWithBgm,
+  getAvailableVoices,
+  findVoicePreset,
 } from './local-tts.js';
 // Ưu tiên: env var → @ffmpeg-installer (đúng kiến trúc) → binaries/ → PATH.
-import { FFMPEG_BIN, FFPROBE_BIN } from './resolve-binaries.js';
+import { FFMPEG_BIN, FFPROBE_BIN, hasVieNeu } from './resolve-binaries.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -890,7 +892,7 @@ const server = http.createServer(async (req, res) => {
             res.writeHead(400, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({ error: 'Vui lòng cung cấp danh sách cảnh hoặc văn bản kịch bản' }));
           }
-          const preset = FREE_VOICE_PRESETS.find(p => p.id === voicePresetId) || FREE_VOICE_PRESETS[0];
+          const preset = findVoicePreset(voicePresetId);
           const metrics = estimateScriptMetrics({ text: scriptText, lang: preset.lang || 'vi', rate: 0 });
           rawScenes = metrics.scenes.map((s, idx) => {
             const words = s.text.split(/\s+/);
@@ -1025,8 +1027,13 @@ const server = http.createServer(async (req, res) => {
 
   // --- API: AVAILABLE VOICES CATALOG ---
   if (pathname === '/api/voices' && req.method === 'GET') {
+    const voices = getAvailableVoices();
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ success: true, voices: FREE_VOICE_PRESETS }));
+    return res.end(JSON.stringify({
+      success: true,
+      hasVieNeu: hasVieNeu(),
+      voices,
+    }));
   }
 
   // --- API: TTS ESTIMATE & SMART SEGMENTATION ---
@@ -1053,8 +1060,9 @@ const server = http.createServer(async (req, res) => {
     req.on('data', (c) => (body += c));
     req.on('end', async () => {
       try {
-        const { text, voicePresetId = 'vi-nam-standard', rate = 0, pitch = 0 } = JSON.parse(body || '{}');
-        const preset = FREE_VOICE_PRESETS.find(p => p.id === voicePresetId) || FREE_VOICE_PRESETS[0];
+        const { text, voicePresetId = 'vi-nam-minh', rate = 0, pitch = 0 } = JSON.parse(body || '{}');
+        const preset = findVoicePreset(voicePresetId);
+
 
         // Sample sentence if none provided
         let auditionText = (text && text.trim().length > 0) ? text.trim() : '';
@@ -1368,7 +1376,7 @@ const server = http.createServer(async (req, res) => {
           return res.end(JSON.stringify({ error: 'Vui lòng cung cấp nội dung kịch bản' }));
         }
 
-        const preset = FREE_VOICE_PRESETS.find(p => p.id === voicePresetId) || FREE_VOICE_PRESETS[0];
+        const preset = findVoicePreset(voicePresetId);
         const metrics = estimateScriptMetrics({ text: script, lang: preset.lang || 'vi', rate });
         const scenesData = metrics.scenes;
 

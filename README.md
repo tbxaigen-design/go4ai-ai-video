@@ -1,14 +1,14 @@
 # GO4AI AI Video (`go4ai-ai-video`)
 
 > [!NOTE]
-> **Notice**: This project is based in part on [html-video](https://github.com/nexu-io/html-video) by nexu-io, licensed under the Apache License 2.0.  
-> The codebase has been substantially modified and extended by GO4AI.
+> **Ghi chú**: Dự án này dựa một phần trên [html-video](https://github.com/nexu-io/html-video) của nexu-io, phát hành theo giấy phép Apache License 2.0.
+> Toàn bộ codebase đã được **GO4AI viết lại và mở rộng đáng kể** để phù hợp với người dùng Việt Nam không biết code.
 
 <p align="center">
-  <img src="docs/assets/hero.png" alt="GO4AI AI Video — HTML becomes video, on your laptop" width="100%" />
+  <img src="docs/assets/hero.png" alt="GO4AI AI Video — HTML thành video, ngay trên máy của bạn" width="100%" />
 </p>
 
-> **HTML becomes video — on your laptop.** Bring your local coding agent (Open Design · Windsurf CLI · Trae CLI · Claude Code · Cursor · Codex · Gemini · Grok · Qwen · OpenCode · Copilot · Aider · Hermes · or the Anthropic API). Describe a video, or **paste an article link / GitHub repo**, and the agent turns it into a multi-frame, fully animated video — then renders it to a real MP4 right on your machine. One agent loop, pluggable rendering engines, a curated template gallery, optional AI soundtrack. Apache-2.0, no per-render fees, no vendor lock-in.
+> **HTML biến thành video — ngay trên laptop của bạn, không cần biết code.** GO4AI AI Video là công cụ giúp bạn dùng AI để biến một ý tưởng, một bài viết, hay một repo GitHub thành video hoàn chỉnh — chỉ bằng **double-click** một file, không cần mở terminal, không cần gõ lệnh. Chọn mẫu, mô tả video bạn muốn, và trợ lý AI (Claude Code, Cursor, Gemini, hay bất kỳ agent nào bạn đang dùng) sẽ tự viết, tự dựng khung hình, rồi render ra file MP4 thật ngay trên máy bạn. Miễn phí, mã nguồn mở, không giới hạn số lần render, không phụ thuộc nhà cung cấp nào.
 
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square" /></a>
@@ -20,272 +20,246 @@
 </p>
 
 <p align="center">
-  <b>Built and maintained by <a href="https://github.com/tbxaigen-design">GO4AI</a></b> · Not affiliated with or endorsed by nexu-io / Open Design
+  <b>Xây dựng và duy trì bởi <a href="https://github.com/tbxaigen-design">GO4AI</a></b> · Không trực thuộc và không được nexu-io / Open Design bảo trợ
 </p>
 
-<p align="center"><a href="HUONG-DAN-SU-DUNG.md"><b>Tiếng Việt</b></a> · <b>English</b> · <a href="README.zh-CN.md">简体中文</a></p>
+<p align="center"><a href="HUONG-DAN-SU-DUNG.md"><b>Hướng dẫn chi tiết tiếng Việt</b></a> · <a href="README.zh-CN.md">简体中文</a></p>
 
 ---
 
-## Showcase
+## Vì sao GO4AI làm bản này
 
-Every template below is a real, animated single-file HTML video — these are live renders, not mockups. Drop one in, let the agent fill it with your content, export to MP4.
+Bản gốc [html-video](https://github.com/nexu-io/html-video) là một công cụ rất mạnh, nhưng được thiết kế cho **lập trình viên** — muốn dùng phải mở terminal, gõ `pnpm install`, tự cấu hình agent, tự đọc log lỗi. Với đa số người dùng Việt Nam làm nội dung, marketing, giáo dục — những người **không biết code và không có nhu cầu học code** — rào cản đó đủ để họ bỏ cuộc ngay từ bước cài đặt.
+
+GO4AI đã bỏ nhiều công sức để viết lại toàn bộ lớp vận hành: từ dòng lệnh terminal thành **một file để double-click**, từ thông báo lỗi tiếng Anh khó hiểu thành hướng dẫn tiếng Việt rõ ràng, từ việc tự tay cài Node.js/FFmpeg/Chromium thành **tự động tải và cài đặt trong lần chạy đầu tiên**. Đây không phải bản dịch giao diện đơn thuần — là công sức tái cấu trúc để một người chưa từng mở terminal trong đời vẫn có thể tạo video AI chuyên nghiệp trong vài phút.
+
+Mục tiêu của GO4AI: mang công nghệ AI tạo video mã nguồn mở đến gần hơn với cộng đồng người Việt — miễn phí, chạy ngay trên máy cá nhân, dữ liệu không rời khỏi máy bạn trừ khi bạn chủ động dùng tính năng có gọi mạng (lấy nội dung từ link/repo, tạo nhạc AI).
+
+---
+
+<h2 id="showcase">Thư viện mẫu</h2>
+
+Mỗi mẫu dưới đây là một video HTML thật, có chuyển động thật — không phải ảnh dựng. Chọn một mẫu, để AI điền nội dung của bạn vào, rồi xuất ra MP4.
 
 <table>
 <tr>
-<td width="50%"><img src="docs/assets/templates/frame-data-chart-nyt.png" alt="NYT-style data chart" /></td>
-<td width="50%"><img src="docs/assets/templates/frame-glitch-title.png" alt="Glitch title" /></td>
+<td width="50%"><img src="docs/assets/templates/frame-data-chart-nyt.png" alt="Biểu đồ dữ liệu phong cách NYT" /></td>
+<td width="50%"><img src="docs/assets/templates/frame-glitch-title.png" alt="Tiêu đề hiệu ứng glitch" /></td>
 </tr>
 <tr>
-<td><b>frame-data-chart-nyt</b> · data-viz<br/>Editorial NYT-style animated line chart — headline, annotated data points, source line. For "the number went up" stories.</td>
-<td><b>frame-glitch-title</b> · title card<br/>Chromatic-aberration glitch title with scanlines. For openers, drops, and "system online" energy.</td>
+<td><b>frame-data-chart-nyt</b> · biểu đồ dữ liệu<br/>Biểu đồ đường động, phong cách báo chí kiểu New York Times — tiêu đề, điểm dữ liệu chú thích, dòng nguồn. Hợp cho câu chuyện kiểu "con số này đã tăng".</td>
+<td><b>frame-glitch-title</b> · thẻ tiêu đề<br/>Tiêu đề hiệu ứng glitch (méo màu, scanline). Hợp cho phần mở đầu, hoặc cảm giác "hệ thống đã sẵn sàng".</td>
 </tr>
 <tr>
-<td><img src="docs/assets/templates/frame-liquid-bg-hero.png" alt="Liquid background hero" /></td>
-<td><img src="docs/assets/templates/frame-light-leak-cinema.png" alt="Light leak cinema" /></td>
+<td><img src="docs/assets/templates/frame-liquid-bg-hero.png" alt="Nền hero dạng chất lỏng" /></td>
+<td><img src="docs/assets/templates/frame-light-leak-cinema.png" alt="Hiệu ứng ánh sáng điện ảnh" /></td>
 </tr>
 <tr>
-<td><b>frame-liquid-bg-hero</b> · hero<br/>Aurora liquid-gradient hero with a centered headline. For product reveals and bold statements.</td>
-<td><b>frame-light-leak-cinema</b> · cinematic<br/>Warm film-grain + light-leak cinematic frame. For mood, brand films, "a quiet year" storytelling.</td>
+<td><b>frame-liquid-bg-hero</b> · hero<br/>Nền gradient dạng chất lỏng (aurora), tiêu đề căn giữa. Hợp cho ra mắt sản phẩm, tuyên ngôn mạnh.</td>
+<td><b>frame-light-leak-cinema</b> · điện ảnh<br/>Hiệu ứng hạt phim + ánh sáng rò rỉ ấm áp. Hợp cho video cảm xúc, phim thương hiệu.</td>
 </tr>
 <tr>
-<td><img src="docs/assets/templates/vfx-text-cursor.png" alt="Typewriter cursor VFX" /></td>
-<td><img src="docs/assets/templates/frame-logo-outro.png" alt="Logo outro" /></td>
+<td><img src="docs/assets/templates/vfx-text-cursor.png" alt="Hiệu ứng con trỏ đánh máy" /></td>
+<td><img src="docs/assets/templates/frame-logo-outro.png" alt="Kết thúc bằng logo" /></td>
 </tr>
 <tr>
-<td><b>vfx-text-cursor</b> · VFX<br/>Typewriter text with a blinking terminal cursor. For code-style reveals and CLI demos.</td>
-<td><b>frame-logo-outro</b> · outro<br/>Clean animated logo end card. For sign-offs and brand stamps at the end of any video.</td>
+<td><b>vfx-text-cursor</b> · hiệu ứng<br/>Chữ hiện dần kiểu đánh máy với con trỏ nhấp nháy. Hợp cho demo kiểu terminal.</td>
+<td><b>frame-logo-outro</b> · kết thúc<br/>Thẻ logo động sạch sẽ. Hợp cho phần kết ở cuối bất kỳ video nào.</td>
 </tr>
 </table>
 
-…and 20 more, including multi-scene product promos, kinetic type, Swiss-grid and Vignelli data cards, decision-tree explainers, Takram-organic motion, and warm-grain editorial. Browse all 26 live in the studio gallery.
+…và 20 mẫu khác, gồm quảng cáo sản phẩm nhiều cảnh, chữ động (kinetic type), thẻ dữ liệu phong cách Thụy Sĩ/Vignelli, sơ đồ giải thích quyết định, chuyển động hữu cơ kiểu Takram, và phong cách báo chí hạt film ấm. Xem đầy đủ 26 mẫu ngay trong thư viện của studio.
 
 ---
 
-## Why this exists
+## Nó hoạt động thế nào
 
-HTML→Video is a real category — but every engine is opinionated, and each wants you to learn *its* authoring model:
-
-| Engine | Paradigm | Tradeoff | In html-video |
-|---|---|---|---|
-| [Hyperframes](https://github.com/heygen-com/hyperframes) | HTML + CSS + GSAP, agent-skill driven | Single rendering paradigm | ✅ **Shipped** — the default engine; renders real MP4 via headless Chromium + ffmpeg |
-| [Remotion](https://www.remotion.dev/) | React components | Source-available, paid above 4 devs | 🗺️ Planned |
-| [Motion Canvas](https://github.com/motion-canvas/motion-canvas) · [Revideo](https://github.com/redotvideo/revideo) | TypeScript generators on canvas | Best for explainers, code-first | 🗺️ Planned |
-| [Manim](https://github.com/3b1b/manim) & friends | Math / 3D first | Niche | 🗺️ Researching |
-
-Picking the right engine per use case, learning each model, and stitching them into one workflow costs real engineering time. Most teams pick one and live with its limits.
-
-**html-video is the meta-layer that sits above all of them.** You talk to your agent; it picks the engine, picks the template, fills in your content, and renders the video. The engine is an implementation detail behind a single adapter interface — one `render(input, ctx)` contract that any backend can satisfy. Add a new engine and every template, every agent, and the whole studio workflow get it for free. No new DSL to learn, no rewrite when you switch engines.
-
-The same idea powers [Open Design](https://github.com/nexu-io/open-design) in the *design* space — an agent meta-layer over many tools. html-video is the *motion* counterpart from the same team.
-
-> **Status:** the pluggable-engine architecture is in place, and the **Hyperframes engine is fully wired up and renders real MP4** — headless Chromium records the animated HTML frame-by-frame and ffmpeg encodes it (libx264). Remotion, Motion Canvas / Revideo, and Manim are on the roadmap: the adapter interface is designed for them, but their adapters aren't built yet. The "In html-video" column above is the single source of truth for what's actually runnable today.
-
----
-
-## At a glance
-
-| | |
-|---|---|
-| **Coding agents (14)** | Open Design (Vela) · Windsurf CLI · Trae CLI · Claude Code · Cursor Agent · Codex CLI · Gemini CLI · Grok Build · Qwen Code · OpenCode · GitHub Copilot CLI · Aider · Hermes · Anthropic Messages API — auto-detected on your `PATH`, switchable from the top bar. |
-| **Real MP4 render** | Headless Chromium records the animated HTML and ffmpeg encodes it (libx264) — locally, no cloud render, no per-clip fee. |
-| **Article / repo → video** | Paste a URL or GitHub repo; the studio fetches it server-side (handles WeChat 公众号 articles) and builds the video from the real content. |
-| **26 templates** | Curated, license-clean patterns: data viz, product promos, social shorts, explainers, kinetic type, transitions — previewed live in the gallery. |
-| **Multi-frame storyboards** | A content-graph drives multi-scene videos; edit per-frame text inline, reorder, re-render. |
-| **AI soundtrack** | Optional background music + narration via MiniMax, mixed into the MP4 at export. |
-| **Studio + CLI** | A local browser studio *and* a scriptable `html-video` CLI. |
-| **License** | Apache-2.0 — no per-render fees, no seat caps, no contributor agreements. |
-
----
-
-## How it works
-
-One sentence (or one link) goes in; a real MP4 comes out. The pipeline is the same whether you start from a prompt, an article, or a repo:
+Một câu mô tả (hoặc một đường link) đi vào; một file MP4 thật đi ra. Quy trình giống nhau dù bạn bắt đầu từ một câu prompt, một bài viết, hay một repo:
 
 ```
   prompt / link / repo
         │
         ▼
-  ① source fetch        studio pulls the URL or repo server-side, flattens it to Markdown
+  ① lấy nguồn            studio tự tải nội dung từ URL hoặc repo, chuyển thành văn bản Markdown
         │
         ▼
-  ② agent loop          your agent reads the material + the picked template's style and emits
-        │               a content-graph (the storyboard) + one HTML block per frame
+  ② vòng lặp agent       AI đọc nội dung + phong cách của mẫu đã chọn, rồi tạo ra
+        │                một content-graph (kịch bản phân cảnh) + khối HTML cho mỗi khung hình
         ▼
-  ③ content-graph       multi-frame IR — nodes (entity / data / text) + edges (sequence /
-        │               dependency / contrast); topo-sorted into frame order & timing
+  ③ content-graph        cấu trúc trung gian đa khung hình — node (thực thể / dữ liệu / văn bản)
+        │                + cạnh nối (trình tự / phụ thuộc / đối lập); tự sắp xếp thứ tự & thời lượng
         ▼
-  ④ per-frame HTML      each node becomes a self-contained animated HTML frame on disk
+  ④ HTML từng khung hình  mỗi node trở thành một khung hình HTML động, độc lập, lưu trên đĩa
         │
         ▼
-  ⑤ Hyperframes render  headless Chromium loads each frame, records it (auto-extending to
-        │               cover the frame's own animation), → webm per frame
+  ⑤ Hyperframes render   Chromium chạy ẩn tải từng khung hình, ghi lại (tự kéo dài đủ thời gian
+        │                chuyển động của khung hình đó) → ra file webm cho mỗi khung
         ▼
-  ⑥ ffmpeg              each webm → mp4 (libx264), then concat into one video;
-        │               optional MiniMax music + narration mixed in
+  ⑥ ffmpeg               mỗi webm → mp4 (libx264), rồi ghép lại thành một video;
+        │                nhạc nền + lời đọc AI (nếu có) được trộn vào
         ▼
-      your.mp4
+      video-cua-ban.mp4
 ```
 
-Steps ②–④ are where the "meta-layer" lives: the agent decides the storyboard and the engine decides how to draw it, and neither leaks into the other. Step ⑤ is engine-specific — swapping in Remotion or Motion Canvas later replaces only that box, leaving the storyboard and the agent loop untouched. Everything runs on your machine; the only network calls are the optional source fetch and the optional soundtrack.
+Các bước ②–④ là nơi lớp "meta" phát huy: AI quyết định kịch bản, engine quyết định cách vẽ ra, hai phần này không lẫn vào nhau. Bước ⑤ phụ thuộc vào engine cụ thể — sau này thêm Remotion hay Motion Canvas chỉ cần thay bước này, kịch bản và vòng lặp AI giữ nguyên. Mọi thứ chạy trên máy bạn — chỉ có 2 việc cần gọi mạng: lấy nội dung nguồn (khi bạn dán link/repo) và tạo nhạc/giọng đọc AI (khi bạn dùng tính năng đó).
 
-Single-frame videos take a fast path that skips the content-graph — one template, one HTML, straight to render.
+Video một khung hình duy nhất đi theo đường tắt, bỏ qua content-graph — một mẫu, một file HTML, render thẳng.
 
 ---
 
-## Turn a link into a video
+<h2 id="turn-a-link-into-a-video">Biến một đường link thành video</h2>
 
-This is what most people reach for: hand your agent a link, get a video back. The agents run as local CLIs with no network access of their own, so the studio fetches the source **server-side** and feeds the real content into the generation prompt — no copy-pasting article bodies, and pages behind a login-free server render (like WeChat 公众号) just work.
+Đây là cách dùng phổ biến nhất: đưa AI một đường link, nhận lại một video. AI chạy cục bộ trên máy bạn không tự truy cập mạng được, nên studio sẽ **tự lấy nội dung nguồn** ở phía server rồi đưa vào cho AI xử lý — bạn không cần copy-paste nội dung bài viết, và các trang không cần đăng nhập (như bài viết WeChat 公众号) vẫn lấy được bình thường.
 
 ```
-You:   做一个解读视频  https://mp.weixin.qq.com/s/…
-Agent: 好，我读完了《用嘴剪视频的时代来了？…》这篇文章 — 这就基于它生成。下一步选风格。
-→      multi-frame explainer, built from the article's actual points
+Bạn:    làm video giải thích bài này  https://mp.weixin.qq.com/s/…
+Agent:  được, mình đã đọc xong bài viết — sẽ dựng video dựa trên nội dung này. Bước tiếp theo: chọn phong cách.
+→       video giải thích nhiều cảnh, dựng từ đúng nội dung bài viết
 ```
 
-- **Web article** → fetched and flattened to Markdown. Server-rendered pages like **WeChat 公众号** articles work out of the box.
-- **GitHub repo** → description, top-level structure, and README pulled via the public API — great for "explain this open-source project" videos.
-- **Just a prompt** → describe the topic and the agent writes the content from scratch.
+- **Bài viết web** → được tải và chuyển thành Markdown. Các trang render sẵn phía server như bài viết **WeChat 公众号** hoạt động ngay không cần cấu hình thêm.
+- **Repo GitHub** → mô tả, cấu trúc thư mục cấp cao, và README được lấy qua GitHub public API — hợp cho video kiểu "giải thích dự án mã nguồn mở này".
+- **Chỉ cần một câu mô tả** → nêu chủ đề, AI tự viết nội dung từ đầu.
 
-Whatever the source, it becomes the material the video is actually built from — not decoration around a canned template. The agent reads the fetched content, decides how many scenes it needs, and writes a **content-graph storyboard**: the key points become frames, the relationships between them (this follows that, this contrasts with that) become edges, and the picked template's visual style is applied per frame. So a 1,500-word article turns into a paced multi-scene explainer whose every line traces back to something in the source, and a repo turns into a structured walkthrough of what the project actually is.
+Dù nguồn là gì, nó sẽ trở thành nội dung thật để dựng video — không phải trang trí quanh một mẫu có sẵn. AI đọc nội dung đã lấy được, tự quyết định cần bao nhiêu cảnh, rồi viết ra một **kịch bản dạng content-graph**: các ý chính trở thành khung hình, mối quan hệ giữa chúng (ý này nối tiếp ý kia, ý này đối lập ý kia) trở thành các cạnh nối, và phong cách của mẫu đã chọn được áp cho từng khung hình. Vậy nên một bài viết 1.500 từ trở thành một video giải thích nhiều cảnh có nhịp độ, mỗi câu đều bắt nguồn từ nội dung gốc; một repo trở thành một video giải thích có cấu trúc về việc dự án đó thực sự làm gì.
 
 ---
 
-## Quick start
+<h2 id="quick-start">Bắt đầu nhanh</h2>
 
-### For everyone — no setup, just double-click
+### Dành cho mọi người — không cần cài đặt, chỉ cần double-click
 
-Download this repository (green **Code** button → **Download ZIP**), unzip it, then:
+Tải repo này về (nút xanh **Code** → **Download ZIP**), giải nén, rồi:
 
-| Your computer | Double-click this file |
+| Máy bạn dùng | Double-click file này |
 |---|---|
 | **Windows** | `1-Chay-Tren-Windows.bat` |
-| **MacBook** | `1-Chay-Tren-Macbook.command` — right-click → **Open** the first time |
+| **MacBook** | `1-Chay-Tren-Macbook.command` — lần đầu chuột phải → **Open** |
 
-The first run downloads everything it needs automatically (Node.js if missing, libraries, FFmpeg, and the Chromium renderer — roughly **300MB**, 5–10 minutes on a normal connection). Later runs start in seconds. Your browser opens the studio at `http://127.0.0.1:3075` when it's ready.
+Lần chạy đầu tiên sẽ tự tải mọi thứ cần thiết (Node.js nếu chưa có, các thư viện, FFmpeg, và trình render Chromium — khoảng **300MB**, mất 5–10 phút với mạng bình thường). Các lần chạy sau khởi động chỉ trong vài giây. Trình duyệt sẽ tự mở studio tại `http://127.0.0.1:3075` khi đã sẵn sàng.
 
-To update later, double-click `2-Cap-Nhat-Windows.bat` / `2-Cap-Nhat-Macbook.command`.
+Muốn cập nhật phiên bản mới sau này, double-click `2-Cap-Nhat-Windows.bat` / `2-Cap-Nhat-Macbook.command`.
 
-> Vietnamese walkthrough: **[HUONG-DAN-SU-DUNG.md](HUONG-DAN-SU-DUNG.md)**
+> Hướng dẫn sử dụng chi tiết bằng tiếng Việt: **[HUONG-DAN-SU-DUNG.md](HUONG-DAN-SU-DUNG.md)**
 
-### For developers
+### Dành cho lập trình viên
 
 ```bash
-pnpm install          # includes ffmpeg/ffprobe binaries for your platform
+pnpm install          # bao gồm binary ffmpeg/ffprobe cho hệ điều hành của bạn
 pnpm -r build
-node setup-binaries.js   # verifies FFmpeg, installs Chromium + edge-tts
-node ui-server.js        # studio at http://127.0.0.1:3075
+node setup-binaries.js   # kiểm tra FFmpeg, cài Chromium + edge-tts
+node ui-server.js        # studio chạy tại http://127.0.0.1:3075
 ```
 
-Everything renders locally — no cloud rendering, no per-render fees.
+Mọi thứ render cục bộ trên máy — không render qua cloud, không mất phí theo lượt render.
 
-Optional overrides: `FFMPEG_PATH`, `FFPROBE_PATH`, `EDGE_TTS_PATH`, `PORT`.
+Các biến môi trường tuỳ chọn: `FFMPEG_PATH`, `FFPROBE_PATH`, `EDGE_TTS_PATH`, `PORT`.
 
-CLI utilities:
+Công cụ dòng lệnh (CLI):
 
 ```bash
-node packages/cli/dist/bin.js doctor                 # detect installed agents + engines
+node packages/cli/dist/bin.js doctor                 # phát hiện agent + engine đã cài
 node packages/cli/dist/bin.js search-templates --intent "github stars race" --top 3
 ```
 
 ---
 
-## Supported agents
+<h2 id="supported-agents">Các AI agent được hỗ trợ</h2>
 
-Auto-detected on your `PATH`; switch the active one from the studio's top bar. The studio leads with **Open Design (Vela)** — one login, many models, lower cost — then falls back to the first *available* agent so a fresh project always has a working backend.
+Tự động phát hiện agent đã cài trên máy (`PATH`); đổi agent đang dùng ngay trong thanh trên cùng của studio. Studio ưu tiên **Open Design (Vela)** — một lần đăng nhập, dùng được nhiều model, chi phí thấp hơn — sau đó tự chuyển sang agent khả dụng đầu tiên tìm thấy, để dự án mới luôn có một backend sẵn sàng chạy.
 
-| Agent | Detection | Invocation |
+| Agent | Cách phát hiện | Cách gọi |
 |---|---|---|
-| **Open Design (Vela)** | `vela` / bundled in the Open Design app | ACP over stdio — one login in Open Design, pick any model |
-| **Windsurf CLI** | `windsurf` | `windsurf --yolo`, ACP over stdio |
-| **Trae CLI** | `traecli` | `traecli acp serve --yolo`, ACP over stdio |
-| **Claude Code** | `claude` | `claude --print`, prompt via stdin |
+| **Open Design (Vela)** | `vela` / có sẵn trong app Open Design | ACP qua stdio — đăng nhập một lần trong Open Design, chọn model bất kỳ |
+| **Windsurf CLI** | `windsurf` | `windsurf --yolo`, ACP qua stdio |
+| **Trae CLI** | `traecli` | `traecli acp serve --yolo`, ACP qua stdio |
+| **Claude Code** | `claude` | `claude --print`, prompt qua stdin |
 | **Cursor Agent** | `cursor-agent` | `cursor-agent --print` |
-| **Codex CLI** | `codex` | `codex exec`, prompt via stdin |
+| **Codex CLI** | `codex` | `codex exec`, prompt qua stdin |
 | **Hermes** | `hermes` | Hermes ACP CLI |
-| **Gemini CLI** | `gemini` | Prompt via stdin |
+| **Gemini CLI** | `gemini` | Prompt qua stdin |
 | **Grok Build** | `grok` | `grok -p <prompt>` |
-| **Qwen Code** | `qwen` | Prompt via stdin |
-| **OpenCode** | `opencode` | `opencode run`, prompt via stdin |
-| **GitHub Copilot CLI** | `copilot` | `copilot --allow-all-tools`, prompt via stdin |
+| **Qwen Code** | `qwen` | Prompt qua stdin |
+| **OpenCode** | `opencode` | `opencode run`, prompt qua stdin |
+| **GitHub Copilot CLI** | `copilot` | `copilot --allow-all-tools`, prompt qua stdin |
 | **Aider** | `aider` | `aider --message <prompt>` |
-| **Anthropic API** | BYOK | Direct Messages API — works with no CLI installed |
+| **Anthropic API** | Dùng API key riêng (BYOK) | Gọi thẳng Messages API — không cần cài CLI nào |
 
-Nothing installed? Set an Anthropic key and the studio talks to the Messages API directly.
-
----
-
-## Soundtrack
-
-Give the finished video a voice. In **Settings → Audio**, add a MiniMax API key, then in the per-project **Soundtrack** panel:
-
-- **Background music** — describe a mood (`calm cinematic ambient, slow build`); MiniMax generates an instrumental track.
-- **Narration** — type a script; MiniMax reads it (TTS).
-
-Both are mixed into the exported MP4 (music ducked under the voice, optional fade-in/out) via ffmpeg. No key configured? The rest of the studio works unchanged.
+Chưa cài agent nào? Chỉ cần nhập một Anthropic API key, studio sẽ gọi thẳng Messages API.
 
 ---
 
-## Template gallery
+<h2 id="soundtrack">Nhạc nền & giọng đọc</h2>
 
-The 26 templates aren't a random grab-bag — each one is a self-contained, agent-readable unit described by a `template.html-video.yaml` manifest the studio scans at startup. A manifest carries everything the agent needs to pick and drive the template without opening the HTML:
+Cho video thành phẩm một "tiếng nói". Vào **Settings → Audio**, thêm MiniMax API key, sau đó ở bảng **Soundtrack** trong từng dự án:
 
-- **What it's for** — `category`, `tags`, and a `best_for` list (e.g. *"Corporate slide"*, *"Minimal report card"*) that `search-templates` matches your intent against.
-- **What it outputs** — supported resolutions, aspect ratios, fps, duration bounds, whether it has an alpha channel or audio.
-- **What goes in** — an `inputs` JSON schema, so the agent knows exactly which text/data slots to fill.
-- **License provenance** — an SPDX id plus explicit `attribution_required` / `redistribution_allowed` / `commercial_use` flags, and an `assets_attribution` block pointing at the upstream source URL.
+- **Nhạc nền** — mô tả không khí bạn muốn (`nhạc nền điện ảnh nhẹ nhàng, cao trào chậm`); MiniMax tự tạo bản nhạc không lời.
+- **Lời đọc (narration)** — gõ kịch bản; MiniMax đọc thành giọng nói (TTS).
 
-That last part is deliberate. Every template is **license-clean by construction**: forks carry their original license, the repo-root [`NOTICE.md`](templates/NOTICE.md) records each source and SPDX, and nothing without a clear permissive license ships. So you can put any of them in commercial work without an audit. Templates span data viz (NYT-style charts, Swiss/Vignelli grids), titles & VFX (glitch, kinetic type, typewriter cursor), heroes & cinematics (liquid gradients, light-leak, warm grain), product promos (15s / 30s multi-scene), and explainer scaffolds (decision trees) — and the format is open, so community templates drop in the same way.
+Cả hai được trộn vào file MP4 xuất ra (nhạc tự giảm âm lượng khi có giọng đọc, có fade in/out tuỳ chọn) qua ffmpeg. Chưa có key? Phần còn lại của studio vẫn hoạt động bình thường.
 
 ---
 
-## Architecture
+## Kho mẫu (template)
+
+26 mẫu không phải chọn ngẫu nhiên — mỗi mẫu là một đơn vị độc lập, AI đọc được, mô tả bằng file `template.html-video.yaml` mà studio quét khi khởi động. Một manifest chứa mọi thứ AI cần để chọn và điều khiển mẫu mà không cần mở file HTML ra xem:
+
+- **Dùng để làm gì** — `category`, `tags`, và danh sách `best_for` (ví dụ *"Slide doanh nghiệp"*, *"Báo cáo tối giản"*) mà `search-templates` dùng để khớp với ý định của bạn.
+- **Xuất ra gì** — độ phân giải hỗ trợ, tỷ lệ khung hình, fps, giới hạn thời lượng, có kênh alpha hay âm thanh không.
+- **Cần nhập gì** — một schema JSON `inputs`, để AI biết chính xác cần điền văn bản/dữ liệu vào đâu.
+- **Nguồn gốc giấy phép** — mã SPDX cùng các cờ rõ ràng `attribution_required` / `redistribution_allowed` / `commercial_use`, và một khối `assets_attribution` trỏ về nguồn gốc.
+
+Phần cuối cùng này là cố ý. Mỗi mẫu đều **sạch về giấy phép ngay từ khi tạo ra**: bản fork giữ nguyên giấy phép gốc, file [`NOTICE.md`](templates/NOTICE.md) ở gốc repo ghi lại nguồn và SPDX của từng mẫu, và không mẫu nào thiếu giấy phép rõ ràng được đưa vào. Nhờ vậy bạn có thể dùng bất kỳ mẫu nào cho công việc thương mại mà không cần kiểm tra lại. Các mẫu trải rộng từ biểu đồ dữ liệu (kiểu NYT, lưới Thụy Sĩ/Vignelli), tiêu đề & hiệu ứng (glitch, chữ động, con trỏ đánh máy), hero & điện ảnh (gradient chất lỏng, ánh sáng rò rỉ, hạt film ấm), quảng cáo sản phẩm (15s / 30s nhiều cảnh), đến khung giải thích (sơ đồ quyết định) — định dạng này mở, nên mẫu do cộng đồng đóng góp cũng gắn vào theo cách tương tự.
+
+---
+
+## Kiến trúc
 
 ```
 packages/
-├── core/                  Project / Asset / ContentGraph types, registries, orchestrator,
-│                          MiniMax provider + ffmpeg audio mux
-├── content-graph/         Multi-frame storyboard IR (nodes + edges, topo-sort)
-│ runtime/               Agent runtime — detect / spawn / stream
+├── core/                  Các kiểu dữ liệu Project / Asset / ContentGraph, registry, orchestrator,
+│                          MiniMax provider + trộn âm thanh bằng ffmpeg
+├── content-graph/         Cấu trúc trung gian đa khung hình (node + cạnh nối, sắp xếp thứ tự)
+│ runtime/               Runtime chạy agent — phát hiện / khởi chạy / stream dữ liệu
 │                          (Open Design/Vela · Windsurf CLI · Trae CLI · Claude · Cursor · Codex · Gemini · Grok · Qwen · OpenCode · Copilot · Aider · Hermes · Anthropic API)
-├── adapter-hyperframes/   Hyperframes engine adapter — real render via Chromium + ffmpeg
-├── cli/                   `html-video` command + the studio HTTP server + source fetching
-└── project-studio/        Browser studio UI (chat, template gallery, frames, soundtrack, export)
-templates/                 26 curated, license-clean video templates
-research/                  RFCs (engine adapter / template metadata / agent skill / content-graph)
+├── adapter-hyperframes/   Adapter cho engine Hyperframes — render thật qua Chromium + ffmpeg
+├── cli/                   Lệnh `html-video` + HTTP server của studio + lấy nội dung nguồn
+└── project-studio/        Giao diện studio trên trình duyệt (chat, kho mẫu, khung hình, âm thanh, xuất video)
+templates/                 26 mẫu video được tuyển chọn, sạch về giấy phép
+research/                  RFC (đặc tả adapter engine / metadata mẫu / skill cho agent / content-graph)
 ```
 
 ---
 
-## Roadmap
+## Lộ trình phát triển
 
-- [x] Engine adapter spec — one interface, N backends
-- [x] Template metadata format — license-first, agent-readable
-- [x] Multi-frame storyboard workflow (content-graph)
-- [x] Studio: live template gallery, agent switcher, per-frame text editing
-- [x] Source material: article / GitHub-repo → video
-- [x] AI soundtrack (MiniMax music + narration), mixed at export
-- [x] Real MP4 render — Hyperframes engine via headless Chromium + ffmpeg
-- [x] Agent model selection — Open Design (Vela) backend, live model catalog
-- [ ] Adapters for Remotion / Motion Canvas / Revideo
-- [ ] Agent skill packages + a template marketplace
+- [x] Đặc tả adapter engine — một interface, nhiều backend
+- [x] Định dạng metadata cho mẫu — ưu tiên giấy phép rõ ràng, AI đọc được
+- [x] Quy trình kịch bản đa khung hình (content-graph)
+- [x] Studio: kho mẫu trực quan, đổi agent, chỉnh sửa văn bản từng khung hình
+- [x] Nguồn nội dung: bài viết / repo GitHub → video
+- [x] Nhạc nền AI (nhạc + lời đọc từ MiniMax), trộn khi xuất video
+- [x] Render MP4 thật — engine Hyperframes qua Chromium chạy ẩn + ffmpeg
+- [x] Chọn model cho agent — backend Open Design (Vela), danh mục model cập nhật trực tiếp
+- [ ] Adapter cho Remotion / Motion Canvas / Revideo
+- [ ] Gói skill cho agent + chợ mẫu (template marketplace)
 
 ---
 
-## References & lineage
+## Nguồn gốc & tham chiếu
 
-| Project | Role here |
+| Dự án | Vai trò |
 |---|---|
-| [Open Design](https://github.com/nexu-io/open-design) | Sister project — the design-agent meta-layer; same team, shared philosophy |
-| [HTML Anything](https://github.com/nexu-io/html-anything) | Sister project — HTML for *static* deliverables; html-video is the *motion* side |
-| [Hyperframes](https://github.com/heygen-com/hyperframes) | The shipped engine adapter; the HTML+CSS+GSAP rendering paradigm and the source of several Apache-2.0 templates |
+| [Open Design](https://github.com/nexu-io/open-design) | Dự án anh em — lớp meta-agent cho thiết kế; cùng đội ngũ, cùng triết lý |
+| [HTML Anything](https://github.com/nexu-io/html-anything) | Dự án anh em — HTML cho sản phẩm *tĩnh*; html-video là phần *chuyển động* |
+| [Hyperframes](https://github.com/heygen-com/hyperframes) | Engine adapter đã triển khai; mô hình render HTML+CSS+GSAP và nguồn của nhiều mẫu Apache-2.0 |
 
-## License
+## Giấy phép
 
 [Apache-2.0](LICENSE)
 
-## Built by
+## Được xây dựng bởi
 
-**GO4AI**. This is a derivative work of [html-video](https://github.com/nexu-io/html-video) by nexu-io (Apache-2.0), substantially modified and extended. GO4AI is **not affiliated with, sponsored by, or endorsed by** nexu-io or the Open Design team.
+**GO4AI**. Đây là bản phái sinh (derivative work) từ [html-video](https://github.com/nexu-io/html-video) của nexu-io (Apache-2.0), đã được GO4AI viết lại và mở rộng đáng kể — chuyển từ công cụ dành cho lập trình viên dùng terminal thành công cụ **double-click, không cần biết code**, dành cho cộng đồng người Việt. GO4AI **không trực thuộc, không được tài trợ, và không được bảo trợ** bởi nexu-io hay đội ngũ Open Design.
 
-Found a bug? Email **hocvien@go4ai.life**, open an [issue](../../issues), or use the **💬 Góp ý & Báo lỗi** button inside the app — it opens a prefilled email with your system details attached.
+Phát hiện lỗi? Gửi email tới **hocvien@go4ai.life**, mở một [issue](../../issues), hoặc dùng nút **💬 Góp ý & Báo lỗi** ngay trong app — nút này sẽ mở sẵn một email kèm theo thông tin hệ thống của bạn.

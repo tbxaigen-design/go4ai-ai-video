@@ -78,7 +78,45 @@ export const EDGE_TTS_BIN = (() => {
   return 'edge-tts';
 })();
 
-/** Giọng neural có dùng được không — dùng để cảnh báo user thay vì im lặng. */
+export const PYTHON_BIN = (() => {
+  const fromEnv = process.env.PYTHON_PATH;
+  if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
+
+  const fromVenv = venvBin('python');
+  if (fs.existsSync(fromVenv)) return fromVenv;
+
+  return isWin ? 'python' : 'python3';
+})();
+
+export const VIENEU_WORKER_SCRIPT = path.join(__dirname, 'vieneu_worker.py');
+
+let _hasVieNeuCache = null;
+
+/** Kiểm tra engine VieNeu-TTS AI tiếng Việt có khả dụng không. */
+export function hasVieNeu(forceRefresh = false) {
+  if (!forceRefresh && _hasVieNeuCache !== null) return _hasVieNeuCache;
+
+  if (!fs.existsSync(VIENEU_WORKER_SCRIPT)) {
+    _hasVieNeuCache = false;
+    return false;
+  }
+
+  try {
+    const out = execFileSync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--check'], {
+      stdio: ['ignore', 'pipe', 'ignore'],
+      encoding: 'utf-8',
+      timeout: 10000,
+    });
+    const parsed = JSON.parse(out.trim());
+    _hasVieNeuCache = parsed.status === 'ok';
+    return _hasVieNeuCache;
+  } catch {
+    _hasVieNeuCache = false;
+    return false;
+  }
+}
+
+/** Giọng neural Edge có dùng được không — dùng để cảnh báo user thay vì im lặng. */
 export function hasNeuralVoice() {
   try {
     execFileSync(EDGE_TTS_BIN, ['--version'], { stdio: 'ignore' });
@@ -105,3 +143,4 @@ export function checkBinaries() {
     ffprobe: { path: FFPROBE_BIN, ok: isRunnable(FFPROBE_BIN) },
   };
 }
+

@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import https from 'node:https';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -10,7 +10,8 @@ const __dirname = path.dirname(__filename);
 
 // ── Binary path resolution ──
 // Ưu tiên: env var → binaries/ (do setup-binaries.js tải) → PATH hệ thống.
-import { FFMPEG_BIN, FFPROBE_BIN, EDGE_TTS_BIN } from './resolve-binaries.js';
+import { FFMPEG_BIN, FFPROBE_BIN, EDGE_TTS_BIN, PYTHON_BIN, VIENEU_WORKER_SCRIPT, hasVieNeu } from './resolve-binaries.js';
+
 
 
 /**
@@ -21,7 +22,220 @@ import { FFMPEG_BIN, FFPROBE_BIN, EDGE_TTS_BIN } from './resolve-binaries.js';
  */
 
 export const FREE_VOICE_PRESETS = [
+  // --- 0. TIẾNG VIỆT VIENEU AI LOCAL (100% Cục Bộ • CPU/ONNX • Bản Địa 3 Miền) ---
+  {
+    id: 'vieneu-truc-ly',
+    name: 'Trúc Ly (Nữ • Chuẩn Bắc • Kể chuyện)',
+    displayName: '👩 [Nữ • Bắc] Trúc Ly (Truyền cảm, Tự nhiên)',
+    gender: 'Nữ',
+    genderLabel: '👩 Nữ',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Bắc',
+    provider: 'vieneu',
+    voiceId: 'Trúc Ly',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Truyền cảm, tự nhiên, nhịp nhàng cho video kể chuyện, review và thương hiệu.',
+  },
+  {
+    id: 'vieneu-minh-duc',
+    name: 'Minh Đức (Nam • Chuẩn Bắc • Tin tức)',
+    displayName: '👨 [Nam • Bắc] Minh Đức (Tin tức, Chững chạc)',
+    gender: 'Nam',
+    genderLabel: '👨 Nam',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Bắc',
+    provider: 'vieneu',
+    voiceId: 'Minh Đức',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Trầm ấm, chững chạc, chuẩn xác cho tin tức, công nghệ và bài giảng chuyên sâu.',
+  },
+  {
+    id: 'vieneu-mai-anh',
+    name: 'Mai Anh (Nữ • Chuẩn Bắc • Thuyết minh)',
+    displayName: '👩 [Nữ • Bắc] Mai Anh (Nhẹ nhàng, Thuyết minh)',
+    gender: 'Nữ',
+    genderLabel: '👩 Nữ',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Bắc',
+    provider: 'vieneu',
+    voiceId: 'Mai Anh',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Nhẹ nhàng, trong sáng, mượt mà cho explainer video và giới thiệu sản phẩm.',
+  },
+  {
+    id: 'vieneu-pham-tuyen',
+    name: 'Phạm Tuyên (Nam • Chuẩn Bắc • Tự nhiên)',
+    displayName: '👨 [Nam • Bắc] Phạm Tuyên (Tự nhiên, Đời sống)',
+    gender: 'Nam',
+    genderLabel: '👨 Nam',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Bắc',
+    provider: 'vieneu',
+    voiceId: 'Phạm Tuyên',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Phong cách hội thoại đời sống tự nhiên, phóng khoáng, dễ nghe.',
+  },
+  {
+    id: 'vieneu-doan-trang',
+    name: 'Đoan Trang (Nữ • Chuẩn Bắc • Tự tin)',
+    displayName: '👩 [Nữ • Bắc] Đoan Trang (Truyền hình, Tự tin)',
+    gender: 'Nữ',
+    genderLabel: '👩 Nữ',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Bắc',
+    provider: 'vieneu',
+    voiceId: 'Đoan Trang',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Rõ ràng, dứt khoát, phong cách MC truyền hình chuyên nghiệp.',
+  },
+  {
+    id: 'vieneu-thai-son',
+    name: 'Thái Sơn (Nam • Miền Nam • Kể chuyện)',
+    displayName: '👨 [Nam • Nam] Thái Sơn (Kể chuyện, Trầm ấm)',
+    gender: 'Nam',
+    genderLabel: '👨 Nam',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Nam',
+    provider: 'vieneu',
+    voiceId: 'Thái Sơn',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nam miền Nam trầm ấm, truyền cảm, thích hợp documentary và podcast.',
+  },
+  {
+    id: 'vieneu-xuan-vinh',
+    name: 'Xuân Vĩnh (Nam • Miền Nam • Tự nhiên)',
+    displayName: '👨 [Nam • Nam] Xuân Vĩnh (Tự nhiên, Thân thiện)',
+    gender: 'Nam',
+    genderLabel: '👨 Nam',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Nam',
+    provider: 'vieneu',
+    voiceId: 'Xuân Vĩnh',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nam miền Nam trẻ trung, thân thiện, tự nhiên cho video TikTok/Shorts.',
+  },
+  {
+    id: 'vieneu-thanh-binh',
+    name: 'Thanh Bình (Nam • Miền Nam • Chuyên nghiệp)',
+    displayName: '👨 [Nam • Nam] Thanh Bình (Chuyên nghiệp)',
+    gender: 'Nam',
+    genderLabel: '👨 Nam',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Nam',
+    provider: 'vieneu',
+    voiceId: 'Thanh Bình',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nam Sài Gòn chuẩn mực, lịch thiệp cho video doanh nghiệp và quảng cáo.',
+  },
+  {
+    id: 'vieneu-thuc-doan',
+    name: 'Thục Đoan (Nữ • Miền Nam • Dịu dàng)',
+    displayName: '👩 [Nữ • Nam] Thục Đoan (Dịu dàng, Mượt mà)',
+    gender: 'Nữ',
+    genderLabel: '👩 Nữ',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Nam',
+    provider: 'vieneu',
+    voiceId: 'Thục Đoan',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nữ miền Nam ngọt ngào, dịu dàng, phát âm êm ái dễ chịu.',
+  },
+  {
+    id: 'vieneu-ngoc-linh',
+    name: 'Ngọc Linh (Nữ • Miền Nam • Tươi trẻ)',
+    displayName: '👩 [Nữ • Nam] Ngọc Linh (Tươi trẻ, Năng động)',
+    gender: 'Nữ',
+    genderLabel: '👩 Nữ',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Nam',
+    provider: 'vieneu',
+    voiceId: 'Ngọc Linh',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nữ Sài Gòn tươi vui, năng động, rất hút tai trong video mạng xã hội.',
+  },
+  {
+    id: 'vieneu-thuy-dung',
+    name: 'Thùy Dung (Nữ • Miền Nam • Truyền cảm)',
+    displayName: '👩 [Nữ • Nam] Thùy Dung (Truyền cảm, Ấm áp)',
+    gender: 'Nữ',
+    genderLabel: '👩 Nữ',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Nam',
+    provider: 'vieneu',
+    voiceId: 'Thùy Dung',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Ấm áp, biểu cảm, giàu cảm xúc cho video kể chuyện và tâm sự.',
+  },
+  {
+    id: 'vieneu-minh-triet',
+    name: 'Minh Triết (Nam • Miền Trung • Rõ ràng)',
+    displayName: '👨 [Nam • Trung] Minh Triết (Trầm ấm, Rõ ràng)',
+    gender: 'Nam',
+    genderLabel: '👨 Nam',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Trung',
+    provider: 'vieneu',
+    voiceId: 'Minh Triết',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nam miền Trung đĩnh đạc, rõ từng chữ, dễ nghe trên toàn quốc.',
+  },
+  {
+    id: 'vieneu-quang-son',
+    name: 'Quang Sơn (Nam • Miền Trung • Chân thực)',
+    displayName: '👨 [Nam • Trung] Quang Sơn (Chân thực, Mộc mạc)',
+    gender: 'Nam',
+    genderLabel: '👨 Nam',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Trung',
+    provider: 'vieneu',
+    voiceId: 'Quang Sơn',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nam miền Trung chân phương, mộc mạc, gần gũi.',
+  },
+  {
+    id: 'vieneu-ngoc-tran',
+    name: 'Ngọc Trân (Nữ • Miền Trung • Dịu nhẹ)',
+    displayName: '👩 [Nữ • Trung] Ngọc Trân (Ngọt ngào, Dịu nhẹ)',
+    gender: 'Nữ',
+    genderLabel: '👩 Nữ',
+    lang: 'vi',
+    langLabel: '🇻🇳 Tiếng Việt (VieNeu AI)',
+    region: 'Miền Trung',
+    provider: 'vieneu',
+    voiceId: 'Ngọc Trân',
+    defaultRate: '+0%',
+    defaultPitch: '+0Hz',
+    style: 'Giọng Nữ miền Trung ngọt ngào, âm điệu êm đềm đặc trưng xứ Huế/Đà Nẵng.',
+  },
+
   // --- 1. TIẾNG VIỆT BẢN ĐỊA (Microsoft Edge Neural • 48kHz Miễn Phí) ---
+
   {
     id: 'vi-nam-minh',
     name: 'Nam Minh (Nam • Chuẩn Bắc)',
@@ -183,6 +397,114 @@ export const FREE_VOICE_PRESETS = [
     style: 'Prestigious, clear British accent for documentary and editorial content.',
   },
 ];
+
+let _cachedVieneuVoices = null;
+
+/**
+ * Lấy danh sách giọng VieNeu từ SDK / runtime
+ */
+export function getVieneuVoices(forceRefresh = false) {
+  if (!forceRefresh && _cachedVieneuVoices !== null) return _cachedVieneuVoices;
+
+  if (!hasVieNeu()) {
+    _cachedVieneuVoices = [];
+    return [];
+  }
+
+  try {
+    const out = execFileSync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--list-voices'], {
+      stdio: ['ignore', 'pipe', 'ignore'],
+      encoding: 'utf-8',
+      timeout: 30000,
+    });
+    const parsed = JSON.parse(out.trim());
+    if (parsed.status === 'ok' && Array.isArray(parsed.voices)) {
+      _cachedVieneuVoices = parsed.voices;
+      return _cachedVieneuVoices;
+    }
+  } catch (err) {
+    console.warn('[LocalTTS] getVieneuVoices warning:', err.message);
+  }
+
+  _cachedVieneuVoices = [];
+  return [];
+}
+
+/**
+ * Danh mục toàn bộ giọng khả dụng (VieNeu nếu có + Edge Neural + Google)
+ */
+export function getAvailableVoices(forceRefresh = false) {
+  const vieneuList = getVieneuVoices(forceRefresh);
+  const combined = [...vieneuList, ...FREE_VOICE_PRESETS];
+  const seen = new Set();
+  const unique = [];
+  for (const v of combined) {
+    if (!seen.has(v.id)) {
+      seen.add(v.id);
+      unique.push(v);
+    }
+  }
+  return unique;
+}
+
+
+/**
+ * Tìm preset giọng theo ID hoặc voiceId
+ */
+export function findVoicePreset(presetId) {
+  if (!presetId) return FREE_VOICE_PRESETS[0];
+  const allVoices = getAvailableVoices();
+  const found = allVoices.find(p => p.id === presetId || p.voiceId === presetId);
+  return found || FREE_VOICE_PRESETS.find(p => p.id === presetId || p.voiceId === presetId) || FREE_VOICE_PRESETS[0];
+}
+
+/**
+ * Tổng hợp 1 câu thoại bằng VieNeu-TTS (Python Worker)
+ */
+export async function synthesizeVieNeuSpeech({
+  text,
+  voiceName = 'Trúc Ly',
+  rate = 0,
+  pitch = 0,
+  outFilePath,
+}) {
+  const outDir = path.dirname(outFilePath);
+  if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
+
+  const payload = {
+    text: text.trim(),
+    voiceId: voiceName,
+    outFilePath,
+    rate: Number(rate) || 0,
+    pitch: Number(pitch) || 0,
+    ffmpegBin: FFMPEG_BIN,
+    ffprobeBin: FFPROBE_BIN,
+  };
+
+  const tempJson = path.join(outDir, `vieneu_single_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.json`);
+  try {
+    fs.writeFileSync(tempJson, JSON.stringify(payload), 'utf-8');
+    const out = execFileSync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--synthesize', '--payload-file', tempJson], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      encoding: 'utf-8',
+      timeout: 60000,
+    });
+
+    const parsed = JSON.parse(out.trim());
+    if (parsed.status !== 'ok') {
+      throw new Error(parsed.message || 'Lỗi không xác định từ VieNeu Worker');
+    }
+
+    return {
+      durationSec: parsed.durationSec || 4.0,
+      sizeBytes: parsed.sizeBytes || (fs.existsSync(outFilePath) ? fs.statSync(outFilePath).size : 0),
+      voiceId: parsed.voiceId || voiceName,
+    };
+  } finally {
+    try { if (fs.existsSync(tempJson)) fs.unlinkSync(tempJson); } catch {}
+  }
+}
+
 
 // Fallback & Direct Google Cloud TTS Fetcher (Chunked & Concatenated)
 export async function fetchGoogleTts(text, lang = 'vi') {
@@ -358,10 +680,10 @@ export async function synthesizeVoiceSpeech({
     throw new Error('Văn bản thuyết minh không được để trống');
   }
 
-  const preset = FREE_VOICE_PRESETS.find(p => p.id === voicePresetId || p.voiceId === voicePresetId) || FREE_VOICE_PRESETS[0];
+  const preset = findVoicePreset(voicePresetId);
   const activeVoiceId = customVoiceId || preset.voiceId;
+  const isVieNeu = (preset.provider === 'vieneu' || voicePresetId.startsWith('vieneu-')) && hasVieNeu();
   const isGoogle = preset.provider === 'google-cloud' || voicePresetId.includes('google');
-  const isEdge = preset.provider === 'edge-neural' || activeVoiceId.includes('Neural');
 
   const outDir = path.dirname(outFilePath);
   if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
@@ -370,17 +692,45 @@ export async function synthesizeVoiceSpeech({
   let formattedRate = rate;
   if (typeof rate === 'number') {
     formattedRate = rate >= 0 ? `+${rate}%` : `${rate}%`;
-  } else if (!formattedRate.endsWith('%')) {
+  } else if (!String(formattedRate).endsWith('%')) {
     formattedRate = `${formattedRate}%`;
   }
 
   let formattedPitch = pitch;
   if (typeof pitch === 'number') {
     formattedPitch = pitch >= 0 ? `+${pitch}Hz` : `${pitch}Hz`;
-  } else if (!formattedPitch.endsWith('Hz')) {
+  } else if (!String(formattedPitch).endsWith('Hz')) {
     formattedPitch = `${formattedPitch}Hz`;
   }
 
+  const rateNum = typeof rate === 'number' ? rate : parseInt(String(rate).replace('%', ''), 10) || 0;
+  const pitchNum = typeof pitch === 'number' ? pitch : parseInt(String(pitch).replace('Hz', ''), 10) || 0;
+
+  // --- 1. VieNeu-TTS (Local AI Engine) ---
+  if (isVieNeu) {
+    try {
+      const res = await synthesizeVieNeuSpeech({
+        text,
+        voiceName: preset.voiceId,
+        rate: rateNum,
+        pitch: pitchNum,
+        outFilePath,
+      });
+
+      return {
+        durationSec: res.durationSec,
+        voiceId: res.voiceId,
+        preset,
+        rate: formattedRate,
+        pitch: formattedPitch,
+        sizeBytes: res.sizeBytes,
+      };
+    } catch (err) {
+      console.warn(`[LocalTTS] VieNeu-TTS error (${err.message}), falling back to Edge-TTS...`);
+    }
+  }
+
+  // --- 2. Google Cloud TTS ---
   if (isGoogle) {
     try {
       const buffer = await fetchGoogleTts(text, preset.lang || 'vi');
@@ -405,14 +755,18 @@ export async function synthesizeVoiceSpeech({
     }
   }
 
-  // Edge Neural TTS (Default)
+  // --- 3. Edge Neural TTS (Default & Fallback) ---
+  const edgeVoiceId = isVieNeu
+    ? (preset.gender === 'Nam' ? 'vi-VN-NamMinhNeural' : 'vi-VN-HoaiMyNeural')
+    : (activeVoiceId.includes('Neural') ? activeVoiceId : 'vi-VN-NamMinhNeural');
+
   const tempFile = path.join(outDir, `temp_speech_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.txt`);
   try {
     fs.writeFileSync(tempFile, text.trim(), 'utf-8');
     const rateArg = (formattedRate && formattedRate !== '+0%' && formattedRate !== '0%') ? `--rate="${formattedRate}"` : '';
     const pitchArg = (formattedPitch && formattedPitch !== '+0Hz' && formattedPitch !== '0Hz') ? `--pitch="${formattedPitch}"` : '';
     
-    const cmd = `"${EDGE_TTS_BIN}" --voice "${activeVoiceId}" ${rateArg} ${pitchArg} -f "${tempFile}" --write-media "${outFilePath}"`;
+    const cmd = `"${EDGE_TTS_BIN}" --voice "${edgeVoiceId}" ${rateArg} ${pitchArg} -f "${tempFile}" --write-media "${outFilePath}"`;
     try {
       execSync(cmd, { stdio: 'pipe' });
     } catch (firstErr) {
@@ -423,13 +777,14 @@ export async function synthesizeVoiceSpeech({
     if (fs.existsSync(outFilePath) && fs.statSync(outFilePath).size > 100) {
       let durationSec = 5;
       try {
-        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`).toString().trim();        const parsed = parseFloat(durOut);
+        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`).toString().trim();
+        const parsed = parseFloat(durOut);
         if (!isNaN(parsed) && parsed > 0) durationSec = Number(parsed.toFixed(2));
       } catch {}
 
       return {
         durationSec,
-        voiceId: activeVoiceId,
+        voiceId: edgeVoiceId,
         preset,
         rate: formattedRate,
         pitch: formattedPitch,
@@ -443,7 +798,8 @@ export async function synthesizeVoiceSpeech({
       fs.writeFileSync(outFilePath, buffer);
       let durationSec = 4.0;
       try {
-        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`).toString().trim();        const parsed = parseFloat(durOut);
+        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${outFilePath}"`).toString().trim();
+        const parsed = parseFloat(durOut);
         if (!isNaN(parsed) && parsed > 0) durationSec = Number(parsed.toFixed(2));
       } catch {}
       return {
@@ -528,6 +884,8 @@ export function parseVttToCues(vttContent) {
 
 /**
  * Synthesize voice for multiple scenes and calculate accurate per-scene duration
+ * For VieNeu-TTS: Model initializes ONCE and processes all scenes in batch.
+ * If VieNeu fails: Automatically falls back to Edge-TTS without breaking.
  */
 export async function synthesizeMultiSceneVoice({
   scenes,
@@ -540,6 +898,92 @@ export async function synthesizeMultiSceneVoice({
   const targetDir = outDir || outputDir;
   if (!fs.existsSync(targetDir)) fs.mkdirSync(targetDir, { recursive: true });
 
+  const preset = findVoicePreset(voicePresetId);
+  const isVieNeu = (preset.provider === 'vieneu' || voicePresetId.startsWith('vieneu-')) && hasVieNeu();
+
+  const rateNum = typeof rate === 'number' ? rate : parseInt(String(rate).replace('%', ''), 10) || 0;
+  const pitchNum = typeof pitch === 'number' ? pitch : parseInt(String(pitch).replace('Hz', ''), 10) || 0;
+
+  // --- VieNeu Multi-Scene Batch Optimization (Model Init ONCE) ---
+  if (isVieNeu) {
+    const batchPayload = {
+      voiceId: preset.voiceId,
+      rate: rateNum,
+      pitch: pitchNum,
+      ffmpegBin: FFMPEG_BIN,
+      ffprobeBin: FFPROBE_BIN,
+      scenes: scenes.map((sc, idx) => {
+        const sceneId = sc.id || `scene_${String(idx + 1).padStart(2, '0')}`;
+        const textToSpeak = sc.speechText || sc.subText || sc.text || sc.title || '';
+        return {
+          id: sceneId,
+          text: textToSpeak,
+          voiceId: sc.voiceId || preset.voiceId,
+          outFilePath: path.join(targetDir, `${sceneId}.mp3`),
+        };
+      }),
+    };
+
+    const tempBatchJson = path.join(targetDir, `batch_payload_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.json`);
+    try {
+      fs.writeFileSync(tempBatchJson, JSON.stringify(batchPayload), 'utf-8');
+      const out = execFileSync(PYTHON_BIN, [VIENEU_WORKER_SCRIPT, '--batch-synthesize', '--payload-file', tempBatchJson], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        encoding: 'utf-8',
+        timeout: 120000,
+      });
+
+      const parsed = JSON.parse(out.trim());
+      if (parsed.status === 'ok' && Array.isArray(parsed.scenes)) {
+        const sceneMap = new Map(parsed.scenes.map(s => [s.id, s]));
+        const results = [];
+        let cumulativeStartSec = 0;
+
+        for (let i = 0; i < scenes.length; i++) {
+          const scene = scenes[i];
+          const sceneId = scene.id || `scene_${String(i + 1).padStart(2, '0')}`;
+          const textToSpeak = scene.speechText || scene.subText || scene.text || scene.title || '';
+          const audioOut = path.join(targetDir, `${sceneId}.mp3`);
+          const res = sceneMap.get(sceneId) || { durationSec: 4.0, audioPath: audioOut };
+
+          // Guarantee audioOut exists
+          if (!fs.existsSync(audioOut) || fs.statSync(audioOut).size < 50) {
+            try {
+              execSync(`"${FFMPEG_BIN}" -y -f lavfi -t 4.0 -i anullsrc=r=44100:cl=stereo -c:a libmp3lame -q:a 2 "${audioOut}"`, { stdio: 'pipe' });
+            } catch {}
+          }
+
+          const visualDurationSec = Math.max(3.5, Number(((res.durationSec || 4.0) + 0.4).toFixed(2)));
+
+          results.push({
+            ...scene,
+            id: sceneId,
+            speechText: textToSpeak,
+            audioPath: audioOut,
+            audioDurationSec: res.durationSec || 4.0,
+            durationSec: visualDurationSec,
+            cues: [],
+            timelineStartSec: Number(cumulativeStartSec.toFixed(2)),
+            timelineEndSec: Number((cumulativeStartSec + visualDurationSec).toFixed(2)),
+          });
+
+          cumulativeStartSec += visualDurationSec;
+        }
+
+        return {
+          totalDurationSec: Number(cumulativeStartSec.toFixed(2)),
+          scenes: results,
+          modelInitCount: parsed.modelInitCount || 1,
+        };
+      }
+    } catch (batchErr) {
+      console.warn(`[LocalTTS] VieNeu batch synthesis error (${batchErr.message}), falling back to scene-by-scene Edge TTS...`);
+    } finally {
+      try { if (fs.existsSync(tempBatchJson)) fs.unlinkSync(tempBatchJson); } catch {}
+    }
+  }
+
+  // --- Fallback & Scene-by-Scene Synthesis Loop ---
   const results = [];
   let cumulativeStartSec = 0;
 
@@ -548,7 +992,6 @@ export async function synthesizeMultiSceneVoice({
     const sceneId = scene.id || `scene_${String(i + 1).padStart(2, '0')}`;
     const textToSpeak = scene.speechText || scene.subText || scene.text || scene.title || '';
     const audioOut = path.join(targetDir, `${sceneId}.mp3`);
-    const vttOut = path.join(targetDir, `${sceneId}.vtt`);
 
     let synthResult = { durationSec: 4.0, cues: [] };
     if (textToSpeak.trim()) {
@@ -605,6 +1048,7 @@ export async function synthesizeMultiSceneVoice({
     scenes: results,
   };
 }
+
 
 /**
  * Royalty-Free Background Music Presets

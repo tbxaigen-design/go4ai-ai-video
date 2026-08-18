@@ -22,7 +22,7 @@ import https from 'node:https';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { execFileSync, execSync } from 'node:child_process';
-import { BINARIES_DIR, VENV_DIR, checkBinaries, hasNeuralVoice } from './resolve-binaries.js';
+import { BINARIES_DIR, VENV_DIR, checkBinaries, hasNeuralVoice, hasVieNeu } from './resolve-binaries.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isWin = process.platform === 'win32';
@@ -343,6 +343,41 @@ async function installChromium() {
   }
 }
 
+/**
+ * Cài đặt VieNeu-TTS (Local AI Engine) vào .venv-tts (Optional).
+ * Nếu thất bại thì cảnh báo và giữ Edge-TTS làm fallback.
+ */
+function installVieNeuTts() {
+  if (hasVieNeu()) {
+    log('[OK] VieNeu-TTS đã sẵn sàng (14 giọng đọc AI tiếng Việt 3 miền).');
+    return true;
+  }
+
+  const python = findPython();
+  if (!python) return false;
+
+  log('[*] Đang chuẩn bị VieNeu-TTS (AI voice tiếng Việt cục bộ)...');
+  try {
+    const venvPython = path.join(VENV_DIR, isWin ? 'Scripts' : 'bin', isWin ? 'python.exe' : 'python');
+    if (!fs.existsSync(venvPython)) return false;
+
+    execFileSync(venvPython, ['-m', 'pip', 'install', '--quiet', 'vieneu'], {
+      stdio: 'inherit',
+    });
+
+    if (hasVieNeu(true)) {
+      log('[OK] Đã cài đặt VieNeu-TTS thành công.');
+      return true;
+    }
+    log('[!] VieNeu-TTS chưa sẵn sàng, app sẽ tự động dùng Edge-TTS dự phòng.');
+    return false;
+  } catch (err) {
+    log(`[!] Cài đặt VieNeu-TTS gặp sự cố: ${String(err.message).split('\n')[0]}`);
+    log('    (App vẫn hoạt động bình thường với Edge-TTS dự phòng).');
+    return false;
+  }
+}
+
 async function main() {
   log('');
   log('[*] Kiểm tra công cụ cần thiết...');
@@ -367,6 +402,7 @@ async function main() {
 
   await installChromium();
   installEdgeTts();
+  installVieNeuTts();
   log('');
 }
 
@@ -374,3 +410,4 @@ main().catch((err) => {
   console.error(`[LỖI] setup-binaries: ${err.message}`);
   process.exitCode = 1;
 });
+

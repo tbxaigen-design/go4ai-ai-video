@@ -269,7 +269,7 @@
             <i data-lucide="mic" class="w-4 h-4 text-indigo-400"></i>
             Studio Lồng Tiếng & Nhịp Đọc
           </span>
-          <span class="text-[10px] font-mono bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20">Edge Neural</span>
+          <span id="badgeEngineType" class="text-[10px] font-mono bg-indigo-500/10 text-indigo-300 px-2 py-0.5 rounded border border-indigo-500/20">VieNeu & Edge Neural</span>
         </div>
 
         <!-- 1. Voice Selector (Rõ Nam/Nữ & Ngôn ngữ) -->
@@ -280,8 +280,24 @@
           </label>
 
           <select id="globalVoiceSelect" onchange="onVoiceChange()" class="w-full bg-slate-900 border border-slate-700 text-xs font-semibold text-white rounded-lg px-2.5 py-2 focus:outline-none focus:border-indigo-500 cursor-pointer">
+            <optgroup label="🇻🇳 Tiếng Việt VieNeu AI Local (Bản địa 3 Miền • Miễn Phí • Offline)">
+              <option value="vieneu-truc-ly" selected>👩 [Nữ • Bắc] Trúc Ly (Truyền cảm, Tự nhiên)</option>
+              <option value="vieneu-minh-duc">👨 [Nam • Bắc] Minh Đức (Tin tức, Chững chạc)</option>
+              <option value="vieneu-mai-anh">👩 [Nữ • Bắc] Mai Anh (Nhẹ nhàng, Thuyết minh)</option>
+              <option value="vieneu-pham-tuyen">👨 [Nam • Bắc] Phạm Tuyên (Tự nhiên, Đời sống)</option>
+              <option value="vieneu-doan-trang">👩 [Nữ • Bắc] Đoan Trang (Truyền hình, Tự tin)</option>
+              <option value="vieneu-thai-son">👨 [Nam • Nam] Thái Sơn (Kể chuyện, Trầm ấm)</option>
+              <option value="vieneu-xuan-vinh">👨 [Nam • Nam] Xuân Vĩnh (Tự nhiên, Thân thiện)</option>
+              <option value="vieneu-thanh-binh">👨 [Nam • Nam] Thanh Bình (Chuyên nghiệp)</option>
+              <option value="vieneu-thuc-doan">👩 [Nữ • Nam] Thục Đoan (Dịu dàng, Mượt mà)</option>
+              <option value="vieneu-ngoc-linh">👩 [Nữ • Nam] Ngọc Linh (Tươi trẻ, Năng động)</option>
+              <option value="vieneu-thuy-dung">👩 [Nữ • Nam] Thùy Dung (Truyền cảm, Ấm áp)</option>
+              <option value="vieneu-minh-triet">👨 [Nam • Trung] Minh Triết (Trầm ấm, Rõ ràng)</option>
+              <option value="vieneu-quang-son">👨 [Nam • Trung] Quang Sơn (Chân thực, Mộc mạc)</option>
+              <option value="vieneu-ngoc-tran">👩 [Nữ • Trung] Ngọc Trân (Ngọt ngào, Dịu nhẹ)</option>
+            </optgroup>
             <optgroup label="🇻🇳 Tiếng Việt Bản Địa (Microsoft Neural • 48kHz Miễn Phí)">
-              <option value="vi-nam-minh" selected>👨 [Nam • Chuẩn Bắc] Nam Minh (Trầm ấm, Công nghệ)</option>
+              <option value="vi-nam-minh">👨 [Nam • Chuẩn Bắc] Nam Minh (Trầm ấm, Công nghệ)</option>
               <option value="vi-hoai-my">👩 [Nữ • Chuẩn Bắc] Hoài My (Nhẹ nhàng, Truyền cảm)</option>
             </optgroup>
             <optgroup label="🇻🇳 Tiếng Việt Google Cloud (Miễn Phí 100%)">
@@ -300,6 +316,7 @@
               <option value="en-gb-ryan">👨 [Male • UK] Ryan (Documentary)</option>
             </optgroup>
           </select>
+
 
           <!-- Nút Nghe Thử Mẫu Giọng Đọc -->
           <button onclick="playVoiceAudition()" id="btnPlayVoiceAudition" class="w-full mt-2 bg-indigo-600/20 hover:bg-indigo-600/35 border border-indigo-500/40 text-indigo-300 hover:text-white font-bold text-xs py-2 rounded-lg flex items-center justify-center gap-1.5 transition shadow-sm">
@@ -700,6 +717,22 @@
                 </div>
                 <select id="sceneVoiceSelect" class="w-full bg-slate-900 border border-slate-700 text-[11px] font-semibold text-white rounded px-2 py-1.5 focus:outline-none focus:border-indigo-500 cursor-pointer">
                   <option value="inherit">✨ Dùng giọng mặc định của dự án</option>
+                  <optgroup label="🇻🇳 Tiếng Việt VieNeu AI Local (Bản địa 3 Miền • Offline)">
+                    <option value="vieneu-truc-ly">👩 [Nữ • Bắc] Trúc Ly</option>
+                    <option value="vieneu-minh-duc">👨 [Nam • Bắc] Minh Đức</option>
+                    <option value="vieneu-mai-anh">👩 [Nữ • Bắc] Mai Anh</option>
+                    <option value="vieneu-pham-tuyen">👨 [Nam • Bắc] Phạm Tuyên</option>
+                    <option value="vieneu-doan-trang">👩 [Nữ • Bắc] Đoan Trang</option>
+                    <option value="vieneu-thai-son">👨 [Nam • Nam] Thái Sơn</option>
+                    <option value="vieneu-xuan-vinh">👨 [Nam • Nam] Xuân Vĩnh</option>
+                    <option value="vieneu-thanh-binh">👨 [Nam • Nam] Thanh Bình</option>
+                    <option value="vieneu-thuc-doan">👩 [Nữ • Nam] Thục Đoan</option>
+                    <option value="vieneu-ngoc-linh">👩 [Nữ • Nam] Ngọc Linh</option>
+                    <option value="vieneu-thuy-dung">👩 [Nữ • Nam] Thùy Dung</option>
+                    <option value="vieneu-minh-triet">👨 [Nam • Trung] Minh Triết</option>
+                    <option value="vieneu-quang-son">👨 [Nam • Trung] Quang Sơn</option>
+                    <option value="vieneu-ngoc-tran">👩 [Nữ • Trung] Ngọc Trân</option>
+                  </optgroup>
                   <optgroup label="🇻🇳 Tiếng Việt Bản Địa (Microsoft Neural • 48kHz)">
                     <option value="vi-nam-minh">👨 [Nam • Chuẩn Bắc] Nam Minh</option>
                     <option value="vi-hoai-my">👩 [Nữ • Chuẩn Bắc] Hoài My</option>
@@ -720,6 +753,7 @@
                     <option value="en-gb-ryan">👨 [Male] Ryan UK</option>
                   </optgroup>
                 </select>
+
 
                 <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-800/60">
                   <span class="text-slate-400 text-[10px]">Tốc độ đọc cảnh:</span>
@@ -1417,10 +1451,89 @@ Giá trị thực sự chỉ xuất hiện khi công nghệ được gắn chặ
 GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ công nghệ vững vàng cho tương lai.`
     };
 
+    let availableVoices = [];
+
     async function loadAll() {
-      await Promise.all([loadProjects(), loadTemplates()]);
+      await Promise.all([loadProjects(), loadTemplates(), loadVoices()]);
       lucide.createIcons();
     }
+
+    // --- VOICES MANAGEMENT ---
+    async function loadVoices() {
+      try {
+        const res = await fetch('/api/voices');
+        const data = await res.json();
+        if (data.success && Array.isArray(data.voices)) {
+          availableVoices = data.voices;
+          renderVoiceSelectOptions();
+        }
+      } catch (err) {
+        console.warn('Lỗi tải danh sách voices:', err);
+      }
+    }
+
+    function renderVoiceSelectOptions() {
+      const select = document.getElementById('globalVoiceSelect');
+      if (!select || availableVoices.length === 0) return;
+
+      const currentVal = select.value || (currentProject?.config?.ttsVoice) || 'vieneu-truc-ly';
+
+      const groups = {
+        vieneu: { label: '🇻🇳 Tiếng Việt VieNeu AI Local (Bản địa 3 Miền • Chạy Offline)', list: [] },
+        edgeNative: { label: '🇻🇳 Tiếng Việt Bản Địa (Microsoft Edge Neural • 48kHz Miễn Phí)', list: [] },
+        google: { label: '🇻🇳 Tiếng Việt Google Cloud (Miễn Phí 100%)', list: [] },
+        edgeMulti: { label: '🇻🇳 Tiếng Việt Multilingual AI Neural (Microsoft Copilot AI)', list: [] },
+        english: { label: '🇺🇸 🇬🇧 English (Male & Female US/UK)', list: [] },
+      };
+
+      for (const v of availableVoices) {
+        if (v.provider === 'vieneu') {
+          groups.vieneu.list.push(v);
+        } else if (v.provider === 'google-cloud') {
+          groups.google.list.push(v);
+        } else if (v.id.startsWith('vi-ai-')) {
+          groups.edgeMulti.list.push(v);
+        } else if (v.lang === 'en') {
+          groups.english.list.push(v);
+        } else {
+          groups.edgeNative.list.push(v);
+        }
+      }
+
+      let html = '';
+      for (const key of ['vieneu', 'edgeNative', 'google', 'edgeMulti', 'english']) {
+        const g = groups[key];
+        if (g.list.length > 0) {
+          html += `<optgroup label="${g.label}">`;
+          for (const v of g.list) {
+            const label = v.displayName || `${v.genderLabel} ${v.name}`;
+            html += `<option value="${v.id}">${label}</option>`;
+          }
+          html += `</optgroup>`;
+        }
+      }
+
+      if (select) {
+        select.innerHTML = html;
+        const exists = availableVoices.some(v => v.id === currentVal || v.voiceId === currentVal);
+        if (exists) {
+          select.value = currentVal;
+        } else if (availableVoices.length > 0) {
+          select.value = availableVoices[0].id;
+        }
+      }
+
+      const sceneSelect = document.getElementById('sceneVoiceSelect');
+      if (sceneSelect) {
+        const currentSceneVal = sceneSelect.value || 'inherit';
+        sceneSelect.innerHTML = `<option value="inherit">✨ Dùng giọng mặc định của dự án</option>` + html;
+        sceneSelect.value = currentSceneVal;
+      }
+
+      onVoiceChange();
+    }
+
+
 
     // --- PROJECTS MANAGEMENT ---
     async function loadProjects() {
@@ -2025,11 +2138,22 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
 
     function onVoiceChange() {
       const val = document.getElementById('globalVoiceSelect').value;
-      const isFemale = val.includes('nu') || val.includes('my') || val.includes('jenny') || val.includes('aria');
-      const isEnglish = val.startsWith('en');
-      document.getElementById('badgeVoiceType').textContent = `${isFemale ? '👩 Nữ' : '👨 Nam'} • ${isEnglish ? 'English' : 'Tiếng Việt'}`;
+      const found = availableVoices.find(v => v.id === val || v.voiceId === val);
+
+      const badgeType = document.getElementById('badgeVoiceType');
+      const badgeEngine = document.getElementById('badgeEngineType');
+
+      if (found) {
+        if (badgeType) badgeType.textContent = `${found.genderLabel || (found.gender === 'Nam' ? '👨 Nam' : '👩 Nữ')} • ${found.region || (found.lang === 'en' ? 'English' : 'Tiếng Việt')}`;
+        if (badgeEngine) badgeEngine.textContent = found.provider === 'vieneu' ? 'VieNeu AI Local' : found.provider === 'google-cloud' ? 'Google Cloud' : 'Edge Neural';
+      } else {
+        const isFemale = val.includes('nu') || val.includes('my') || val.includes('jenny') || val.includes('aria') || val.includes('truc');
+        const isEnglish = val.startsWith('en');
+        if (badgeType) badgeType.textContent = `${isFemale ? '👩 Nữ' : '👨 Nam'} • ${isEnglish ? 'English' : 'Tiếng Việt'}`;
+      }
       debounceEstimate();
     }
+
 
     function loadSampleScript() {
       const key = document.getElementById('sampleScriptSelect').value;
