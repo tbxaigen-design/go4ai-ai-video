@@ -115,9 +115,12 @@ Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu t
 <p align="center">👇 Không phải mockup — đây là một video thật, render bằng chính pipeline trên (nhóm A · Social video):</p>
 
 <p align="center">
-<video src="https://raw.githubusercontent.com/tbxaigen-design/go4ai-ai-video/main/docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4" controls muted width="720" poster="docs/assets/hero.png">
-Trình duyệt của bạn không hỗ trợ xem video trực tiếp — <a href="https://raw.githubusercontent.com/tbxaigen-design/go4ai-ai-video/main/docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4">tải video mẫu tại đây</a>.
-</video>
+  <a href="https://www.youtube.com/watch?v=ZjZDOSL9yio">
+    <img src="https://img.youtube.com/vi/ZjZDOSL9yio/maxresdefault.jpg" alt="▶ Xem video demo trên YouTube" width="720" />
+  </a>
+  <br/>
+  <a href="https://www.youtube.com/watch?v=ZjZDOSL9yio"><b>▶ Bấm để xem trên YouTube</b></a>
+  · <a href="https://raw.githubusercontent.com/tbxaigen-design/go4ai-ai-video/main/docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4">tải file MP4 gốc</a>
 </p>
 
 <p align="center"><i>Giọng đọc AI Miền Nam · 9 cảnh · 60 giây · không qua chỉnh sửa hậu kỳ.</i></p>
