@@ -2146,9 +2146,10 @@ const server = http.createServer(async (req, res) => {
       let resolution = { width: 1920, height: 1080 };
       let fps = 60;
       let defaultDuration = 5;
-      // 'low' | 'medium' | 'high' | 'lossless' — người dùng chọn ở dropdown
-      // "Chất lượng xuất video", mặc định 'medium' giữ đúng hành vi cũ (CRF20).
-      let quality = 'medium';
+      // 'standard' | 'sharp' | 'ultra' — người dùng chọn ở dropdown "Chất lượng
+      // xuất video". Mỗi mức là một bộ trọn gói (độ nét render + độ phân giải
+      // xuất), xem resolveQualityParams() trong adapter-hyperframes/render.ts.
+      let quality = 'standard';
 
       let cfg = {};
       const configFile = path.join(dir, 'config.json');
@@ -2160,12 +2161,23 @@ const server = http.createServer(async (req, res) => {
           else if (cfg.width && cfg.height) resolution = { width: Number(cfg.width), height: Number(cfg.height) };
           if (cfg.fps) fps = Number(cfg.fps);
           if (cfg.defaultDuration) defaultDuration = Number(cfg.defaultDuration);
-          if (cfg.quality && ['low', 'medium', 'high', 'lossless'].includes(cfg.quality)) quality = cfg.quality;
+          // Tương thích ngược: bản trước lưu quality dạng 'low'/'medium'/'high'/
+          // 'lossless' (chỉ đổi CRF, chưa có supersampling). Map sang tier mới
+          // gần nghĩa nhất để không âm thầm mất lựa chọn cũ của người dùng.
+          const legacyQualityMap = { low: 'standard', medium: 'standard', high: 'sharp', lossless: 'ultra' };
+          if (cfg.quality && ['standard', 'sharp', 'ultra'].includes(cfg.quality)) quality = cfg.quality;
+          else if (cfg.quality && legacyQualityMap[cfg.quality]) quality = legacyQualityMap[cfg.quality];
         } catch {}
       }
 
-      const qualityLabel = { low: 'Nhanh', medium: 'Chuẩn', high: 'Cao (nét hơn)', lossless: 'Cực nét' }[quality];
-      sendEvent('log', { message: `Độ phân giải: ${resolution.width}x${resolution.height} (${fps}fps), chất lượng: ${qualityLabel}, ${htmlFiles.length} scenes` });
+      const qualityLabel = {
+        standard: 'Chuẩn (Full HD)',
+        sharp: 'Nét cao (Full HD Sắc nét)',
+        ultra: 'Cực nét (4K)',
+      }[quality];
+      const outputScale = quality === 'ultra' ? 2 : 1;
+      const finalResLabel = `${resolution.width * outputScale}x${resolution.height * outputScale}`;
+      sendEvent('log', { message: `Độ phân giải xuất: ${finalResLabel} (${fps}fps), chất lượng: ${qualityLabel}, ${htmlFiles.length} scenes` });
 
       // Gather scenes metadata for audio assembly
       const sceneObjects = htmlFiles.map((file) => {

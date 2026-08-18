@@ -33,15 +33,26 @@
   <style>
     /* Toàn app là dark UI, nhưng thẻ <select> gốc không tự biết điều đó —
        trình duyệt vẫn vẽ popup danh sách option theo theme SÁNG mặc định của
-       hệ điều hành (nền trắng, chữ đen) vì thiếu khai báo color-scheme. Đây là
-       lỗi chung cho toàn bộ 15 dropdown trong app (tỉ lệ khung hình, FPS, chất
-       lượng, giọng đọc, văn mẫu kịch bản, danh mục template...), không riêng
-       một ô nào — fix một lần ở gốc thay vì từng <select>. */
+       hệ điều hành. Đây là lỗi chung cho toàn bộ 15 dropdown trong app (tỉ lệ
+       khung hình, FPS, chất lượng, giọng đọc, văn mẫu kịch bản, danh mục
+       template...), không riêng một ô nào — fix một lần ở gốc.
+       `color-scheme: dark` chỉ là GỢI Ý cho trình duyệt, và trên Chrome/Windows
+       popup danh sách <option> không phải lúc nào cũng theo gợi ý này (khác
+       phần <select> đã đóng). Cách chắc chắn hoạt động: khai báo tường minh
+       background-color/color trực tiếp trên select VÀ từng option — đây là
+       "màu tác giả" mà trình duyệt bắt buộc phải tuân theo, không phải hint. */
     html, body {
       color-scheme: dark;
     }
-    select {
+    select, option {
       color-scheme: dark;
+      background-color: #0f172a;
+      color: #e2e8f0;
+    }
+    select option:checked,
+    select option:hover {
+      background-color: #4f46e5;
+      color: #ffffff;
     }
     body {
       background-color: #070a12;
@@ -212,10 +223,6 @@
         <span>+ Thêm Cảnh</span>
       </button>
 
-      <button id="btnRenderVideo" onclick="startRender()" class="hidden gradient-btn px-4 py-1.5 rounded-lg font-bold text-xs text-white flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
-        <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
-        <span>Xuất Video 60fps</span>
-      </button>
     </div>
   </header>
 
@@ -601,15 +608,22 @@
             </div>
 
             <!-- Quality Selector -->
-            <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1" title="Chất lượng cao hơn = hình nét hơn, đặc biệt khi xem full-screen trên laptop/màn lớn — nhưng file nặng hơn và render lâu hơn.">
+            <div class="flex items-center gap-1.5 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1" title="Chất lượng cao hơn = hình nét hơn, giống hệt lúc xem file HTML gốc trên máy — nhưng render lâu hơn và file nặng hơn.">
               <i data-lucide="sparkles" class="w-3.5 h-3.5 text-indigo-400"></i>
               <select id="selectQuality" onchange="updateProjectConfig()" class="bg-transparent text-xs font-bold text-slate-200 focus:outline-none cursor-pointer">
-                <option value="low">Nhanh (file nhẹ)</option>
-                <option value="medium" selected>Chuẩn (khuyến nghị)</option>
-                <option value="high">Cao (nét hơn, chậm hơn)</option>
-                <option value="lossless">Cực nét (nặng, chậm nhất)</option>
+                <option value="standard" selected>Chuẩn — Full HD (render nhanh nhất)</option>
+                <option value="sharp">Nét cao — Full HD Sắc nét (render lâu hơn)</option>
+                <option value="ultra">Cực nét — 4K (render lâu nhất, file nặng)</option>
               </select>
             </div>
+
+            <!-- Export — đặt ngay cạnh 3 lựa chọn ở trên: chọn xong bấm luôn,
+                 không phải đi tìm nút ở góc khác. Nhãn fps đọc động theo
+                 selectFps để không nói sai (vd chọn 30fps mà nút vẫn ghi 60fps). -->
+            <button id="btnRenderVideo" onclick="startRender()" class="hidden gradient-btn px-4 py-1.5 rounded-lg font-bold text-xs text-white flex items-center gap-1.5 shadow-md shadow-indigo-600/30">
+              <i data-lucide="play" class="w-3.5 h-3.5 fill-white"></i>
+              <span>Xuất Video <span id="btnRenderVideoFps">60</span>fps</span>
+            </button>
           </div>
 
           <!-- View Mode Switcher -->
@@ -1643,7 +1657,11 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
       document.getElementById('projHeaderTitle').textContent = currentProject.name;
       document.getElementById('selectAspect').value = currentProject.config.aspect || '16:9';
       document.getElementById('selectFps').value = String(currentProject.config.fps || '60');
-      document.getElementById('selectQuality').value = currentProject.config.quality || 'medium';
+      document.getElementById('btnRenderVideoFps').textContent = String(currentProject.config.fps || '60');
+      // Tương thích ngược với project lưu quality kiểu cũ ('low'/'medium'/'high'/'lossless')
+      const legacyQualityMap = { low: 'standard', medium: 'standard', high: 'sharp', lossless: 'ultra' };
+      const savedQuality = currentProject.config.quality;
+      document.getElementById('selectQuality').value = legacyQualityMap[savedQuality] || savedQuality || 'standard';
 
       if (currentProject.config.ttsVoice) {
         document.getElementById('globalVoiceSelect').value = currentProject.config.ttsVoice;
@@ -2352,7 +2370,7 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
         if (data.success) {
           await selectProject(currentProject.name);
           switchSidebarTab('projects');
-          alert(`🎉 AI Auto-Director đã tạo xong toàn bộ video (${data.metrics.sceneCount} cảnh, tỉ lệ ${aspect})!\nBạn có thể bấm "Xuất Video 60fps" để tải file MP4 ngay lập tức.`);
+          alert(`🎉 AI Auto-Director đã tạo xong toàn bộ video (${data.metrics.sceneCount} cảnh, tỉ lệ ${aspect})!\nBạn có thể bấm "Xuất Video" để tải file MP4 ngay lập tức.`);
         } else {
           alert('Lỗi AI Director: ' + data.error);
         }
@@ -2614,7 +2632,7 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
               <i data-lucide="video-off" class="w-6 h-6"></i>
             </div>
             <h4 class="text-sm font-bold text-slate-300">Chưa có video nào được xuất cho dự án này</h4>
-            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto mb-4">Bấm "Xuất Video 60fps" để bắt đầu render video đầu tiên từ các cảnh HTML của bạn.</p>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm mx-auto mb-4">Bấm "Xuất Video" để bắt đầu render video đầu tiên từ các cảnh HTML của bạn.</p>
             <button onclick="openExportsFolder()" class="text-xs font-bold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-4 py-2 rounded-xl inline-flex items-center gap-2 transition shadow-sm">
               <i data-lucide="folder-open" class="w-4 h-4 text-amber-400"></i>
               <span>Mở Thư Mục Chứa Video Trên Máy</span>
@@ -2695,6 +2713,7 @@ GO4AI đồng hành cùng doanh nghiệp xây dựng năng lực tự chủ côn
       const aspect = document.getElementById('selectAspect').value;
       const fps = Number(document.getElementById('selectFps').value);
       const quality = document.getElementById('selectQuality').value;
+      document.getElementById('btnRenderVideoFps').textContent = String(fps);
 
       updateAspectFrameDimensions();
       try {

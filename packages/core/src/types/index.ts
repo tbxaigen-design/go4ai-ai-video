@@ -74,7 +74,16 @@ export interface RenderConfig {
   durationMode?: 'explicit' | 'auto';
   outputPath: string;
   alpha?: boolean;
-  quality?: number | 'low' | 'medium' | 'high' | 'lossless';
+  /**
+   * User-facing export quality preset (see adapter-hyperframes resolveQualityParams
+   * for the concrete crf/preset/deviceScaleFactor/outputScale each maps to):
+   *   'standard' — base resolution, no supersampling. Fastest.
+   *   'sharp'    — same resolution, but rendered at 2x pixel density then
+   *                downsampled — sharper text/gradients, same delivered size.
+   *   'ultra'    — 'sharp' supersampling PLUS 2x delivered resolution (4K from
+   *                a 1080p base). Slowest, largest file.
+   */
+  quality?: 'standard' | 'sharp' | 'ultra';
   audio?: { path: string; volumeDb?: number }[];
 }
 

@@ -49,8 +49,16 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
 
   let totalDuration =
     input.config.duration === 'auto' ? 5 : Math.max(0.5, Number(input.config.duration));
+  // `resolution` is the CSS layout size the template was designed for (driven
+  // purely by aspect ratio, e.g. 1920x1080) — NOT necessarily the delivered
+  // pixel size. Quality preset scales the delivered size independently via
+  // deviceScaleFactor/outputScale below, so the page never reflows differently
+  // between quality tiers (only pixel density / output size changes).
   const { width, height } = input.config.resolution;
   const fps = input.config.fps || 30;
+  const qualityParams = resolveQualityParams(input.config.quality);
+  const outputWidth = Math.round(width * qualityParams.outputScale);
+  const outputHeight = Math.round(height * qualityParams.outputScale);
 
   // Lazy-load playwright so the import cost only hits actual exports.
   ctx.onProgress?.(15, 'launching browser');
@@ -77,9 +85,14 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
     // the webm's t=0 reference.
     const tWebmStart = Date.now();
     const context = await browser.newContext({
+      // Viewport stays at the base CSS layout size regardless of quality tier
+      // — this is what makes 'sharp'/'ultra' safe: the template renders
+      // pixel-identical layout, just supersampled at a higher device pixel
+      // ratio (like opening the page on a Retina/HiDPI screen) and optionally
+      // delivered at a larger final size (recordVideo.size).
       viewport: { width, height },
-      deviceScaleFactor: 1,
-      recordVideo: { dir: recordDir, size: { width, height } },
+      deviceScaleFactor: qualityParams.deviceScaleFactor,
+      recordVideo: { dir: recordDir, size: { width: outputWidth, height: outputHeight } },
     });
     const page = await context.newPage();
 
@@ -347,7 +360,6 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
   // target. -t then trims to the precise length. For 'auto' we keep the old
   // behavior (just -t, no padding) — there the duration is a soft fallback.
   const explicit = input.config.durationMode === 'explicit';
-  const qualityParams = resolveQualityParams(input.config.quality);
   await runFfmpeg([
     '-y',
     // -ss before -i = fast input seek, drops the frozen lead-in entirely.
@@ -379,36 +391,49 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
     meta: {
       durationSec: totalDuration,
       fileSizeBytes: st.size,
-      actualResolution: input.config.resolution,
+      actualResolution: { width: outputWidth, height: outputHeight },
       fps,
       renderedFrames: Math.round(totalDuration * fps),
       renderWallClockSec: (Date.now() - t0) / 1000,
       engineVersion: `hyperframes-playwright@${ADAPTER_VERSION}`,
     },
-    diagnostics: [`recorded via playwright/chromium then encoded with ffmpeg (libx264 crf${qualityParams.crf}, preset ${qualityParams.preset})`],
+    diagnostics: [
+      `recorded via playwright/chromium (deviceScaleFactor ${qualityParams.deviceScaleFactor}) at ${outputWidth}x${outputHeight}, encoded with ffmpeg (libx264 crf${qualityParams.crf}, preset ${qualityParams.preset})`,
+    ],
   };
 }
 
 /**
- * Map the user-facing quality knob (RenderConfig.quality) to concrete libx264
- * `-crf`/`-preset` values. Lower CRF = sharper/heavier; slower preset = better
- * compression at the same CRF but longer encode time. Defaults to the pre-RFC
- * 'medium' behavior (crf 20) when unset, so existing callers are unaffected.
+ * Map the user-facing quality knob (RenderConfig.quality) to concrete render
+ * params. Three tiers, each a full bundle (not independent sliders) so the
+ * user only ever picks one thing and the quality difference is unambiguous:
+ *
+ *   'standard' — base resolution, deviceScaleFactor 1 (1 CSS px = 1 delivered
+ *                px). Fastest; matches the pre-RFC default (crf 20).
+ *   'sharp'    — same delivered resolution, but Chromium renders internally
+ *                at 2x pixel density (deviceScaleFactor 2) and Playwright
+ *                downsamples to the target size — this is exactly what makes
+ *                a page look crisp on a Retina/HiDPI screen vs a plain 1x
+ *                capture. Text/gradients noticeably sharper, same file
+ *                dimensions. ~2-3x slower to render+encode.
+ *   'ultra'    — 'sharp' supersampling AND 2x delivered resolution (e.g.
+ *                1080p base → real 4K output). Slowest, largest file.
+ *
+ * `outputScale` only affects recordVideo output size, never the CSS viewport
+ * — the template always lays out at the same logical size, so nothing
+ * reflows differently between tiers, only pixel density/delivered size.
  */
-function resolveQualityParams(quality: RenderConfig['quality']): { crf: number; preset: string } {
-  if (typeof quality === 'number') {
-    return { crf: Math.min(51, Math.max(0, Math.round(quality))), preset: 'medium' };
-  }
+function resolveQualityParams(
+  quality: RenderConfig['quality'],
+): { crf: number; preset: string; deviceScaleFactor: number; outputScale: number } {
   switch (quality) {
-    case 'low':
-      return { crf: 26, preset: 'fast' };
-    case 'high':
-      return { crf: 17, preset: 'slow' };
-    case 'lossless':
-      return { crf: 12, preset: 'slower' };
-    case 'medium':
+    case 'sharp':
+      return { crf: 17, preset: 'slow', deviceScaleFactor: 2, outputScale: 1 };
+    case 'ultra':
+      return { crf: 15, preset: 'slow', deviceScaleFactor: 2, outputScale: 2 };
+    case 'standard':
     default:
-      return { crf: 20, preset: 'medium' };
+      return { crf: 20, preset: 'medium', deviceScaleFactor: 1, outputScale: 1 };
   }
 }
 
