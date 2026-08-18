@@ -16,6 +16,11 @@ import {
 } from './local-tts.js';
 // Ưu tiên: env var → @ffmpeg-installer (đúng kiến trúc) → binaries/ → PATH.
 import { FFMPEG_BIN, FFPROBE_BIN, hasVieNeu } from './resolve-binaries.js';
+// bootstrap() dựng orchestrator/engines/templates cho pipeline render thật
+// (content-graph + export). Thiếu import này khiến MỌI lần xuất video luôn
+// ReferenceError ngay khi vừa ghép xong audio — trước đó lỗi bị che bởi
+// execSync không timeout nên UI chỉ thấy "đứng hình", không thấy lỗi thật.
+import { bootstrap } from './packages/cli/dist/context.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -210,7 +215,7 @@ function getProjectExportedVideos(projectName) {
       const stat = fs.statSync(p);
       let duration = null;
       try {
-        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${p}"`).toString().trim();
+        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${p}"`, { timeout: 15000 }).toString().trim();
         duration = parseFloat(durOut);
       } catch {}
 
@@ -231,7 +236,7 @@ function getProjectExportedVideos(projectName) {
     const stat = fs.statSync(mainOut);
     let duration = null;
     try {
-      const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${mainOut}"`).toString().trim();
+      const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${mainOut}"`, { timeout: 15000 }).toString().trim();
       duration = parseFloat(durOut);
     } catch {}
 
@@ -694,77 +699,91 @@ export function compileTemplateHtml(tmplId) {
  * Generate a complete master synchronized narration audio from scenes
  * Respects each scene's introPause, speech duration, and outro silence gaps!
  */
-async function assembleProjectMasterAudio(projectName, scenes) {
+async function assembleProjectMasterAudio(projectName, scenes, onProgress) {
   const pDir = path.join(PROJECTS_DIR, projectName);
   const tempAudioDir = path.join(pDir, '__temp_audio_assembly');
   if (!fs.existsSync(tempAudioDir)) fs.mkdirSync(tempAudioDir, { recursive: true });
 
-  const sceneAudioTracks = [];
+  // Mọi lệnh ffmpeg/ffprobe PHẢI có timeout — trước đây execSync không giới
+  // hạn thời gian nên một tiến trình con treo (file bị khoá, filter_complex
+  // kẹt...) sẽ đơ toàn bộ server Node (single-thread) vĩnh viễn: không lỗi,
+  // không log, UI đứng hình mãi ở % cuối cùng nhận được.
+  const FFMPEG_TIMEOUT_MS = 20000;
 
-  for (let i = 0; i < scenes.length; i++) {
-    const scene = scenes[i];
-    const sceneDuration = Number(scene.duration || 5);
-    const sceneFile = scene.file;
-    const sceneBase = sceneFile.replace(/\.html$/i, '');
-    const possibleVoiceFile = path.join(pDir, `voice-${sceneBase}.mp3`);
-    const sceneTrackPath = path.join(tempAudioDir, `track_${String(i + 1).padStart(3, '0')}.wav`);
+  try {
+    const sceneAudioTracks = [];
 
-    const hasVoice = fs.existsSync(possibleVoiceFile) && fs.statSync(possibleVoiceFile).size > 100;
-    const introPause = Math.max(0, Number(scene.introPause || 0.3));
+    for (let i = 0; i < scenes.length; i++) {
+      const scene = scenes[i];
+      const sceneDuration = Number(scene.duration || 5);
+      const sceneFile = scene.file;
+      const sceneBase = sceneFile.replace(/\.html$/i, '');
+      const possibleVoiceFile = path.join(pDir, `voice-${sceneBase}.mp3`);
+      const sceneTrackPath = path.join(tempAudioDir, `track_${String(i + 1).padStart(3, '0')}.wav`);
 
-    if (hasVoice) {
-      let voiceDuration = 0;
-      try {
-        const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${possibleVoiceFile}"`).toString().trim();
-        voiceDuration = parseFloat(durOut) || 0;
-      } catch {}
+      onProgress?.(i, scenes.length, sceneFile);
 
-      const outroSilence = Math.max(0, sceneDuration - introPause - voiceDuration);
+      const hasVoice = fs.existsSync(possibleVoiceFile) && fs.statSync(possibleVoiceFile).size > 100;
+      const introPause = Math.max(0, Number(scene.introPause || 0.3));
 
-      // Build scene track: introSilence + voice + outroSilence
-      try {
-        if (introPause > 0.05 && outroSilence > 0.05) {
-          execSync(
-            `"${FFMPEG_BIN}" -y -f lavfi -t ${introPause.toFixed(2)} -i anullsrc=r=44100:cl=stereo -i "${possibleVoiceFile}" -f lavfi -t ${outroSilence.toFixed(2)} -i anullsrc=r=44100:cl=stereo -filter_complex "[0:a][1:a][2:a]concat=n=3:v=0:a=1[a]" -map "[a]" -t ${sceneDuration.toFixed(2)} "${sceneTrackPath}"`,
-          );
-        } else if (introPause > 0.05) {
-          execSync(
-            `"${FFMPEG_BIN}" -y -f lavfi -t ${introPause.toFixed(2)} -i anullsrc=r=44100:cl=stereo -i "${possibleVoiceFile}" -filter_complex "[0:a][1:a]concat=n=2:v=0:a=1[a]" -map "[a]" -t ${sceneDuration.toFixed(2)} "${sceneTrackPath}"`,
-          );
-        } else {
-          execSync(
-            `"${FFMPEG_BIN}" -y -i "${possibleVoiceFile}" -af "apad=whole_dur=${sceneDuration.toFixed(2)}" -t ${sceneDuration.toFixed(2)} "${sceneTrackPath}"`,
-          );
+      if (hasVoice) {
+        let voiceDuration = 0;
+        try {
+          const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${possibleVoiceFile}"`, { timeout: FFMPEG_TIMEOUT_MS }).toString().trim();
+          voiceDuration = parseFloat(durOut) || 0;
+        } catch {}
+
+        const outroSilence = Math.max(0, sceneDuration - introPause - voiceDuration);
+
+        // Build scene track: introSilence + voice + outroSilence
+        try {
+          if (introPause > 0.05 && outroSilence > 0.05) {
+            execSync(
+              `"${FFMPEG_BIN}" -y -f lavfi -t ${introPause.toFixed(2)} -i anullsrc=r=44100:cl=stereo -i "${possibleVoiceFile}" -f lavfi -t ${outroSilence.toFixed(2)} -i anullsrc=r=44100:cl=stereo -filter_complex "[0:a][1:a][2:a]concat=n=3:v=0:a=1[a]" -map "[a]" -t ${sceneDuration.toFixed(2)} "${sceneTrackPath}"`,
+              { timeout: FFMPEG_TIMEOUT_MS, stdio: 'pipe' },
+            );
+          } else if (introPause > 0.05) {
+            execSync(
+              `"${FFMPEG_BIN}" -y -f lavfi -t ${introPause.toFixed(2)} -i anullsrc=r=44100:cl=stereo -i "${possibleVoiceFile}" -filter_complex "[0:a][1:a]concat=n=2:v=0:a=1[a]" -map "[a]" -t ${sceneDuration.toFixed(2)} "${sceneTrackPath}"`,
+              { timeout: FFMPEG_TIMEOUT_MS, stdio: 'pipe' },
+            );
+          } else {
+            execSync(
+              `"${FFMPEG_BIN}" -y -i "${possibleVoiceFile}" -af "apad=whole_dur=${sceneDuration.toFixed(2)}" -t ${sceneDuration.toFixed(2)} "${sceneTrackPath}"`,
+              { timeout: FFMPEG_TIMEOUT_MS, stdio: 'pipe' },
+            );
+          }
+          sceneAudioTracks.push(sceneTrackPath);
+        } catch (e) {
+          console.warn(`[AudioAssemble] Scene ${i + 1} voice merge failed, generating silence fallback:`, e.message);
+          execSync(`"${FFMPEG_BIN}" -y -f lavfi -t ${sceneDuration.toFixed(2)} -i anullsrc=r=44100:cl=stereo "${sceneTrackPath}"`, { timeout: FFMPEG_TIMEOUT_MS, stdio: 'pipe' });
+          sceneAudioTracks.push(sceneTrackPath);
         }
-        sceneAudioTracks.push(sceneTrackPath);
-      } catch (e) {
-        console.warn(`[AudioAssemble] Scene ${i + 1} voice merge failed, generating silence fallback:`, e.message);
-        execSync(`"${FFMPEG_BIN}" -y -f lavfi -t ${sceneDuration.toFixed(2)} -i anullsrc=r=44100:cl=stereo "${sceneTrackPath}"`, { stdio: 'pipe' });
+      } else {
+        // Pure silence track for visual-only scenes
+        execSync(`"${FFMPEG_BIN}" -y -f lavfi -t ${sceneDuration.toFixed(2)} -i anullsrc=r=44100:cl=stereo "${sceneTrackPath}"`, { timeout: FFMPEG_TIMEOUT_MS, stdio: 'pipe' });
         sceneAudioTracks.push(sceneTrackPath);
       }
-    } else {
-      // Pure silence track for visual-only scenes
-      execSync(`"${FFMPEG_BIN}" -y -f lavfi -t ${sceneDuration.toFixed(2)} -i anullsrc=r=44100:cl=stereo "${sceneTrackPath}"`, { stdio: 'pipe' });
-      sceneAudioTracks.push(sceneTrackPath);
     }
+
+    // Concatenate all scene tracks into final voice-narration.mp3
+    const masterOutPath = path.join(pDir, 'voice-narration.mp3');
+    if (sceneAudioTracks.length > 0) {
+      const listFile = path.join(tempAudioDir, 'concat_list.txt');
+      const fileContent = sceneAudioTracks.map(p => `file '${p.replace(/\\/g, '/')}'`).join('\n');
+      fs.writeFileSync(listFile, fileContent, 'utf-8');
+
+      execSync(`"${FFMPEG_BIN}" -y -f concat -safe 0 -i "${listFile}" -c:a libmp3lame -q:a 2 "${masterOutPath}"`, { timeout: FFMPEG_TIMEOUT_MS, stdio: 'pipe' });
+    }
+
+    return masterOutPath;
+  } finally {
+    // Dọn temp folder kể cả khi lỗi/timeout — trước đây chỉ dọn ở nhánh
+    // thành công, để rác __temp_audio_assembly lại nếu có lỗi giữa chừng.
+    try {
+      fs.rmSync(tempAudioDir, { recursive: true, force: true });
+    } catch {}
   }
-
-  // Concatenate all scene tracks into final voice-narration.mp3
-  const masterOutPath = path.join(pDir, 'voice-narration.mp3');
-  if (sceneAudioTracks.length > 0) {
-    const listFile = path.join(tempAudioDir, 'concat_list.txt');
-    const fileContent = sceneAudioTracks.map(p => `file '${p.replace(/\\/g, '/')}'`).join('\n');
-    fs.writeFileSync(listFile, fileContent, 'utf-8');
-
-    execSync(`"${FFMPEG_BIN}" -y -f concat -safe 0 -i "${listFile}" -c:a libmp3lame -q:a 2 "${masterOutPath}"`, { stdio: 'pipe' });
-  }
-
-  // Clean up temp folder
-  try {
-    fs.rmSync(tempAudioDir, { recursive: true, force: true });
-  } catch {}
-
-  return masterOutPath;
 }
 
 // HTTP Server
@@ -1303,7 +1322,7 @@ const server = http.createServer(async (req, res) => {
       let speechDuration = null;
       if (hasVoice) {
         try {
-          const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${voiceFile}"`).toString().trim();
+          const durOut = execSync(`"${FFPROBE_BIN}" -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${voiceFile}"`, { timeout: 15000 }).toString().trim();
           speechDuration = parseFloat(durOut) || null;
         } catch {}
       }
@@ -2159,7 +2178,9 @@ const server = http.createServer(async (req, res) => {
 
       // Assemble master aligned soundtrack with exact timing & silence gaps
       sendEvent('status', { stage: 'Đang xử lý đồng bộ âm thanh & khoảng trống...', percent: 5 });
-      const masterAudioPath = await assembleProjectMasterAudio(projectName, sceneObjects);
+      const masterAudioPath = await assembleProjectMasterAudio(projectName, sceneObjects, (i, total, file) => {
+        sendEvent('log', { message: `Ghép âm thanh cảnh ${i + 1}/${total}: ${file}` });
+      });
 
       const ctx = await bootstrap({ cwd: __dirname });
       const project = await ctx.orchestrator.create({
