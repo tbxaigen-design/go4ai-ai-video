@@ -23,7 +23,6 @@
     "format": "biome format --write .",
     "lint": "biome lint .",
     "render-high": "node render-linkedin-video-high.js"
-  }
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",

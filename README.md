@@ -19,14 +19,6 @@
 </p>
 
 <p align="center">
-<video src="docs/assets/demo/go4ai-linkedin-60s-mien-nam.mp4" controls muted width="720" poster="docs/assets/hero.png">
-Trình duyệt của bạn không hỗ trợ xem video trực tiếp — <a href="docs/assets/demo/go4ai-linkedin-60s-mien-nam.mp4">tải video mẫu tại đây</a>.
-</video>
-</p>
-
-<p align="center"><i>Video thật, render bằng chính app này — giọng đọc AI Miền Nam, 9 cảnh, 60 giây, không qua chỉnh sửa hậu kỳ.</i></p>
-
-<p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square" /></a>
   <a href="#supported-agents"><img alt="Agents" src="https://img.shields.io/badge/agents-14%20backends-111?style=flat-square" /></a>
   <a href="#showcase"><img alt="Templates" src="https://img.shields.io/badge/templates-26-3ce6ac?style=flat-square" /></a>
@@ -119,6 +111,16 @@ Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu t
 </table>
 
 <p align="center">Bốn nhóm trên dùng chung 26 mẫu, chung engine render, chung vòng lặp AI — không có bản riêng "giá cao hơn" cho từng use case.</p>
+
+<p align="center">👇 Không phải mockup — đây là một video thật, render bằng chính pipeline trên (nhóm A · Social video):</p>
+
+<p align="center">
+<video src="docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4" controls muted width="720" poster="docs/assets/hero.png">
+Trình duyệt của bạn không hỗ trợ xem video trực tiếp — <a href="docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4">tải video mẫu tại đây</a>.
+</video>
+</p>
+
+<p align="center"><i>Giọng đọc AI Miền Nam · 9 cảnh · 60 giây · không qua chỉnh sửa hậu kỳ.</i></p>
 
 ---
 

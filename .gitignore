@@ -79,6 +79,7 @@ models/
 
 # Generated video & audio outputs (large binaries)
 *.mp4
+!docs/assets/video/*.mp4
 *.webm
 *.mov
 *.gif
