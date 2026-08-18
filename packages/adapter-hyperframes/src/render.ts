@@ -115,19 +115,30 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
     // animations up front lets us hold the timeline at frame 0 until fonts are
     // ready, then release it so capture and motion start together — the same
     // shape as the multi-composition paused→drive path below.
-    await page.addInitScript(() => {
+    await page.addInitScript((scale: number) => {
       const style = document.createElement('style');
       style.id = '__hv_freeze';
-      style.textContent =
+      let css =
         '*, *::before, *::after { animation-play-state: paused !important;' +
         ' -webkit-animation-play-state: paused !important; }';
+      if (scale > 1) {
+        css += ` html { zoom: ${scale} !important; }`;
+      }
+      style.textContent = css;
       const attach = () => (document.head || document.documentElement).appendChild(style);
       if (document.head || document.documentElement) attach();
       else document.addEventListener('DOMContentLoaded', attach, { once: true });
       (window as unknown as { __hvUnfreeze?: () => void }).__hvUnfreeze = () => {
-        document.getElementById('__hv_freeze')?.remove();
+        const existing = document.getElementById('__hv_freeze');
+        if (existing) {
+          if (scale > 1) {
+            existing.textContent = `html { zoom: ${scale} !important; }`;
+          } else {
+            existing.remove();
+          }
+        }
       };
-    });
+    }, qualityParams.renderScale);
 
     ctx.onProgress?.(30, 'loading frame');
     // Multi-composition templates ship an entry index.html that only stitches
@@ -382,6 +393,7 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
     '-t', String(totalDuration),
     '-r', String(fps),
     '-c:v', 'libx264',
+    '-tune', 'animation',
     '-pix_fmt', 'yuv420p',
     '-preset', qualityParams.preset,
     '-crf', String(qualityParams.crf),
@@ -406,7 +418,7 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
       engineVersion: `hyperframes-playwright@${ADAPTER_VERSION}`,
     },
     diagnostics: [
-      `recorded via playwright/chromium at ${renderWidth}x${renderHeight} (deviceScaleFactor 1, no supersampling), encoded with ffmpeg (libx264 crf${qualityParams.crf}, preset ${qualityParams.preset})`,
+      `recorded via playwright/chromium at ${renderWidth}x${renderHeight} (deviceScaleFactor 1, auto-zoom ${qualityParams.renderScale}x), encoded with ffmpeg (libx264 crf${qualityParams.crf}, preset ${qualityParams.preset}, tune animation)`,
     ],
   };
 }
@@ -418,36 +430,20 @@ export async function render(input: RenderInput, ctx: RenderContext): Promise<Re
  *   'standard' — base resolution (e.g. 1920x1080). Fastest, matches the
  *                long-standing default (crf 20).
  *   'sharp'    — SAME resolution/viewport as 'standard' (zero layout risk),
- *                just a lower CRF + slower x264 preset for less compression
- *                artifacting. This used to also render at 2x pixel density
- *                (deviceScaleFactor) for genuine supersampling, but that
- *                combination produced videos where only part of the frame
- *                had real content — confirmed by extracting raw frames from
- *                the exported MP4, not a player/display artifact. Root cause
- *                sits inside Playwright's screencast-based video recorder for
- *                that specific deviceScaleFactor+recordVideo.size combo.
- *                Rather than chase the exact trigger, every tier here now
- *                sticks to the one config shape that has rendered correctly
- *                in every test so far: viewport CSS size == recordVideo.size,
- *                deviceScaleFactor always 1.
+ *                lower CRF (16) + slower x264 preset + tune animation for crisp text.
  *   'ultra'    — genuinely bigger render: viewport AND recordVideo.size both
- *                2x (e.g. 1080p base → real 4K, 3840x2160). Delivers more
- *                actual resolution, not oversampling. Tradeoff: templates
- *                built with fixed-pixel absolute layouts (most of them) will
- *                look "zoomed out" — elements occupy a smaller fraction of
- *                the frame — since the CSS viewport itself is bigger, not
- *                just the pixel density. That's a visual composition
- *                difference, not a broken/corrupted render, and only applies
- *                to this explicitly-bigger tier.
+ *                2x (e.g. 1080p base → real 4K, 2160x2160 or 3840x2160).
+ *                Auto-injected `html { zoom: 2 }` scales all content proportionally,
+ *                delivering true 4K sharpness with zero layout distortion.
  */
 function resolveQualityParams(
   quality: RenderConfig['quality'],
 ): { crf: number; preset: string; renderScale: number } {
   switch (quality) {
     case 'sharp':
-      return { crf: 17, preset: 'slow', renderScale: 1 };
+      return { crf: 16, preset: 'slow', renderScale: 1 };
     case 'ultra':
-      return { crf: 15, preset: 'slow', renderScale: 2 };
+      return { crf: 14, preset: 'slow', renderScale: 2 };
     case 'standard':
     default:
       return { crf: 20, preset: 'medium', renderScale: 1 };
