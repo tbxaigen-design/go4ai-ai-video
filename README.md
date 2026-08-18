@@ -8,7 +8,19 @@
   <img src="docs/assets/hero.png" alt="GO4AI AI Video — HTML thành video, ngay trên máy của bạn" width="100%" />
 </p>
 
-> **HTML biến thành video — ngay trên laptop của bạn, không cần biết code.** GO4AI AI Video là công cụ giúp bạn dùng AI để biến một ý tưởng, một bài viết, hay một repo GitHub thành video hoàn chỉnh — chỉ bằng **double-click** một file, không cần mở terminal, không cần gõ lệnh. Chọn mẫu, mô tả video bạn muốn, và trợ lý AI (Claude Code, Cursor, Gemini, hay bất kỳ agent nào bạn đang dùng) sẽ tự viết, tự dựng khung hình, rồi render ra file MP4 thật ngay trên máy bạn. Miễn phí, mã nguồn mở, không giới hạn số lần render, không phụ thuộc nhà cung cấp nào.
+<h3 align="center">💰 0 ĐỒNG PHÍ RENDER · 0 ĐỒNG PHÍ BẢN QUYỀN · 0 GIỚI HẠN SỐ VIDEO</h3>
+
+<p align="center">
+✅ <b>Miễn phí vĩnh viễn</b> — mã nguồn mở Apache-2.0, không phí license, không phí theo lượt render, không thu phí ẩn<br/>
+✅ <b>Chạy 100% trên máy bạn</b> — video render tại chỗ bằng Chromium + FFmpeg, không upload dữ liệu lên server nào<br/>
+✅ <b>Không giới hạn số lượng</b> — render bao nhiêu video tuỳ thích, không đếm lượt, không giới hạn export<br/>
+✅ <b>Không cần biết code</b> — double-click 1 file để chạy, không mở terminal, không gõ lệnh<br/>
+✅ <b>26 mẫu video sẵn có</b> — sạch bản quyền, dùng được cho công việc thương mại, không cần audit lại
+</p>
+
+> **HTML biến thành video — ngay trên laptop của bạn, không cần biết code.** GO4AI AI Video là công cụ giúp bạn dùng AI để biến một ý tưởng, một bài viết, hay một repo GitHub thành video hoàn chỉnh — chỉ bằng **double-click** một file. Chọn mẫu, mô tả video bạn muốn, và trợ lý AI (Claude Code, Cursor, Gemini, hay bất kỳ agent nào bạn đang dùng) sẽ tự viết, tự dựng khung hình, rồi render ra file MP4 thật ngay trên máy bạn.
+>
+> *Lưu ý minh bạch: bản thân công cụ này 100% miễn phí. Nếu bạn muốn dùng thêm nhạc/giọng đọc AI (MiniMax) hoặc một AI agent trả phí (Claude/Cursor/…), đó là lựa chọn tuỳ chọn — không bắt buộc để dùng app.*
 
 <p align="center">
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg?style=flat-square" /></a>
