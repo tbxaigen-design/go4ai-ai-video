@@ -115,8 +115,8 @@ Giới thiệu tính năng, ra mắt sản phẩm, walkthrough cho nhà đầu t
 <p align="center">👇 Không phải mockup — đây là một video thật, render bằng chính pipeline trên (nhóm A · Social video):</p>
 
 <p align="center">
-<video src="docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4" controls muted width="720" poster="docs/assets/hero.png">
-Trình duyệt của bạn không hỗ trợ xem video trực tiếp — <a href="docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4">tải video mẫu tại đây</a>.
+<video src="https://raw.githubusercontent.com/tbxaigen-design/go4ai-ai-video/main/docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4" controls muted width="720" poster="docs/assets/hero.png">
+Trình duyệt của bạn không hỗ trợ xem video trực tiếp — <a href="https://raw.githubusercontent.com/tbxaigen-design/go4ai-ai-video/main/docs/assets/video/go4ai-linkedin-60s-mien-nam.mp4">tải video mẫu tại đây</a>.
 </video>
 </p>
 
