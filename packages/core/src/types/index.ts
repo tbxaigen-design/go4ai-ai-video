@@ -76,12 +76,17 @@ export interface RenderConfig {
   alpha?: boolean;
   /**
    * User-facing export quality preset (see adapter-hyperframes resolveQualityParams
-   * for the concrete crf/preset/deviceScaleFactor/outputScale each maps to):
-   *   'standard' — base resolution, no supersampling. Fastest.
-   *   'sharp'    — same resolution, but rendered at 2x pixel density then
-   *                downsampled — sharper text/gradients, same delivered size.
-   *   'ultra'    — 'sharp' supersampling PLUS 2x delivered resolution (4K from
-   *                a 1080p base). Slowest, largest file.
+   * for the concrete crf/preset/renderScale each maps to):
+   *   'standard' — base resolution. Fastest.
+   *   'sharp'    — same resolution/viewport as 'standard', lower CRF + slower
+   *                preset for less compression artifacting. (Not supersampled
+   *                — deviceScaleFactor-based supersampling was removed after
+   *                it was found to produce videos with blank/corrupted frame
+   *                regions in some render configs; see adapter-hyperframes.)
+   *   'ultra'    — genuinely bigger render: viewport AND delivered resolution
+   *                both 2x (e.g. 1080p base → real 4K). Fixed-pixel template
+   *                layouts will look "zoomed out" at this tier since the CSS
+   *                viewport itself is larger, not just the pixel density.
    */
   quality?: 'standard' | 'sharp' | 'ultra';
   audio?: { path: string; volumeDb?: number }[];

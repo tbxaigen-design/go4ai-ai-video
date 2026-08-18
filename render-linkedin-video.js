@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 
 const PROJECT_DIR = path.join(__dirname, 'projects', 'linkedin OS');
 const AUDIO_DIR = path.join(PROJECT_DIR, 'audio');
-const HTML_FILE = path.join(PROJECT_DIR, 'go4ai-linkedin-60s-video-mock.html');
+const HTML_FILE = path.join(PROJECT_DIR, '_source', 'go4ai-linkedin-60s-video-mock.html');
 const OUTPUT_MP4 = path.join(PROJECT_DIR, 'go4ai-linkedin-60s-video.mp4');
 const ROOT_MP4 = path.join(__dirname, 'go4ai-linkedin-os-demo.mp4');
 
@@ -151,10 +151,16 @@ async function main() {
     args: ['--no-sandbox', '--disable-blink-features=AutomationControlled', '--autoplay-policy=no-user-gesture-required'],
   });
 
+  // "ultra" quality standard (đồng bộ với render-linkedin-video-high.js và 3
+  // tier trong Studio): viewport CSS giữ nguyên 1920x1080 để layout không vỡ,
+  // quay ở deviceScaleFactor 2 (như màn Retina/HiDPI) và xuất đúng 2x = 4K thật.
+  const OUTPUT_SCALE = 2;
+  const BASE_WIDTH = 1920, BASE_HEIGHT = 1080;
+  const OUT_WIDTH = BASE_WIDTH * OUTPUT_SCALE, OUT_HEIGHT = BASE_HEIGHT * OUTPUT_SCALE;
   const context = await browser.newContext({
-    viewport: { width: 1920, height: 1080 },
-    deviceScaleFactor: 1,
-    recordVideo: { dir: tempRecordDir, size: { width: 1920, height: 1080 } },
+    viewport: { width: BASE_WIDTH, height: BASE_HEIGHT },
+    deviceScaleFactor: OUTPUT_SCALE,
+    recordVideo: { dir: tempRecordDir, size: { width: OUT_WIDTH, height: OUT_HEIGHT } },
   });
 
   const page = await context.newPage();
@@ -185,8 +191,8 @@ async function main() {
   }
   const rawWebm = path.join(tempRecordDir, webmFiles[0]);
 
-  console.log('\n🎞️ Step 4: Transcoding to H.264 MP4 & Multiplexing with Voiceover Soundtrack...');
-  const ffmpegCmd = `"${FFMPEG_BIN}" -y -i "${rawWebm}" -i "${masterSoundtrack}" -t 60.0 -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p -r 60 -c:a aac -b:a 192k -movflags +faststart "${OUTPUT_MP4}"`;
+  console.log(`\n🎞️ Step 4: Transcoding to H.264 MP4 ${OUT_WIDTH}x${OUT_HEIGHT} & Multiplexing with Voiceover Soundtrack (ultra quality)...`);
+  const ffmpegCmd = `"${FFMPEG_BIN}" -y -i "${rawWebm}" -i "${masterSoundtrack}" -t 60.0 -c:v libx264 -preset slow -crf 15 -b:v 20000k -pix_fmt yuv420p -r 60 -c:a aac -b:a 256k -movflags +faststart "${OUTPUT_MP4}"`;
   execSync(ffmpegCmd, { stdio: 'inherit' });
 
   // Copy to root directory for easy access

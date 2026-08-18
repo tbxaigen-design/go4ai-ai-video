@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 
 const PROJECT_DIR = path.join(__dirname, 'projects', 'linkedin OS');
 const AUDIO_DIR = path.join(PROJECT_DIR, 'audio');
-const HTML_FILE = path.join(PROJECT_DIR, 'go4ai-linkedin-60s-video-mock.html');
+const HTML_FILE = path.join(PROJECT_DIR, '_source', 'go4ai-linkedin-60s-video-mock.html');
 const OUTPUT_MP4 = path.join(PROJECT_DIR, 'go4ai-linkedin-60s-video.mp4');
 const ROOT_MP4 = path.join(__dirname, 'go4ai-linkedin-os-demo.mp4');
 
@@ -64,14 +64,22 @@ async function main(){
   console.log(`✓ Master soundtrack generated: ${masterSoundtrack}\n`);
 
   // Playwright recording
-  console.log('🎬 Step 3: Launching Chromium at 1920x1080 to record 60s mock animation...');
+  // "ultra" quality standard (đồng bộ với 3 tier trong Studio, xem
+  // packages/adapter-hyperframes/src/render.ts resolveQualityParams): viewport
+  // CSS giữ nguyên 1920x1080 để layout mock không vỡ, nhưng quay ở
+  // deviceScaleFactor 2 (như xem trên màn Retina/HiDPI — nét hơn hẳn DSF1) VÀ
+  // xuất video ở đúng 2x kích thước đó = 3840x2160 (4K thật, không phải upscale).
+  const OUTPUT_SCALE=2;
+  const BASE_WIDTH=1920, BASE_HEIGHT=1080;
+  const OUT_WIDTH=BASE_WIDTH*OUTPUT_SCALE, OUT_HEIGHT=BASE_HEIGHT*OUTPUT_SCALE;
+  console.log(`🎬 Step 3: Launching Chromium (deviceScaleFactor 2, xuất ${OUT_WIDTH}x${OUT_HEIGHT} 4K) to record 60s mock animation...`);
   const playwrightMod=await import('./packages/adapter-hyperframes/node_modules/playwright/index.mjs');
   const playwright=playwrightMod.default||playwrightMod;
   const tempRecordDir=path.join(PROJECT_DIR,'temp_record');
   if(fs.existsSync(tempRecordDir)) fs.rmSync(tempRecordDir,{recursive:true,force:true});
   fs.mkdirSync(tempRecordDir,{recursive:true});
   const browser=await playwright.chromium.launch({headless:true,args:['--no-sandbox','--disable-blink-features=AutomationControlled','--autoplay-policy=no-user-gesture-required']});
-  const context=await browser.newContext({viewport:{width:1920,height:1080},deviceScaleFactor:1,recordVideo:{dir:tempRecordDir,size:{width:1920,height:1080}}});
+  const context=await browser.newContext({viewport:{width:BASE_WIDTH,height:BASE_HEIGHT},deviceScaleFactor:OUTPUT_SCALE,recordVideo:{dir:tempRecordDir,size:{width:OUT_WIDTH,height:OUT_HEIGHT}}});
   const page=await context.newPage();
   const fileUrl=pathToFileURL(HTML_FILE).href;
   console.log(`  → Opening HTML: ${fileUrl}`);
@@ -92,8 +100,11 @@ async function main(){
   const webmFiles=fs.readdirSync(tempRecordDir).filter(f=>f.endsWith('.webm'));
   if(webmFiles.length===0) throw new Error('Playwright did not output a webm video file');
   const rawWebm=path.join(tempRecordDir,webmFiles[0]);
-  console.log('\n🎞️ Step 4: Transcoding to H.264 MP4 & Multiplexing (high quality)...');
-  const ffmpegCmd=`"${FFMPEG_BIN}" -y -i "${rawWebm}" -i "${masterSoundtrack}" -t 60.0 -c:v libx264 -preset slow -crf 15 -b:v 5000k -vf "scale=1920:1080" -pix_fmt yuv420p -r 60 -c:a aac -b:a 256k -movflags +faststart "${OUTPUT_MP4}"`;
+  console.log(`\n🎞️ Step 4: Transcoding to H.264 MP4 ${OUT_WIDTH}x${OUT_HEIGHT} & Multiplexing (ultra quality)...`);
+  // Bỏ '-vf scale=1920:1080' của bản cũ (nó ép video xuống lại 1080p, xoá mất
+  // toàn bộ lợi ích 4K vừa quay được). Bitrate tăng theo tỉ lệ pixel (x4) so
+  // với bản 1080p gốc để không bị CRF nén quá tay ở độ phân giải cao hơn.
+  const ffmpegCmd=`"${FFMPEG_BIN}" -y -i "${rawWebm}" -i "${masterSoundtrack}" -t 60.0 -c:v libx264 -preset slow -crf 15 -b:v 20000k -pix_fmt yuv420p -r 60 -c:a aac -b:a 256k -movflags +faststart "${OUTPUT_MP4}"`;
   execSync(ffmpegCmd,{stdio:'inherit'});
 
   fs.copyFileSync(OUTPUT_MP4,ROOT_MP4);
